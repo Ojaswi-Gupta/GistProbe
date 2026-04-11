@@ -34,7 +34,13 @@ def process():
         display_df = df[["text", "cluster"]].rename(columns={"cluster": "Cluster"})
         table_html = display_df.to_html(classes="table table-hover", index=False)
 
-        return render_template("index.html", table=table_html, cluster_counts=cluster_counts)
+        # UPDATED: Pass url=url back to the template
+        return render_template(
+            "index.html", 
+            table=table_html, 
+            cluster_counts=cluster_counts, 
+            url=url
+        )
 
     except Exception as e:
         return f"Error: {str(e)}"
