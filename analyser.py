@@ -1,6 +1,7 @@
 import re
 import pandas as pd
 from difflib import SequenceMatcher
+from textblob import TextBlob
 
 
 def _similarity(a, b):
@@ -65,3 +66,38 @@ def clean_text_data(df):
     print("✓ Text cleaning complete")
 
     return df
+
+
+def compute_sentiment(df):
+    """
+    Calculate the sentiment of each text row using TextBlob.
+    Assigns a label and badge icon for the UI.
+    """
+    if df.empty:
+        return df, {}
+
+    print(f"\n--- Phase 2.5: Sentiment Analysis ---")
+    
+    def get_sentiment(text):
+        polarity = TextBlob(str(text)).sentiment.polarity
+        if polarity > 0.1:
+            return "Positive"
+        elif polarity < -0.1:
+            return "Negative"
+        else:
+            return "Neutral"
+
+    def get_badge(sentiment):
+        if sentiment == "Positive":
+            return "🟩 Positive"
+        elif sentiment == "Negative":
+            return "🟥 Negative"
+        return "⬜ Neutral"
+
+    df["sentiment_label"] = df["text"].apply(get_sentiment)
+    df["Sentiment"] = df["sentiment_label"].apply(get_badge)
+
+    counts = df["sentiment_label"].value_counts().to_dict()
+    print(f"Sentiment Distribution: {counts}")
+    
+    return df, counts

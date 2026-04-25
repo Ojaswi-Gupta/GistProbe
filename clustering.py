@@ -2,6 +2,10 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
+from difflib import SequenceMatcher
+
+def _similarity(a, b):
+    return SequenceMatcher(None, a, b).ratio()
 
 
 def _generate_cluster_name(cluster_id, center, terms):
@@ -42,9 +46,8 @@ def perform_clustering(df):
 
     if df.empty or len(df) < 3:
         print("Data volume too low for clustering. Defaulting to Cluster 0.")
-        df["cluster"] = 0
         df["cluster_name"] = "0: General Topics"
-        return df, {"0: General Topics": len(df)}
+        return df, {"0: General Topics": len(df)}, []
 
     texts = df["cleaned"]
 
@@ -64,7 +67,7 @@ def perform_clustering(df):
         print(f"Vectorization error: {e}")
         df["cluster"] = 0
         df["cluster_name"] = "0: General Topics"
-        return df, {"0: General Topics": len(df)}
+        return df, {"0: General Topics": len(df)}, []
 
     # --- MATHEMATICAL SEARCH FOR OPTIMAL K ---
     best_k = 2
@@ -118,4 +121,25 @@ def perform_clustering(df):
 
     print(f"\n✓ Clustering complete: {best_k} clusters, {len(df)} items")
 
-    return df, counts
+    # --- EXTRACTIVE SUMMARIZATION (TF-IDF) ---
+    print("Extracting Key Takeaways using TF-IDF...")
+    takeaways = []
+    try:
+        doc_scores = X.sum(axis=1).A1  # Convert matrix to 1D array
+        df["tfidf_score"] = doc_scores
+        
+        # Filter meaningful sentences (>50 chars) and sort by TF-IDF density
+        valid_sentences = df[df["text"].str.len() > 50].sort_values(by="tfidf_score", ascending=False)
+        
+        for text in valid_sentences["text"]:
+            if len(takeaways) >= 3:
+                break
+            # Avoid near-duplicates in takeaways
+            is_duplicate = any(_similarity(text, t) > 0.6 for t in takeaways) if takeaways else False
+            if not is_duplicate:
+                takeaways.append(text)
+                
+    except Exception as e:
+        print(f"Summarization error: {e}")
+
+    return df, counts, takeaways

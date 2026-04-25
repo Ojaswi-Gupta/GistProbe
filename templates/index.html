@@ -231,16 +231,49 @@
          style="display:none;">
     </div>
 
+    {% if takeaways %}
+    <div class="row justify-content-center mb-5 fade-in-up" style="animation-delay: 0.15s;">
+        <div class="col-md-10">
+            <div class="glass-card p-4" style="border-left: 4px solid var(--accent-primary);">
+                <h5 class="mb-3 d-flex align-items-center" style="color: var(--text-main);">
+                    <span class="fs-4 me-2">✨</span> AI Executive Summary
+                </h5>
+                <ul class="mb-0" style="color: var(--text-muted); line-height: 1.6;">
+                    {% for item in takeaways %}
+                    <li class="mb-2">{{ item }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <div class="row mb-5">
-        <div class="col-md-6 mb-4 fade-in-up" style="animation-delay: 0.2s;">
+        <div class="col-md-4 mb-4 fade-in-up" style="animation-delay: 0.2s;">
             <div class="glass-card p-4 h-100 d-flex flex-column">
-                <h5 class="text-center mb-4">Semantic Distribution</h5>
-                <div style="flex-grow: 1; position: relative;">
+                <h5 class="text-center mb-4">Topic Distribution</h5>
+                <div style="flex-grow: 1; position: relative; min-height: 250px;">
                     <canvas id="myChart"></canvas>
                 </div>
             </div>
         </div>
-        <div class="col-md-6 mb-4 fade-in-up" style="animation-delay: 0.3s;">
+
+        {% if sentiment_counts %}
+        <div class="col-md-4 mb-4 fade-in-up" style="animation-delay: 0.25s;">
+            <div class="glass-card p-4 h-100 d-flex flex-column">
+                <h5 class="text-center mb-4">Overall Sentiment</h5>
+                <div id="sentiment-data" 
+                     data-labels='{{ sentiment_counts.keys()|list|tojson | safe }}'
+                     data-values='{{ sentiment_counts.values()|list|tojson | safe }}'
+                     style="display:none;"></div>
+                <div style="flex-grow: 1; position: relative; min-height: 250px;">
+                    <canvas id="sentimentChart"></canvas>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="col-md-4 mb-4 fade-in-up" style="animation-delay: 0.3s;">
             <div class="glass-card p-4 h-100 d-flex flex-column">
                 <h5 class="mb-4">Cluster Dominance</h5>
                 <div class="list-group list-group-flush mb-4 flex-grow-1">
@@ -295,13 +328,7 @@
                 datasets: [{
                     data: dataValues,
                     backgroundColor: [
-                        '#0ea5e9', // Cyan
-                        '#8b5cf6', // Purple
-                        '#10b981', // Emerald
-                        '#f59e0b', // Amber
-                        '#ec4899', // Pink
-                        '#3b82f6', // Blue
-                        '#84cc16'  // Lime
+                        '#0ea5e9', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899', '#3b82f6', '#84cc16'
                     ],
                     borderWidth: 2,
                     borderColor: '#ffffff',
@@ -312,10 +339,39 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: { 
-                    legend: { 
-                        position: 'bottom',
-                        labels: { padding: 20, usePointStyle: true }
-                    } 
+                    legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true } } 
+                },
+                cutout: '70%'
+            }
+        });
+    }
+
+    const sentimentElement = document.getElementById('sentiment-data');
+    if (sentimentElement) {
+        const sentLabels = JSON.parse(sentimentElement.getAttribute('data-labels'));
+        const sentValues = JSON.parse(sentimentElement.getAttribute('data-values'));
+        
+        // Map colors based on sentiment
+        const colorMap = { 'Positive': '#10b981', 'Negative': '#ef4444', 'Neutral': '#94a3b8' };
+        const bgColors = sentLabels.map(label => colorMap[label] || '#94a3b8');
+
+        new Chart(document.getElementById('sentimentChart'), {
+            type: 'doughnut',
+            data: {
+                labels: sentLabels,
+                datasets: [{
+                    data: sentValues,
+                    backgroundColor: bgColors,
+                    borderWidth: 2,
+                    borderColor: '#ffffff',
+                    hoverOffset: 10
+                }]
+            },
+            options: { 
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true } } 
                 },
                 cutout: '70%'
             }

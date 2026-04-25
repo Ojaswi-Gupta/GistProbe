@@ -5,7 +5,7 @@ import os
 import glob
 
 from crawler import scrape_url
-from analyser import clean_text_data
+from analyser import clean_text_data, compute_sentiment
 from clustering import perform_clustering
 
 app = Flask(__name__)
@@ -58,8 +58,11 @@ def process():
                 url=url,
             )
 
-        # Phase 3: Cluster
-        df, cluster_counts = perform_clustering(df)
+        # Phase 2.5: Sentiment Analysis
+        df, sentiment_counts = compute_sentiment(df)
+
+        # Phase 3: Cluster and Summarize
+        df, cluster_counts, takeaways = perform_clustering(df)
 
         # Save results
         session_id = str(uuid.uuid4())[:8]
@@ -67,14 +70,20 @@ def process():
         df.to_csv(filename, index=False)
         active_files["latest"] = filename
 
-        # Build display table: show 'text' and 'cluster' number
-        display_df = df[["text", "cluster"]].rename(columns={"cluster": "Cluster"})
+        # Build display table
+        if "Sentiment" in df.columns:
+            display_df = df[["text", "cluster", "Sentiment"]].rename(columns={"cluster": "Cluster"})
+        else:
+            display_df = df[["text", "cluster"]].rename(columns={"cluster": "Cluster"})
+            
         table_html = display_df.to_html(classes="table table-hover", index=False)
 
         return render_template(
             "index.html",
             table=table_html,
             cluster_counts=cluster_counts,
+            sentiment_counts=sentiment_counts,
+            takeaways=takeaways,
             url=url,
             total_items=len(df),
         )
