@@ -3,46 +3,93 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 
+
+def _generate_cluster_name(cluster_id, center, terms):
+    """
+    Generate a meaningful cluster name from top TF-IDF terms.
+    Prefers bigrams/trigrams over single words for more descriptive names.
+    """
+    top_indices = center.argsort()[-5:]  # Get top 5 terms
+    top_words = [terms[t] for t in top_indices]
+
+    # Separate bigrams and unigrams
+    bigrams = [w for w in top_words if len(w.split()) > 1]
+    unigrams = [w for w in top_words if len(w.split()) == 1]
+
+    if bigrams:
+        # Use the best bigram as the cluster name
+        topic_name = bigrams[-1].title()
+    elif len(unigrams) >= 2:
+        # Join top 2 unigrams
+        topic_name = f"{unigrams[-1].title()} & {unigrams[-2].title()}"
+    else:
+        topic_name = unigrams[-1].title() if unigrams else "General"
+
+    return f"{cluster_id}: {topic_name}"
+
+
 def perform_clustering(df):
     """
-    Phase 3: Intelligent Clustering Engine
-    Uses Silhouette Score to find the optimal k and N-grams for better naming.
+    Phase 3: Intelligent Clustering Engine.
+    Uses Silhouette Score to find the optimal k.
+    
+    Improvements over original:
+    - Wider k-range (2 to min(10, N)) for better coverage on large datasets
+    - Better cluster naming using bigrams/trigrams
+    - Graceful error handling for edge cases
     """
     print(f"\n--- Phase 3: Intelligent Clustering (GistProbe) ---")
-    
+
     if df.empty or len(df) < 3:
-        print("Data volume too low for mathematical optimization. Defaulting to Cluster 0.")
+        print("Data volume too low for clustering. Defaulting to Cluster 0.")
         df["cluster"] = 0
         df["cluster_name"] = "0: General Topics"
         return df, {"0: General Topics": len(df)}
 
     texts = df["cleaned"]
 
-    # NLP Improvement: ngram_range=(1, 2) captures phrases like "San Francisco" or "Artificial Intelligence"
-    vectorizer = TfidfVectorizer(stop_words="english", ngram_range=(1, 2))
-    X = vectorizer.fit_transform(texts)
+    # NLP: ngram_range=(1, 2) captures phrases like "climate change" or "supreme court"
+    # max_features limits noise from rare terms
+    vectorizer = TfidfVectorizer(
+        stop_words="english",
+        ngram_range=(1, 2),
+        max_features=5000,
+        min_df=1,
+        max_df=0.95,
+    )
+
+    try:
+        X = vectorizer.fit_transform(texts)
+    except ValueError as e:
+        print(f"Vectorization error: {e}")
+        df["cluster"] = 0
+        df["cluster_name"] = "0: General Topics"
+        return df, {"0: General Topics": len(df)}
 
     # --- MATHEMATICAL SEARCH FOR OPTIMAL K ---
     best_k = 2
     best_score = -1
-    
-    # We test a range from 2 to 6 clusters
-    limit = min(7, len(df)) 
-    print("Evaluating mathematical optimum for k...")
 
-    for k in range(2, limit):
-        model = KMeans(n_clusters=k, random_state=42, n_init=10)
-        labels = model.fit_predict(X)
-        
-        # Calculate Silhouette Score (Closer to 1 is better)
-        score = silhouette_score(X, labels)
-        print(f"Testing k={k} | Silhouette Score: {score:.4f}")
-        
-        if score > best_score:
-            best_score = score
-            best_k = k
+    # Extended range: 2 to min(10, N-1) for better granularity on large datasets
+    max_k = min(10, len(df))
+    print(f"Evaluating optimal k in range [2, {max_k - 1}]...")
 
-    print(f"Mathematical Optimum Found: k={best_k}")
+    for k in range(2, max_k):
+        try:
+            model = KMeans(n_clusters=k, random_state=42, n_init=10)
+            labels = model.fit_predict(X)
+
+            # Silhouette Score: closer to 1 = better separation
+            score = silhouette_score(X, labels)
+            print(f"  k={k} → Silhouette Score: {score:.4f}")
+
+            if score > best_score:
+                best_score = score
+                best_k = k
+        except Exception as e:
+            print(f"  k={k} → Error: {e}")
+
+    print(f"✓ Optimal k = {best_k} (score: {best_score:.4f})")
 
     # --- FINAL CLUSTERING ---
     model = KMeans(n_clusters=best_k, random_state=42, n_init=10)
@@ -52,45 +99,23 @@ def perform_clustering(df):
     terms = vectorizer.get_feature_names_out()
     summary_mapping = {}
 
-    print("\nCluster Keywords:")
+    print("\nCluster Details:")
     for i in range(best_k):
-        # Get the top features for this cluster
         center = model.cluster_centers_[i]
-        top_indices = center.argsort()[-2:] # Focus on top 2 most relevant terms
-        top_words = [terms[t] for t in top_indices]
-        
-        # Logic to clean up the name: 
-        # If the top word is already a phrase (like "san francisco"), use it.
-        # Otherwise, join the top two with an ampersand.
-        main_topic = top_words[-1] # The most important word/phrase
-        secondary_topic = top_words[-2]
-        
-        if len(main_topic.split()) > 1:
-            # If the top term is already a bigram (e.g., "san francisco")
-            topic_name = main_topic.capitalize()
-        else:
-            # Join two unigrams (e.g., "Robot & Youtube")
-            topic_name = f"{secondary_topic} & {main_topic}".capitalize()
-            
-        display_name = f"{i}: {topic_name}"
+        display_name = _generate_cluster_name(i, center, terms)
         summary_mapping[i] = display_name
-        
-        # Terminal Log for Keywords
-        raw_keywords = [terms[t] for t in center.argsort()[-5:]]
-        print(f"Cluster {i} ({display_name}): {raw_keywords}")
 
-    # Map the display names back to the dataframe
+        # Terminal log: show top 5 keywords for debugging
+        raw_keywords = [terms[t] for t in center.argsort()[-5:]]
+        count = (model.labels_ == i).sum()
+        print(f"  {display_name} ({count} items) → keywords: {raw_keywords}")
+
+    # Map display names to dataframe
     df["cluster_summary_name"] = df["cluster"].map(summary_mapping)
-    
-    # Sort by cluster number (0, 1, 2...) for the UI summary
+
+    # Sort by cluster number for consistent UI display
     counts = df["cluster_summary_name"].value_counts().sort_index().to_dict()
-    
-    print("\nCluster Distribution:")
-    print(df["cluster_summary_name"].value_counts())
-    
-    print("\nPreview:")
-    print(df[["text", "cluster"]].head())
-    
-    print("\nClustering done successfully")
-    
+
+    print(f"\n✓ Clustering complete: {best_k} clusters, {len(df)} items")
+
     return df, counts
