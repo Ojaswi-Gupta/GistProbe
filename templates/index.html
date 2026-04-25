@@ -2,88 +2,227 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Team Flux | GistProbe</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { background-color: #f8f9fa; }
-        .hero { background: #1a1d20; color: white; padding: 40px 0; border-radius: 0 0 30px 30px; margin-bottom: 30px; }
-        .card { border: none; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        #loading { display: none; }
-        
-        /* Centering ONLY the headers */
-        table.table thead th {
-            text-align: center !important;
-            background-color: #f1f3f5;
-        }
-        
-        /* Data info remains left-aligned */
-        table.table tbody td:nth-child(1) {
-            text-align: left !important;
-            padding: 12px;
+        :root {
+            --bg-color: #ffffff;
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(0, 0, 0, 0.08);
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --accent-glow: rgba(14, 165, 233, 0.2);
+            --accent-primary: #0ea5e9;
         }
 
-        /* Cluster number column remains centered */
-        table.table td:nth-child(2) {
-            text-align: center !important;
-            font-weight: bold;
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
         }
 
-        /* Styling for the displayed URL */
-        .active-url { font-size: 0.95rem; color: #0d6efd; word-break: break-all; text-decoration: none; }
-        .active-url:hover { text-decoration: underline; }
+        h1, h2, h3, h4, h5, .hero-badge {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* Glassmorphism Cards */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.04);
+            color: var(--text-main);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .glass-card:hover {
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 60px 0 40px;
+            text-align: center;
+        }
+        .hero h1 {
+            font-weight: 800;
+            font-size: 3.5rem;
+            background: linear-gradient(135deg, #38bdf8, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        .hero-badge {
+            background: rgba(14, 165, 233, 0.1);
+            border: 1px solid var(--accent-primary);
+            color: #38bdf8;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+
+        /* Form Inputs */
+        .form-control {
+            background-color: #f8fafc;
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            border-radius: 12px 0 0 12px !important;
+            padding: 15px 20px;
+        }
+        .form-control:focus {
+            background-color: #ffffff;
+            border-color: var(--accent-primary);
+            color: var(--text-main);
+            box-shadow: 0 0 0 0.25rem var(--accent-glow);
+        }
+        .form-control::placeholder {
+            color: #94a3b8;
+        }
+
+        /* Premium Button */
+        .btn-probe {
+            background: linear-gradient(135deg, #0ea5e9, #6366f1);
+            border: none;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            padding: 15px 30px;
+            border-radius: 0 12px 12px 0 !important;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-probe:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -10px #38bdf8;
+            color: white;
+        }
+        .btn-probe:disabled {
+            opacity: 0.7;
+            background: #475569;
+        }
+
+        /* Custom Loader */
+        #loading { display: none; margin-top: 25px; }
+        .spinner-grow {
+            width: 3rem;
+            height: 3rem;
+            background-color: var(--accent-primary);
+            animation: spinner-grow .75s linear infinite;
+        }
+
+        /* Results Animation */
+        .fade-in-up {
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Table Styling */
+        .table {
+            color: var(--text-main);
+            border-collapse: separate;
+            border-spacing: 0 8px;
+        }
+        .table thead th {
+            border: none;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            padding-bottom: 10px;
+        }
+        .table tbody tr {
+            background-color: #ffffff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .table tbody tr:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            transform: scale(1.01);
+        }
+        .table tbody td {
+            border: 1px solid #f1f5f9;
+            border-width: 1px 0;
+            padding: 16px;
+            vertical-align: middle;
+        }
+        .table tbody td:first-child { border-left-width: 1px; border-radius: 10px 0 0 10px; }
+        .table tbody td:last-child { border-right-width: 1px; border-radius: 0 10px 10px 0; text-align: center; font-weight: bold; color: #0ea5e9; }
+
+        /* List Group */
+        .list-group-item {
+            background: transparent;
+            color: var(--text-main);
+            border-color: var(--glass-border);
+            padding: 12px 0;
+        }
+        .badge-cluster {
+            background: rgba(14, 165, 233, 0.2) !important;
+            color: #38bdf8 !important;
+            border: 1px solid #0ea5e9;
+        }
+
+        .active-url { color: #38bdf8; text-decoration: none; word-break: break-all; }
+        .active-url:hover { text-decoration: underline; color: #bae6fd; }
     </style>
 </head>
 <body>
 
-<div class="hero text-center">
-    <h1 class="fw-bold">Team Flux's GistProbe</h1>
-    <p class="lead">Web Content NLP Analyzer</p>
-    <div class="badge bg-primary px-3">Crawl → Analyze → Cluster</div>
+<div class="hero">
+    <h1>GistProbe</h1>
+    <p class="lead text-muted mb-4">NLP-Driven Web Content Analyzer</p>
+    <span class="hero-badge">Crawl → Analyze → Cluster</span>
 </div>
 
 <div class="container">
     <div class="row justify-content-center mb-5">
         <div class="col-md-8">
-            <div class="card p-4 text-center">
+            <div class="glass-card p-4 text-center">
                 <form method="POST" action="/process" id="probe-form">
                     <div class="input-group">
-                        <input type="url" name="url" class="form-control" placeholder="Enter News URL..." value="{{ url if url else '' }}" required>
-                        <button class="btn btn-primary px-4" id="submit-btn" type="submit">Probe</button>
+                        <input type="url" name="url" class="form-control" placeholder="Enter Target URL (e.g., bbc.com, theverge.com)" value="{{ url if url else '' }}" required>
+                        <button class="btn btn-probe" id="submit-btn" type="submit">Probe</button>
                     </div>
                 </form>
-                <div id="loading" class="mt-3">
-                    <div class="spinner-border text-primary" role="status"></div>
-                    <p class="text-muted mt-2 fw-bold" id="loading-text">Crawling and analyzing... this may take 15-20 seconds.</p>
+                <div id="loading">
+                    <div class="spinner-grow" role="status"></div>
+                    <p class="text-info mt-3 fw-bold" id="loading-text" style="letter-spacing: 0.5px;">Crawling & Clustering... (10-20s)</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        document.getElementById('probe-form').addEventListener('submit', function() {
-            document.getElementById('loading').style.display = 'block';
-            const btn = document.getElementById('submit-btn');
-            btn.disabled = true;
-            btn.innerHTML = 'Probing...';
-        });
-    </script>
-
     {% if error %}
-    <div class="row justify-content-center mb-4">
+    <div class="row justify-content-center mb-4 fade-in-up">
         <div class="col-md-8">
-            <div class="alert alert-warning d-flex align-items-start" role="alert">
-                <strong class="me-2">⚠️</strong>
-                <div>{{ error }}</div>
+            <div class="alert alert-danger glass-card" style="border-left: 4px solid #ef4444;" role="alert">
+                <strong>⚠️ Pipeline Error:</strong> {{ error }}
             </div>
         </div>
     </div>
     {% endif %}
 
     {% if cluster_counts %}
-    <div class="text-center mb-4">
-        <p class="text-muted mb-0 small uppercase fw-bold">Currently Probing:</p>
-        <a href="{{ url }}" target="_blank" class="active-url fw-bold">{{ url }}</a>
+    <div class="text-center mb-5 fade-in-up" style="animation-delay: 0.1s;">
+        <p class="text-muted mb-1 small text-uppercase fw-bold">Active Probe Target</p>
+        <a href="{{ url }}" target="_blank" class="active-url fw-bold fs-5">{{ url }}</a>
     </div>
 
     <div id="nlp-data" 
@@ -93,30 +232,36 @@
     </div>
 
     <div class="row mb-5">
-        <div class="col-md-6 mb-3">
-            <div class="card p-3 h-100">
-                <h5 class="text-center">Topic Distribution</h5>
-                <canvas id="myChart"></canvas>
+        <div class="col-md-6 mb-4 fade-in-up" style="animation-delay: 0.2s;">
+            <div class="glass-card p-4 h-100 d-flex flex-column">
+                <h5 class="text-center mb-4">Semantic Distribution</h5>
+                <div style="flex-grow: 1; position: relative;">
+                    <canvas id="myChart"></canvas>
+                </div>
             </div>
         </div>
-        <div class="col-md-6 mb-3">
-            <div class="card p-3 h-100">
-                <h5>Cluster Summary</h5>
-                <div class="list-group list-group-flush mb-3">
+        <div class="col-md-6 mb-4 fade-in-up" style="animation-delay: 0.3s;">
+            <div class="glass-card p-4 h-100 d-flex flex-column">
+                <h5 class="mb-4">Cluster Dominance</h5>
+                <div class="list-group list-group-flush mb-4 flex-grow-1">
                     {% for name, count in cluster_counts.items() %}
                     <div class="list-group-item d-flex justify-content-between align-items-center">
-                        {{ name }} <span class="badge bg-primary rounded-pill">{{ count }} items</span>
+                        {{ name }} <span class="badge badge-cluster rounded-pill">{{ count }} items</span>
                     </div>
                     {% endfor %}
                 </div>
-                <a href="/download" class="btn btn-outline-success mt-auto w-100">Download Dataset</a>
+                <a href="/download" class="btn btn-outline-info w-100 mt-auto" style="border-radius: 12px; font-weight: 600;">Download CSV Dataset</a>
             </div>
         </div>
     </div>
 
-    <div class="card p-4 mb-5 shadow-sm">
-        <h4 class="mb-4">Extracted Insights</h4>
-        <input type="text" id="search" class="form-control mb-3" placeholder="Search news...">
+    <div class="glass-card p-4 mb-5 fade-in-up" style="animation-delay: 0.4s;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">Extracted Insights</h4>
+            <div class="w-50">
+                <input type="text" id="search" class="form-control" style="border-radius: 12px !important;" placeholder="Filter insights...">
+            </div>
+        </div>
         <div class="table-responsive">
             {{ table|safe }}
         </div>
@@ -125,30 +270,65 @@
 </div>
 
 <script>
-const dataElement = document.getElementById('nlp-data');
-if (dataElement) {
-    const labels = JSON.parse(dataElement.getAttribute('data-labels'));
-    const dataValues = JSON.parse(dataElement.getAttribute('data-values'));
-
-    new Chart(document.getElementById('myChart'), {
-        type: 'doughnut',
-        data: {
-            labels: labels,
-            datasets: [{
-                data: dataValues,
-                backgroundColor: ['#0d6efd', '#6610f2', '#198754', '#fd7e14', '#20c997']
-            }]
-        },
-        options: { plugins: { legend: { position: 'bottom' } } }
+    // Form Submission Loader
+    document.getElementById('probe-form').addEventListener('submit', function() {
+        document.getElementById('loading').style.display = 'block';
+        const btn = document.getElementById('submit-btn');
+        btn.disabled = true;
+        btn.innerHTML = 'Probing...';
     });
-}
 
-document.getElementById("search")?.addEventListener("keyup", function() {
-    let filter = this.value.toLowerCase();
-    document.querySelectorAll("table tbody tr").forEach(row => {
-        row.style.display = row.innerText.toLowerCase().includes(filter) ? "" : "none";
+    // Chart.js Default Styling for Light Mode
+    Chart.defaults.color = '#64748b';
+    Chart.defaults.font.family = "'Inter', sans-serif";
+
+    // Initialize Chart
+    const dataElement = document.getElementById('nlp-data');
+    if (dataElement) {
+        const labels = JSON.parse(dataElement.getAttribute('data-labels'));
+        const dataValues = JSON.parse(dataElement.getAttribute('data-values'));
+
+        new Chart(document.getElementById('myChart'), {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: dataValues,
+                    backgroundColor: [
+                        '#0ea5e9', // Cyan
+                        '#8b5cf6', // Purple
+                        '#10b981', // Emerald
+                        '#f59e0b', // Amber
+                        '#ec4899', // Pink
+                        '#3b82f6', // Blue
+                        '#84cc16'  // Lime
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#ffffff',
+                    hoverOffset: 10
+                }]
+            },
+            options: { 
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { 
+                        position: 'bottom',
+                        labels: { padding: 20, usePointStyle: true }
+                    } 
+                },
+                cutout: '70%'
+            }
+        });
+    }
+
+    // Search Filter
+    document.getElementById("search")?.addEventListener("keyup", function() {
+        let filter = this.value.toLowerCase();
+        document.querySelectorAll("table tbody tr").forEach(row => {
+            row.style.display = row.innerText.toLowerCase().includes(filter) ? "" : "none";
+        });
     });
-});
 </script>
 
 </body>
