@@ -1,71 +1,151 @@
-# GistProbe: NLP-Driven Web Crawling & Clustering Engine
+# GistProbe — NLP-Driven Web Content Analyzer
 
-GistProbe is an advanced, resilient web scraping and NLP clustering application built by **Team Flux**. It acts as a data ingestion pipeline that autonomously extracts meaningful text from any given URL (news, articles, blogs), cleans it, and uses Machine Learning to group the content into semantic clusters.
+> An end-to-end NLP pipeline that crawls any URL, analyses text using unsupervised machine learning, and surfaces semantic clusters, sentiment scores, and extractive summaries through an interactive web dashboard.
 
-## 🚀 Features
+**Built by Team Flux | 4th Year CS Project**
 
-- **Multi-Tiered Extraction Engine:**
-  - **Tier 1 (Targeted DOM Parsing):** Smartly extracts text from headings, `<a>` tags, `<article>` containers, and specific CSS classes using `BeautifulSoup`.
-  - **Tier 2 (Deep Extraction):** Falls back to `trafilatura`—a state-of-the-art NLP library—to rip full article bodies when complex nested HTML is encountered.
-- **Resilient & Evasive:** Uses rotating, realistic browser User-Agents and HTTP retry logic (with exponential backoff) to bypass basic anti-bot systems.
-- **Smart Junk Filtering:** Algorithms walk up the DOM tree to identify and strip out navigational menus, footers, advertisements, and cookie banners.
-- **Intelligent NLP Clustering:**
-  - Performs text cleaning while preserving Unicode characters and critical numbers.
-  - Removes near-duplicates using mathematical Sequence Matching (>85% similarity threshold).
-  - Uses **TF-IDF Vectorization** and **K-Means Clustering** to group text.
-  - Automatically calculates the optimal `K` (number of clusters) using the **Silhouette Score**.
-  - Generates human-readable cluster names using Bigrams/Trigrams.
-- **Legal & Polite:** Respects `robots.txt` rules and implements rate-limiting delays.
+---
+
+## ✨ What It Does
+
+Paste any URL — a news article, blog, Wikipedia page, or financial site — and GistProbe runs it through a 5-stage NLP pipeline:
+
+| Stage | What Happens |
+|---|---|
+| **1. Crawl** | BeautifulSoup scrapes the DOM with rotating user-agents & robots.txt compliance |
+| **2. Extract** | Multi-tier text extraction (targeted DOM → trafilatura fallback) |
+| **3. Analyse** | NLTK deduplication + TextBlob sentiment polarity & subjectivity scoring |
+| **4. Cluster** | TF-IDF vectorization + K-Means with automatic `k` selection via Silhouette Score |
+| **5. Summarize** | Extractive NLP summary using TF-IDF document density ranking |
+
+---
+
+## 🧠 Key Technical Decisions
+
+### Silhouette Score for Optimal `k`
+Rather than hardcoding a fixed number of clusters, GistProbe mathematically evaluates **k = 2 to 10** and selects the value with the highest Silhouette Score. A score closer to `1.0` indicates well-separated, meaningful clusters.
+
+```python
+for k in range(2, max_k):
+    model = KMeans(n_clusters=k, random_state=42, n_init=10)
+    labels = model.fit_predict(X)
+    score = silhouette_score(X, labels)  # Evaluate separation quality
+    if score > best_score:
+        best_score, best_k = score, k
+```
+
+### No LLM API — Pure NLP Math
+GistProbe deliberately avoids paid LLM APIs (OpenAI, Claude, etc.). All summarization and clustering is done using classical NLP and linear algebra. This keeps it free, fast, and interpretable.
+
+### Near-Duplicate Removal
+Uses `SequenceMatcher` to compute string similarity ratios, filtering out paragraphs with >85% overlap before clustering — ensuring cluster quality isn't diluted by repeated boilerplate.
+
+---
 
 ## 🛠️ Tech Stack
 
-- **Backend:** Python, Flask
-- **Scraping:** Requests, BeautifulSoup4, lxml, Trafilatura
-- **Machine Learning (NLP):** Scikit-learn (TF-IDF, K-Means, Silhouette Score), Pandas, Numpy
-- **Frontend:** HTML5, Bootstrap 5, Chart.js
+**Backend**
+- `Python 3.11`, `Flask` — web framework & routing
+- `BeautifulSoup4`, `Requests`, `Trafilatura` — multi-tier web crawling
+- `NLTK` — text tokenization & cleaning
+- `TextBlob` — sentiment polarity & subjectivity scoring
+- `scikit-learn` — TF-IDF Vectorizer, K-Means, Silhouette Score
+- `Pandas`, `NumPy` — data manipulation
 
-## 💻 Local Setup
+**Frontend**
+- `Bootstrap 5` — responsive layout
+- `Chart.js` — interactive donut charts (sentiment & topic distribution)
+- `DataTables.js` — filterable, paginated results table
+- Glassmorphism CSS + cursor-glow effect (vanilla JS `requestAnimationFrame`)
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/Ojaswi-Gupta/GistProbe.git
-   cd GistProbe
-   ```
+---
 
-2. **Create a virtual environment:**
-   ```bash
-   python3.11 -m venv venv
-   source venv/bin/activate  # On Windows use: venv\Scripts\activate
-   ```
+## 🖥️ Screenshots
 
-3. **Install dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+> Probe BBC News, The Verge, Wikipedia, or any URL. Results appear after a 5-stage live terminal animation.
 
-4. **Run the application:**
-   ```bash
-   python app.py
-   ```
-   Open `http://127.0.0.1:5000` in your web browser.
+| Homepage | Results Dashboard |
+|---|---|
+| URL input + feature grid + tech stack | Sentiment chart + cluster donut + AI summary |
 
-## 🚢 Deployment (Render / Railway)
+---
 
-This application performs heavy NLP and Machine Learning tasks. It is **NOT recommended** for serverless platforms like Vercel or Netlify due to their strict 10-second timeout limits and 250MB size limits.
+## 🚀 Local Setup
 
-**To deploy on Render:**
-1. Connect your GitHub repository to Render.
-2. Select **Web Service**.
-3. Set the Build Command:
-   ```bash
-   pip install -r requirements.txt
-   ```
-4. Set the Start Command:
-   ```bash
-   gunicorn app:app --timeout 120
-   ```
-   *(Note: You will need to add `gunicorn` to your `requirements.txt`)*
+```bash
+# 1. Clone the repo
+git clone https://github.com/Ojaswi-Gupta/GistProbe.git
+cd GistProbe
 
-## 📝 License
+# 2. Create & activate a virtual environment
+python3.11 -m venv venv
+source venv/bin/activate      # Windows: venv\Scripts\activate
+
+# 3. Install dependencies
+pip install -r requirements.txt
+
+# 4. Download required NLTK data (first run only)
+python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
+
+# 5. Start the server
+python app.py
+```
+
+Open **http://127.0.0.1:5000** in your browser.
+
+---
+
+## 🚢 Deployment
+
+> ⚠️ **Do NOT deploy to Vercel or Netlify.** This app runs heavy NLP + ML tasks that exceed serverless 10s timeout limits and 250MB bundle limits.
+
+**Recommended: Render or Railway**
+
+```bash
+# Start command (add gunicorn to requirements.txt first)
+gunicorn app:app --timeout 120 --workers 2
+```
+
+1. Connect your GitHub repo to [Render](https://render.com)
+2. Set **Build Command:** `pip install -r requirements.txt`
+3. Set **Start Command:** `gunicorn app:app --timeout 120`
+4. Select a **Standard** instance (not free tier — needs >512MB RAM for sklearn)
+
+---
+
+## 📂 Project Structure
+
+```
+GistProbe/
+├── app.py              # Flask routes & pipeline orchestration
+├── crawler.py          # Multi-tier web scraper (BS4 + trafilatura)
+├── analyser.py         # Text cleaning, deduplication & sentiment scoring
+├── clustering.py       # TF-IDF vectorization, K-Means, Silhouette Score
+├── templates/
+│   └── index.html      # Full-stack SPA-like dashboard (Bootstrap + Chart.js)
+├── requirements.txt
+└── README.md
+```
+
+---
+
+## 📊 What the Dashboard Shows
+
+- **AI Executive Summary** — top 3 most information-dense sentences ranked by TF-IDF score
+- **Overall Sentiment** — donut chart (Positive / Negative / Neutral) — click to filter table
+- **Topic Distribution** — donut chart of K-Means cluster sizes
+- **Cluster Dominance** — ranked list of topic clusters with item counts
+- **Extracted Insights Table** — full paginated/filterable DataTable of all scraped text
+- **Execution Logs Modal** — simulated NLP pipeline logs + model diagnostics (Silhouette Score, Optimal k, Vocabulary Size)
+
+---
+
+## 📝 Resume Bullet
+
+> *"Built GistProbe, a full-stack NLP web application that crawls and semantically clusters web content using K-Means + TF-IDF, with automated Silhouette Score optimization for k selection, real-time sentiment analysis via TextBlob, and an interactive Flask dashboard featuring Chart.js visualizations and DataTables."*
+
+---
+
+## 📜 License
 
 Created by **Team Flux**. All rights reserved.
