@@ -2,7 +2,7 @@
 
 > An end-to-end NLP pipeline that crawls any URL, analyses text using unsupervised machine learning, and surfaces semantic clusters, sentiment scores, and extractive summaries through an interactive web dashboard.
 
-**Built by Team Flux | 4th Year CS Project**
+**Built by Ojaswi Gupta**
 
 ---
 
@@ -148,4 +148,4 @@ GistProbe/
 
 ## 📜 License
 
-Created by **Team Flux**. All rights reserved.
+Created by **Ojaswi Gupta**. All rights reserved.
