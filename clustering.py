@@ -47,7 +47,8 @@ def perform_clustering(df):
     if df.empty or len(df) < 3:
         print("Data volume too low for clustering. Defaulting to Cluster 0.")
         df["cluster_name"] = "0: General Topics"
-        return df, {"0: General Topics": len(df)}, []
+        metrics = {"silhouette_score": "N/A", "optimal_k": 1, "vocab_size": 0}
+        return df, {"0: General Topics": len(df)}, [], metrics
 
     texts = df["cleaned"]
 
@@ -63,11 +64,13 @@ def perform_clustering(df):
 
     try:
         X = vectorizer.fit_transform(texts)
+        vocab_size = X.shape[1]
     except ValueError as e:
         print(f"Vectorization error: {e}")
         df["cluster"] = 0
         df["cluster_name"] = "0: General Topics"
-        return df, {"0: General Topics": len(df)}, []
+        metrics = {"silhouette_score": "N/A", "optimal_k": 1, "vocab_size": 0}
+        return df, {"0: General Topics": len(df)}, [], metrics
 
     # --- MATHEMATICAL SEARCH FOR OPTIMAL K ---
     best_k = 2
@@ -142,4 +145,10 @@ def perform_clustering(df):
     except Exception as e:
         print(f"Summarization error: {e}")
 
-    return df, counts, takeaways
+    metrics = {
+        "silhouette_score": round(best_score, 3) if best_score > -1 else "N/A",
+        "optimal_k": best_k,
+        "vocab_size": vocab_size
+    }
+
+    return df, counts, takeaways, metrics

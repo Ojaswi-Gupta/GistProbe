@@ -62,7 +62,7 @@ def process():
         df, sentiment_counts, avg_subjectivity = compute_sentiment(df)
 
         # Phase 3: Cluster and Summarize
-        df, cluster_counts, takeaways = perform_clustering(df)
+        df, cluster_counts, takeaways, metrics = perform_clustering(df)
 
         # Save results
         session_id = str(uuid.uuid4())[:8]
@@ -85,6 +85,7 @@ def process():
             sentiment_counts=sentiment_counts,
             avg_subjectivity=avg_subjectivity,
             takeaways=takeaways,
+            metrics=metrics,
             url=url,
             total_items=len(df),
         )

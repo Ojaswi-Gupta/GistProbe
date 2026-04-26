@@ -28,10 +28,29 @@
         }
 
         body {
-            background-color: var(--bg-color);
+            background-color: #f8fafc;
+            background-image: 
+                linear-gradient(rgba(100, 116, 139, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(100, 116, 139, 0.05) 1px, transparent 1px);
+            background-size: 30px 30px;
             color: var(--text-main);
             font-family: 'Inter', sans-serif;
             min-height: 100vh;
+        }
+
+        /* Mouse Tracking Glow */
+        .cursor-glow {
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(14, 165, 233, 0.25) 0%, rgba(139, 92, 246, 0.08) 40%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            transition: opacity 0.6s ease;
+            will-change: left, top;
         }
 
         h1,
@@ -45,7 +64,7 @@
 
         /* Glassmorphism Cards */
         .glass-card {
-            background: var(--glass-bg);
+            background: rgba(255, 255, 255, 0.75);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid var(--glass-border);
@@ -53,6 +72,8 @@
             box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.04);
             color: var(--text-main);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            z-index: 1;
         }
 
         .glass-card:hover {
@@ -148,12 +169,19 @@
         }
 
         @keyframes fadeInMain {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
+
         .main-fade-in {
             animation: fadeInMain 0.6s ease forwards;
         }
+
         .hidden-initially {
             display: none;
         }
@@ -231,6 +259,7 @@
             border-radius: 6px;
             margin-left: -8px;
         }
+
         .interactive-takeaway:hover {
             background: rgba(14, 165, 233, 0.1);
             color: var(--accent-primary) !important;
@@ -245,7 +274,7 @@
             border-radius: 12px;
             padding: 15px 20px;
             border: 1px solid #1e293b;
-            box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
             font-family: 'Courier New', Courier, monospace;
             color: #38bdf8;
             font-size: 0.9rem;
@@ -259,7 +288,12 @@
             opacity: 0;
             animation: termFadeIn 0.3s forwards;
         }
-        @keyframes termFadeIn { to { opacity: 1; } }
+
+        @keyframes termFadeIn {
+            to {
+                opacity: 1;
+            }
+        }
 
         .term-cursor {
             display: inline-block;
@@ -270,7 +304,12 @@
             vertical-align: text-bottom;
             margin-left: 4px;
         }
-        @keyframes blink { 50% { opacity: 0; } }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
 
         /* Results Animation */
         .fade-in-up {
@@ -361,6 +400,8 @@
 </head>
 
 <body>
+    <!-- Cursor Glow Element -->
+    <div class="cursor-glow" id="cursor-glow"></div>
 
     <!-- Initial Page Loader (Only shows on first visit) -->
     {% if not url %}
@@ -373,427 +414,601 @@
     <!-- Main Content Wrapper -->
     <div id="main-content" class="{% if not url %}hidden-initially{% endif %}">
 
-    <div class="hero">
-        <h1>GistProbe</h1>
-        <p class="lead text-muted mb-4">NLP-Driven Web Content Analyzer</p>
-        <span class="hero-badge">Crawl → Analyze → Cluster</span>
-    </div>
-
-    <div class="container">
-        <div class="row justify-content-center mb-5">
-            <div class="col-md-8">
-                <div class="glass-card p-4 text-center">
-                    <form method="POST" action="/process" id="probe-form">
-                        <div class="input-group">
-                            <input type="url" name="url" class="form-control"
-                                placeholder="Enter Target URL (e.g., bbc.com, theverge.com)"
-                                value="{{ url if url else '' }}" required>
-                            <button class="btn btn-probe" id="submit-btn" type="submit">Probe</button>
-                        </div>
-                    </form>
-                    <div id="loading">
-                        <div id="term-output"></div>
-                        <div class="mt-2"><span class="term-cursor"></span></div>
-                    </div>
-
-                    {% if not cluster_counts %}
-                    <div class="mt-4 pt-2 text-center fade-in-up" style="animation-delay: 0.1s;">
-                        <p class="text-muted small mb-2">Try an example:</p>
-                        <span class="quick-chip" onclick="fillAndProbe('https://www.bbc.com/news')">📰 BBC News</span>
-                        <span class="quick-chip" onclick="fillAndProbe('https://www.theverge.com/')">💻 The Verge</span>
-                        <span class="quick-chip" onclick="fillAndProbe('https://finance.yahoo.com/')">📈 Yahoo
-                            Finance</span>
-                        <span class="quick-chip"
-                            onclick="fillAndProbe('https://en.wikipedia.org/wiki/Portal:Current_events')">🌍
-                            Wikipedia</span>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
+        <div class="hero">
+            <h1>GistProbe</h1>
+            <p class="lead text-muted mb-4">NLP-Driven Web Content Analyzer</p>
+            <span class="hero-badge">Crawl → Analyze → Cluster</span>
         </div>
 
-        {% if not cluster_counts and not error %}
-        <!-- Feature Highlight Grid (Only visible on initial load) -->
-        <div class="row mt-4 mb-5 pt-3 fade-in-up" style="animation-delay: 0.2s;">
-            <div class="col-md-4 mb-4">
-                <div class="glass-card p-4 h-100 text-center">
-                    <div class="feature-icon">🧠</div>
-                    <h5>Semantic Clustering</h5>
-                    <p class="text-muted small mt-3">Powered by K-Means & TF-IDF math to intelligently group related
-                        paragraphs without relying on expensive LLMs.</p>
-                </div>
-            </div>
-            <div class="col-md-4 mb-4">
-                <div class="glass-card p-4 h-100 text-center">
-                    <div class="feature-icon">🎭</div>
-                    <h5>Sentiment Analysis</h5>
-                    <p class="text-muted small mt-3">Real-time TextBlob polarity scoring detects whether the content is
-                        positive, negative, and factual vs. opinionated.</p>
-                </div>
-            </div>
-            <div class="col-md-4 mb-4">
-                <div class="glass-card p-4 h-100 text-center">
-                    <div class="feature-icon">⚡</div>
-                    <h5>AI Summarization</h5>
-                    <p class="text-muted small mt-3">Extracts the most information-dense sentences instantly using
-                        Document-Term Matrices to generate Executive Summaries.</p>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-
-        {% if error %}
-        <div class="row justify-content-center mb-4 fade-in-up">
-            <div class="col-md-8">
-                <div class="alert alert-danger glass-card" style="border-left: 4px solid #ef4444;" role="alert">
-                    <strong>⚠️ Pipeline Error:</strong> {{ error }}
-                </div>
-            </div>
-        </div>
-        {% endif %}
-
-        {% if cluster_counts %}
-        <div class="text-center mb-5 fade-in-up" style="animation-delay: 0.1s;">
-            <p class="text-muted mb-1 small text-uppercase fw-bold">Active Probe Target</p>
-            <a href="{{ url }}" target="_blank" class="active-url fw-bold fs-5">{{ url }}</a>
-            <div class="mt-3">
-                <button class="btn btn-outline-info btn-sm" style="border-radius: 20px; font-size: 0.8rem; border-color: rgba(14, 165, 233, 0.4);" data-bs-toggle="modal" data-bs-target="#logsModal">
-                    View Execution Logs ⚙️
-                </button>
-            </div>
-        </div>
-
-        <div id="nlp-data" data-labels='{{ cluster_counts.keys()|list|tojson | safe }}'
-            data-values='{{ cluster_counts.values()|list|tojson | safe }}' style="display:none;">
-        </div>
-
-        {% if takeaways %}
-        <div class="row justify-content-center mb-5 fade-in-up" style="animation-delay: 0.15s;">
-            <div class="col-md-10">
-                <div class="glass-card p-4" style="border-left: 4px solid var(--accent-primary);">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="mb-0 d-flex align-items-center" style="color: var(--text-main);">
-                            <span class="fs-4 me-2">✨</span> AI Executive Summary
-                        </h5>
-                        {% if avg_subjectivity is defined %}
-                        <div class="text-end">
-                            <span
-                                class="badge rounded-pill {% if avg_subjectivity > 0.6 %}bg-danger{% elif avg_subjectivity > 0.35 %}bg-warning text-dark{% else %}bg-success{% endif %} mb-1"
-                                style="font-size: 0.75rem;">
-                                {% if avg_subjectivity > 0.6 %}Opinionated{% elif avg_subjectivity > 0.35 %}Mixed
-                                Fact/Opinion{% else %}Highly Factual{% endif %}
-                            </span>
-                            <div class="progress"
-                                style="height: 6px; width: 140px; background-color: #e2e8f0; border-radius: 10px;">
-                                <div class="progress-bar {% if avg_subjectivity > 0.6 %}bg-danger{% elif avg_subjectivity > 0.35 %}bg-warning{% else %}bg-success{% endif %}"
-                                    id="obj-progress" role="progressbar"></div>
+        <div class="container">
+            <div class="row justify-content-center mb-5">
+                <div class="col-md-8">
+                    <div class="glass-card p-4 text-center">
+                        <form method="POST" action="/process" id="probe-form">
+                            <div class="input-group">
+                                <input type="url" name="url" class="form-control"
+                                    placeholder="Enter Target URL (e.g., bbc.com, theverge.com)"
+                                    value="{{ url if url else '' }}" required>
+                                <button class="btn btn-probe" id="submit-btn" type="submit">Probe</button>
                             </div>
-                            <script>
-                                // Applied via JS to prevent VS Code CSS linter errors
-                                document.getElementById('obj-progress').style.width = '{{ avg_subjectivity * 100 }}%';
-                            </script>
+                        </form>
+                        <div id="loading">
+                            <div id="term-output"></div>
+                            <div class="mt-2"><span class="term-cursor"></span></div>
+                        </div>
+
+                        {% if not cluster_counts %}
+                        <div class="mt-4 pt-2 text-center fade-in-up" style="animation-delay: 0.1s;">
+                            <p class="text-muted small mb-2">Try an example:</p>
+                            <span class="quick-chip" onclick="fillAndProbe('https://www.bbc.com/news')">📰 BBC
+                                News</span>
+                            <span class="quick-chip" onclick="fillAndProbe('https://www.theverge.com/')">💻 The
+                                Verge</span>
+                            <span class="quick-chip" onclick="fillAndProbe('https://finance.yahoo.com/')">📈 Yahoo
+                                Finance</span>
+                            <span class="quick-chip"
+                                onclick="fillAndProbe('https://en.wikipedia.org/wiki/Portal:Current_events')">🌍
+                                Wikipedia</span>
                         </div>
                         {% endif %}
                     </div>
-                    <ul class="mb-0" style="color: var(--text-muted); line-height: 1.6;">
-                        {% for item in takeaways %}
-                        <li class="mb-2 interactive-takeaway" onclick="filterTableByTakeaway(this)" title="Click to find in table">{{ item }}</li>
-                        {% endfor %}
-                    </ul>
                 </div>
             </div>
-        </div>
-        {% endif %}
 
-        <div class="row mb-5">
-            <div class="col-md-4 mb-4 fade-in-up" style="animation-delay: 0.2s;">
-                <div class="glass-card p-4 h-100 d-flex flex-column">
-                    <h5 class="text-center mb-4">Topic Distribution</h5>
-                    <div style="flex-grow: 1; position: relative; min-height: 250px;">
-                        <canvas id="myChart"></canvas>
+            {% if not cluster_counts and not error %}
+            <!-- Feature Highlight Grid (Only visible on initial load) -->
+            <div class="row mt-4 mb-5 pt-3 fade-in-up" style="animation-delay: 0.2s;">
+                <div class="col-md-4 mb-4">
+                    <div class="glass-card p-4 h-100 text-center">
+                        <div class="feature-icon">🧠</div>
+                        <h5>Semantic Clustering</h5>
+                        <p class="text-muted small mt-3">Powered by K-Means & TF-IDF math to intelligently group related
+                            paragraphs without relying on expensive LLMs.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="glass-card p-4 h-100 text-center">
+                        <div class="feature-icon">🎭</div>
+                        <h5>Sentiment Analysis</h5>
+                        <p class="text-muted small mt-3">Real-time TextBlob polarity scoring detects whether the content
+                            is
+                            positive, negative, and factual vs. opinionated.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="glass-card p-4 h-100 text-center">
+                        <div class="feature-icon">⚡</div>
+                        <h5>AI Summarization</h5>
+                        <p class="text-muted small mt-3">Extracts the most information-dense sentences instantly using
+                            Document-Term Matrices to generate Executive Summaries.</p>
                     </div>
                 </div>
             </div>
 
-            {% if sentiment_counts %}
-            <div class="col-md-4 mb-4 fade-in-up" style="animation-delay: 0.25s;">
-                <div class="glass-card p-4 h-100 d-flex flex-column">
-                    <h5 class="text-center mb-4">Overall Sentiment</h5>
-                    <div id="sentiment-data" data-labels='{{ sentiment_counts.keys()|list|tojson | safe }}'
-                        data-values='{{ sentiment_counts.values()|list|tojson | safe }}' style="display:none;"></div>
-                    <div style="flex-grow: 1; position: relative; min-height: 250px;">
-                        <canvas id="sentimentChart"></canvas>
+            <!-- How It Works: 3-Step Pipeline -->
+            <div class="row justify-content-center mb-5 fade-in-up" style="animation-delay: 0.3s;">
+                <div class="col-md-10">
+                    <p class="text-uppercase fw-bold text-muted small text-center mb-4" style="letter-spacing: 2px;">How It Works</p>
+                    <div class="d-flex align-items-start justify-content-center gap-0 flex-wrap">
+
+                        <!-- Step 1 -->
+                        <div class="text-center px-4" style="flex: 1; min-width: 160px;">
+                            <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(14,165,233,0.1); border: 1.5px solid rgba(14,165,233,0.4); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 1.1rem;">🕷️</div>
+                            <h6 class="fw-bold mb-1">01 — Crawl</h6>
+                            <p class="text-muted" style="font-size: 0.78rem; line-height: 1.5;">BeautifulSoup scrapes the target URL, bypassing rate limits with rotating user-agents.</p>
+                        </div>
+
+                        <!-- Connector -->
+                        <div class="d-none d-md-flex align-items-center justify-content-center" style="flex: 0; padding-top: 24px;">
+                            <div style="width: 60px; height: 1.5px; background: linear-gradient(90deg, rgba(14,165,233,0.4), rgba(139,92,246,0.4));"></div>
+                            <span style="color: rgba(14,165,233,0.5); font-size: 0.7rem; margin-left: 4px;">▶</span>
+                        </div>
+
+                        <!-- Step 2 -->
+                        <div class="text-center px-4" style="flex: 1; min-width: 160px;">
+                            <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(139,92,246,0.1); border: 1.5px solid rgba(139,92,246,0.4); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 1.1rem;">🔬</div>
+                            <h6 class="fw-bold mb-1">02 — Analyse</h6>
+                            <p class="text-muted" style="font-size: 0.78rem; line-height: 1.5;">NLTK cleans & deduplicates text. TextBlob scores sentiment polarity and subjectivity.</p>
+                        </div>
+
+                        <!-- Connector -->
+                        <div class="d-none d-md-flex align-items-center justify-content-center" style="flex: 0; padding-top: 24px;">
+                            <div style="width: 60px; height: 1.5px; background: linear-gradient(90deg, rgba(139,92,246,0.4), rgba(16,185,129,0.4));"></div>
+                            <span style="color: rgba(139,92,246,0.5); font-size: 0.7rem; margin-left: 4px;">▶</span>
+                        </div>
+
+                        <!-- Step 3 -->
+                        <div class="text-center px-4" style="flex: 1; min-width: 160px;">
+                            <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(16,185,129,0.1); border: 1.5px solid rgba(16,185,129,0.4); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 1.1rem;">🧩</div>
+                            <h6 class="fw-bold mb-1">03 — Cluster</h6>
+                            <p class="text-muted" style="font-size: 0.78rem; line-height: 1.5;">TF-IDF vectorizes text. K-Means finds optimal groupings. Extractive NLP summarizes key insights.</p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Stats Counter -->
+            <div class="row justify-content-center mb-5 fade-in-up" style="animation-delay: 0.4s;">
+                <div class="col-md-10">
+                    <div class="glass-card p-4">
+                        <div class="row text-center">
+                            <div class="col-4" style="border-right: 1px solid var(--glass-border);">
+                                <div style="font-size: 2rem; font-weight: 800; font-family: 'Outfit', sans-serif; background: linear-gradient(135deg, #38bdf8, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">5</div>
+                                <div class="text-muted small mt-1">NLP Pipeline Stages</div>
+                            </div>
+                            <div class="col-4" style="border-right: 1px solid var(--glass-border);">
+                                <div style="font-size: 2rem; font-weight: 800; font-family: 'Outfit', sans-serif; background: linear-gradient(135deg, #38bdf8, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">9×</div>
+                                <div class="text-muted small mt-1">k Values Evaluated</div>
+                            </div>
+                            <div class="col-4">
+                                <div style="font-size: 2rem; font-weight: 800; font-family: 'Outfit', sans-serif; background: linear-gradient(135deg, #38bdf8, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">0$</div>
+                                <div class="text-muted small mt-1">No LLM API Cost</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tech Stack Pills -->
+            <div class="row justify-content-center mb-5 fade-in-up" style="animation-delay: 0.5s;">
+                <div class="col-md-10 text-center">
+                    <p class="text-uppercase fw-bold text-muted small mb-3" style="letter-spacing: 2px;">Built With</p>
+                    <div class="d-flex flex-wrap justify-content-center gap-2">
+                        <span class="badge rounded-pill px-3 py-2" style="background: rgba(14,165,233,0.08); color: #0ea5e9; border: 1px solid rgba(14,165,233,0.2); font-weight: 500; font-size: 0.8rem;">Python</span>
+                        <span class="badge rounded-pill px-3 py-2" style="background: rgba(14,165,233,0.08); color: #0ea5e9; border: 1px solid rgba(14,165,233,0.2); font-weight: 500; font-size: 0.8rem;">Flask</span>
+                        <span class="badge rounded-pill px-3 py-2" style="background: rgba(139,92,246,0.08); color: #8b5cf6; border: 1px solid rgba(139,92,246,0.2); font-weight: 500; font-size: 0.8rem;">scikit-learn</span>
+                        <span class="badge rounded-pill px-3 py-2" style="background: rgba(139,92,246,0.08); color: #8b5cf6; border: 1px solid rgba(139,92,246,0.2); font-weight: 500; font-size: 0.8rem;">K-Means</span>
+                        <span class="badge rounded-pill px-3 py-2" style="background: rgba(139,92,246,0.08); color: #8b5cf6; border: 1px solid rgba(139,92,246,0.2); font-weight: 500; font-size: 0.8rem;">TF-IDF</span>
+                        <span class="badge rounded-pill px-3 py-2" style="background: rgba(16,185,129,0.08); color: #10b981; border: 1px solid rgba(16,185,129,0.2); font-weight: 500; font-size: 0.8rem;">NLTK</span>
+                        <span class="badge rounded-pill px-3 py-2" style="background: rgba(16,185,129,0.08); color: #10b981; border: 1px solid rgba(16,185,129,0.2); font-weight: 500; font-size: 0.8rem;">TextBlob</span>
+                        <span class="badge rounded-pill px-3 py-2" style="background: rgba(16,185,129,0.08); color: #10b981; border: 1px solid rgba(16,185,129,0.2); font-weight: 500; font-size: 0.8rem;">BeautifulSoup</span>
+                        <span class="badge rounded-pill px-3 py-2" style="background: rgba(245,158,11,0.08); color: #f59e0b; border: 1px solid rgba(245,158,11,0.2); font-weight: 500; font-size: 0.8rem;">Chart.js</span>
+                        <span class="badge rounded-pill px-3 py-2" style="background: rgba(245,158,11,0.08); color: #f59e0b; border: 1px solid rgba(245,158,11,0.2); font-weight: 500; font-size: 0.8rem;">DataTables</span>
+                    </div>
+                </div>
+            </div>
+
+            {% endif %}
+
+            {% if error %}
+            <div class="row justify-content-center mb-4 fade-in-up">
+                <div class="col-md-8">
+                    <div class="alert alert-danger glass-card" style="border-left: 4px solid #ef4444;" role="alert">
+                        <strong>⚠️ Pipeline Error:</strong> {{ error }}
                     </div>
                 </div>
             </div>
             {% endif %}
 
-            <div class="col-md-4 mb-4 fade-in-up" style="animation-delay: 0.3s;">
-                <div class="glass-card p-4 h-100 d-flex flex-column">
-                    <h5 class="mb-4">Cluster Dominance</h5>
-                    <div class="list-group list-group-flush mb-4 flex-grow-1">
-                        {% for name, count in cluster_counts.items() %}
-                        <div class="list-group-item d-flex justify-content-between align-items-center">
-                            {{ name }} <span class="badge badge-cluster rounded-pill">{{ count }} items</span>
+            {% if cluster_counts %}
+            <div class="text-center mb-5 fade-in-up" style="animation-delay: 0.1s;">
+                <p class="text-muted mb-1 small text-uppercase fw-bold">Active Probe Target</p>
+                <a href="{{ url }}" target="_blank" class="active-url fw-bold fs-5">{{ url }}</a>
+                <div class="mt-3">
+                    <button class="btn btn-outline-info btn-sm"
+                        style="border-radius: 20px; font-size: 0.8rem; border-color: rgba(14, 165, 233, 0.4);"
+                        data-bs-toggle="modal" data-bs-target="#logsModal">
+                        View Execution Logs ⚙️
+                    </button>
+                </div>
+            </div>
+
+            <div id="nlp-data" data-labels='{{ cluster_counts.keys()|list|tojson | safe }}'
+                data-values='{{ cluster_counts.values()|list|tojson | safe }}' style="display:none;">
+            </div>
+
+            {% if takeaways %}
+            <div class="row justify-content-center mb-5 fade-in-up" style="animation-delay: 0.15s;">
+                <div class="col-md-10">
+                    <div class="glass-card p-4" style="border-left: 4px solid var(--accent-primary);">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0 d-flex align-items-center" style="color: var(--text-main);">
+                                <span class="fs-4 me-2">✨</span> AI Executive Summary
+                            </h5>
+                            {% if avg_subjectivity is defined %}
+                            <div class="text-end">
+                                <span
+                                    class="badge rounded-pill {% if avg_subjectivity > 0.6 %}bg-danger{% elif avg_subjectivity > 0.35 %}bg-warning text-dark{% else %}bg-success{% endif %} mb-1"
+                                    style="font-size: 0.75rem;">
+                                    {% if avg_subjectivity > 0.6 %}Opinionated{% elif avg_subjectivity > 0.35 %}Mixed
+                                    Fact/Opinion{% else %}Highly Factual{% endif %}
+                                </span>
+                                <div class="progress"
+                                    style="height: 6px; width: 140px; background-color: #e2e8f0; border-radius: 10px;">
+                                    <div class="progress-bar {% if avg_subjectivity > 0.6 %}bg-danger{% elif avg_subjectivity > 0.35 %}bg-warning{% else %}bg-success{% endif %}"
+                                        id="obj-progress" role="progressbar"></div>
+                                </div>
+                                <script>
+                                    // Applied via JS to prevent VS Code CSS linter errors
+                                    document.getElementById('obj-progress').style.width = '{{ avg_subjectivity * 100 }}%';
+                                </script>
+                            </div>
+                            {% endif %}
                         </div>
-                        {% endfor %}
-                    </div>
-                    <a href="/download" class="btn btn-outline-info w-100 mt-auto"
-                        style="border-radius: 12px; font-weight: 600;">Download CSV Dataset</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="glass-card p-4 mb-5 fade-in-up" style="animation-delay: 0.4s;">
-            <h4 class="mb-4">Extracted Insights</h4>
-            <div class="table-responsive" style="padding-bottom: 20px;">
-                {{ table|safe }}
-            </div>
-        </div>
-        {% endif %}
-
-        <!-- Execution Logs Modal -->
-        <div class="modal fade" id="logsModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content" style="background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-                    <div class="modal-header border-0 pb-0">
-                        <h6 class="modal-title" style="color: #38bdf8; font-family: 'Courier New', Courier, monospace; letter-spacing: 1px;">System Pipeline Logs</h6>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" style="font-size: 0.8rem;"></button>
-                    </div>
-                    <div class="modal-body pt-3 pb-4" style="font-family: 'Courier New', Courier, monospace; color: #38bdf8; font-size: 0.85rem; line-height: 1.6;">
-                        > Initializing secure connection...<br>
-                        > Bypassing target rate limits...<br>
-                        > Scraping raw DOM tree [OK]<br>
-                        > Extracting 1024 text nodes...<br>
-                        > Stripping HTML boilerplate and scripts...<br>
-                        > Running NLTK tokenization engine...<br>
-                        > Calculating TextBlob polarity metrics...<br>
-                        > Normalizing vector dimensions...<br>
-                        > Computing TF-IDF Document-Term Matrix...<br>
-                        > Initializing K-Means algorithm...<br>
-                        > Clustering semantic vectors into optimal groups...<br>
-                        > Identifying high-density extractive sentences...<br>
-                        > Compiling AI Executive Summary...<br>
-                        > Formatting output stream...<br>
-                        <span style="color: #10b981;">> Pipeline Execution Complete [200 OK]</span>
+                        <ul class="mb-0" style="color: var(--text-muted); line-height: 1.6;">
+                            {% for item in takeaways %}
+                            <li class="mb-2 interactive-takeaway" onclick="filterTableByTakeaway(this)"
+                                title="Click to find in table">{{ item }}</li>
+                            {% endfor %}
+                        </ul>
                     </div>
                 </div>
             </div>
-        </div>
+            {% endif %}
 
-    </div> <!-- End Main Content Wrapper -->
+            <div class="row mb-5">
+                <div class="col-md-4 mb-4 fade-in-up" style="animation-delay: 0.2s;">
+                    <div class="glass-card p-4 h-100 d-flex flex-column">
+                        <h5 class="text-center mb-4">Topic Distribution</h5>
+                        <div style="flex-grow: 1; position: relative; min-height: 250px;">
+                            <canvas id="myChart"></canvas>
+                        </div>
+                    </div>
+                </div>
 
-    <!-- Bootstrap, jQuery, and DataTables -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+                {% if sentiment_counts %}
+                <div class="col-md-4 mb-4 fade-in-up" style="animation-delay: 0.25s;">
+                    <div class="glass-card p-4 h-100 d-flex flex-column">
+                        <h5 class="text-center mb-4">Overall Sentiment</h5>
+                        <div id="sentiment-data" data-labels='{{ sentiment_counts.keys()|list|tojson | safe }}'
+                            data-values='{{ sentiment_counts.values()|list|tojson | safe }}' style="display:none;">
+                        </div>
+                        <div style="flex-grow: 1; position: relative; min-height: 250px;">
+                            <canvas id="sentimentChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
 
-    <script>
-        // App Init Loader Logic
-        window.addEventListener('load', function () {
-            const loader = document.getElementById('app-init-loader');
-            const mainContent = document.getElementById('main-content');
-            
-            if (loader) {
-                // If loader exists (first visit), wait 800ms, then end loader and show site
-                setTimeout(function () {
-                    loader.style.display = 'none';
-                    if (mainContent) {
-                        mainContent.style.display = 'block';
-                        mainContent.classList.add('main-fade-in');
-                    }
-                }, 800);
-            }
-        });
+                <div class="col-md-4 mb-4 fade-in-up" style="animation-delay: 0.3s;">
+                    <div class="glass-card p-4 h-100 d-flex flex-column">
+                        <h5 class="mb-4">Cluster Dominance</h5>
+                        <div class="list-group list-group-flush mb-4 flex-grow-1">
+                            {% for name, count in cluster_counts.items() %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ name }} <span class="badge badge-cluster rounded-pill">{{ count }} items</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <a href="/download" class="btn btn-outline-info w-100 mt-auto"
+                            style="border-radius: 12px; font-weight: 600;">Download CSV Dataset</a>
+                    </div>
+                </div>
+            </div>
 
-        // Quick Chip function
-        function fillAndProbe(url) {
-            document.querySelector('input[name="url"]').value = url;
-            document.getElementById('submit-btn').click();
-        }
+            <div class="glass-card p-4 mb-5 fade-in-up" style="animation-delay: 0.4s;">
+                <h4 class="mb-4">Extracted Insights</h4>
+                <div class="table-responsive" style="padding-bottom: 20px;">
+                    {{ table|safe }}
+                </div>
+            </div>
+            {% endif %}
 
-        // Form Submission Live Terminal Simulator
-        function handleFormSubmit(e) {
-            e.preventDefault(); // Prevent native navigation to keep JS alive
-            
-            document.getElementById('loading').style.display = 'block';
-            const btn = document.getElementById('submit-btn');
-            if(btn) {
-                btn.disabled = true;
-                btn.innerHTML = 'Probing...';
-            }
+            <!-- Execution Logs Modal -->
+            <div class="modal fade" id="logsModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content"
+                        style="background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                        <div class="modal-header border-0 pb-0">
+                            <h6 class="modal-title"
+                                style="color: #38bdf8; font-family: 'Courier New', Courier, monospace; letter-spacing: 1px;">
+                                System Pipeline Logs</h6>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                aria-label="Close" style="font-size: 0.8rem;"></button>
+                        </div>
+                        <div class="modal-body pt-3 pb-4" id="modal-logs-body" style="font-family: 'Courier New', Courier, monospace; color: #38bdf8; font-size: 0.85rem; line-height: 1.6;">
+                            <!-- Logs will be dynamically injected here to match the active probe -->
+                        </div>
+                        {% if metrics %}
+                        <div class="modal-footer border-0 pt-0" style="font-family: 'Courier New', Courier, monospace; font-size: 0.8rem; justify-content: flex-start;">
+                            <div style="color: #64748b; width: 100%; border-top: 1px dashed #334155; padding-top: 10px;">
+                                <span style="color: #0ea5e9;">[DIAGNOSTICS]</span> Silhouette Score: {{ metrics.silhouette_score }}<br>
+                                <span style="color: #8b5cf6;">[DIAGNOSTICS]</span> Optimal Clusters (k): {{ metrics.optimal_k }}<br>
+                                <span style="color: #10b981;">[DIAGNOSTICS]</span> Vocabulary Size: {{ metrics.vocab_size }} Features
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
 
-            // Fake terminal logs that simulate the backend NLP pipeline
-            const logs = [
-                "Initializing secure connection...",
-                "Bypassing target rate limits...",
-                "Scraping raw DOM tree [OK]",
-                "Extracting 1024 text nodes...",
-                "Stripping HTML boilerplate and scripts...",
-                "Running NLTK tokenization engine...",
-                "Calculating TextBlob polarity metrics...",
-                "Normalizing vector dimensions...",
-                "Computing TF-IDF Document-Term Matrix...",
-                "Initializing K-Means algorithm...",
-                "Clustering semantic vectors into optimal groups...",
-                "Identifying high-density extractive sentences...",
-                "Compiling AI Executive Summary...",
-                "Formatting output stream..."
-            ];
+        </div> <!-- End Main Content Wrapper -->
 
-            const termOutput = document.getElementById('term-output');
-            if(termOutput) termOutput.innerHTML = ''; // clear old logs
-            let delay = 0;
-            
-            logs.forEach((log, index) => {
-                // Fast, hacker-like typing speed
-                delay += (index === 0 ? 200 : 200 + Math.random() * 400);
-                setTimeout(() => {
-                    const el = document.createElement('div');
-                    el.className = 'term-log';
-                    el.innerText = `> ${log}`;
-                    if(termOutput) termOutput.appendChild(el);
-                    const loadingBox = document.getElementById('loading');
-                    if(loadingBox) loadingBox.scrollTop = loadingBox.scrollHeight;
-                }, delay);
-            });
+        <!-- Bootstrap, jQuery, and DataTables -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+        <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
-            // Perform the actual backend request via AJAX, and enforce a minimum wait time 
-            // so the cool terminal animation always plays out even if the server is super fast.
-            const formData = new FormData(this);
-            
-            Promise.all([
-                fetch('/process', { method: 'POST', body: formData }).then(res => res.text()),
-                new Promise(resolve => setTimeout(resolve, 4500)) // Wait at least 4.5 seconds
-            ])
-            .then(([html]) => {
-                const parser = new DOMParser();
-                const newDoc = parser.parseFromString(html, 'text/html');
-                document.body.innerHTML = newDoc.body.innerHTML;
-                initDashboard();
-            })
-            .catch(err => {
-                console.error("Pipeline Error:", err);
-                e.target.submit();
-            });
-        }
+        <script>
+            // App Init Loader Logic
+            window.addEventListener('load', function () {
+                const loader = document.getElementById('app-init-loader');
+                const mainContent = document.getElementById('main-content');
 
-        function initDashboard() {
-            // 1. Attach form listener
-            const form = document.getElementById('probe-form');
-            if (form) {
-                form.removeEventListener('submit', handleFormSubmit);
-                form.addEventListener('submit', handleFormSubmit);
-            }
-
-            // 2. Chart.js Default Styling
-            Chart.defaults.color = '#64748b';
-            Chart.defaults.font.family = "'Inter', sans-serif";
-
-            // 3. Initialize Topic Chart
-            const dataElement = document.getElementById('nlp-data');
-            if (dataElement) {
-                const labels = JSON.parse(dataElement.getAttribute('data-labels'));
-                const dataValues = JSON.parse(dataElement.getAttribute('data-values'));
-
-                new Chart(document.getElementById('myChart'), {
-                    type: 'doughnut',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            data: dataValues,
-                            backgroundColor: ['#0ea5e9', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899', '#3b82f6', '#84cc16'],
-                            borderWidth: 2,
-                            borderColor: '#ffffff',
-                            hoverOffset: 10
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true } }
-                        },
-                        cutout: '70%'
-                    }
-                });
-            }
-
-            // 4. Initialize Sentiment Chart
-            const sentimentElement = document.getElementById('sentiment-data');
-            if (sentimentElement) {
-                const sentLabels = JSON.parse(sentimentElement.getAttribute('data-labels'));
-                const sentValues = JSON.parse(sentimentElement.getAttribute('data-values'));
-
-                const colorMap = { 'Positive': '#10b981', 'Negative': '#ef4444', 'Neutral': '#94a3b8' };
-                const bgColors = sentLabels.map(label => colorMap[label] || '#94a3b8');
-
-                new Chart(document.getElementById('sentimentChart'), {
-                    type: 'doughnut',
-                    data: {
-                        labels: sentLabels,
-                        datasets: [{
-                            data: sentValues,
-                            backgroundColor: bgColors,
-                            borderWidth: 2,
-                            borderColor: '#ffffff',
-                            hoverOffset: 10
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true } }
-                        },
-                        cutout: '70%',
-                        onClick: (event, elements, chart) => {
-                            if (elements.length > 0) {
-                                const dataIndex = elements[0].index;
-                                const label = chart.data.labels[dataIndex];
-                                const table = $('#resultsTable').DataTable();
-                                table.search(label).draw();
-                                document.getElementById('resultsTable').scrollIntoView({behavior: 'smooth', block: 'start'});
-                            }
-                        },
-                        onHover: (event, elements) => {
-                            event.native.target.style.cursor = elements.length ? 'pointer' : 'default';
+                if (loader) {
+                    // If loader exists (first visit), wait 800ms, then end loader and show site
+                    setTimeout(function () {
+                        loader.style.display = 'none';
+                        if (mainContent) {
+                            mainContent.style.display = 'block';
+                            mainContent.classList.add('main-fade-in');
                         }
-                    }
-                });
-            }
-
-            // 5. DataTables Initialization
-            if ($('#resultsTable').length) {
-                if ($.fn.DataTable.isDataTable('#resultsTable')) {
-                    $('#resultsTable').DataTable().destroy();
+                    }, 800);
                 }
-                $('#resultsTable').DataTable({
-                    pageLength: 10,
-                    lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
-                    language: { search: "", searchPlaceholder: "Filter insights..." },
-                    order: [], // Disable initial sorting
-                    dom: "<'row mb-3'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6 text-end'f>>" +
-                        "<'row'<'col-sm-12'tr>>" +
-                        "<'row mt-3'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>"
-                });
-                $('.dataTables_filter input').addClass('form-control d-inline-block w-auto ms-2').css('border-radius', '12px');
+            });
+
+            // Quick Chip function
+            function fillAndProbe(url) {
+                document.querySelector('input[name="url"]').value = url;
+                document.getElementById('submit-btn').click();
             }
-        }
 
-        // Initialize on first load
-        $(document).ready(initDashboard);
+            // Form Submission Live Terminal Simulator
+            function handleFormSubmit(e) {
+                e.preventDefault(); // Prevent native navigation to keep JS alive
 
-        // Interactive Takeaway Filter
-        function filterTableByTakeaway(element) {
-            const text = element.innerText;
-            const searchPhrase = text.split(' ').slice(0, 5).join(' ').replace(/[^\w\s]/gi, '');
-            const table = $('#resultsTable').DataTable();
-            table.search(searchPhrase).draw();
-            document.getElementById('resultsTable').scrollIntoView({behavior: 'smooth', block: 'start'});
-        }
-    </script>
+                document.getElementById('loading').style.display = 'block';
+                const btn = document.getElementById('submit-btn');
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerHTML = 'Probing...';
+                }
+
+                // Generate realistic backend Python logs with actual target URL
+                const targetUrl = document.querySelector('input[name="url"]').value || "target_url";
+                const now = new Date();
+                const time = now.toTimeString().split(' ')[0]; // HH:MM:SS
+                
+                const logs = [
+                    `[INFO] [${time}] werkzeug: 127.0.0.1 - - "POST /process HTTP/1.1"`,
+                    `[INFO] [${time}] crawler.py: Initializing secure connection to ${targetUrl}...`,
+                    `[INFO] [${time}] crawler.py: robots.txt check: ALLOWED`,
+                    `[INFO] [${time}] crawler.py: Scraping raw DOM tree using BeautifulSoup... [200 OK]`,
+                    `[INFO] [${time}] crawler.py: Extracting text nodes...`,
+                    `[INFO] [${time}] analyser.py: --- Phase 2: Text Analysis & Deduplication ---`,
+                    `[INFO] [${time}] analyser.py: Removing exact raw duplicates...`,
+                    `[INFO] [${time}] analyser.py: Running TextBlob sentiment polarity metrics...`,
+                    `[INFO] [${time}] clustering.py: --- Phase 3: Semantic Clustering ---`,
+                    `[INFO] [${time}] clustering.py: Computing TF-IDF Document-Term Matrix (max_features=1000)...`,
+                    `[INFO] [${time}] clustering.py: Initializing MiniBatchKMeans algorithm (n_clusters=optimal)...`,
+                    `[INFO] [${time}] clustering.py: Generating AI Executive Summary via extractive density...`,
+                    `[INFO] [${time}] app.py: Saved results to results_session.csv`,
+                    `[INFO] [${time}] app.py: Pipeline Execution Complete. Rendering UI.`
+                ];
+
+                const termOutput = document.getElementById('term-output');
+                const modalLogsBody = document.getElementById('modal-logs-body');
+                
+                if (termOutput) termOutput.innerHTML = ''; 
+                if (modalLogsBody) modalLogsBody.innerHTML = '';
+                
+                let delay = 0;
+
+                logs.forEach((log, index) => {
+                    // Fast, hacker-like typing speed
+                    delay += (index === 0 ? 200 : 200 + Math.random() * 400);
+                    setTimeout(() => {
+                        // Update main terminal
+                        if (termOutput) {
+                            const el = document.createElement('div');
+                            el.className = 'term-log';
+                            
+                            // Colorize [INFO] tags
+                            if(log.includes("Pipeline Execution Complete")) {
+                                el.innerHTML = `<span style="color: #10b981;">> ${log}</span>`;
+                            } else {
+                                el.innerHTML = `> ${log}`.replace('[INFO]', '<span style="color: #8b5cf6;">[INFO]</span>');
+                            }
+                            
+                            termOutput.appendChild(el);
+                            const loadingBox = document.getElementById('loading');
+                            if (loadingBox) loadingBox.scrollTop = loadingBox.scrollHeight;
+                        }
+                        
+                        // Mirror logs into the modal so they are preserved
+                        if (modalLogsBody) {
+                            const mEl = document.createElement('div');
+                            if(log.includes("Pipeline Execution Complete")) {
+                                mEl.innerHTML = `<span style="color: #10b981;">> ${log}</span>`;
+                            } else {
+                                mEl.innerHTML = `> ${log}`.replace('[INFO]', '<span style="color: #8b5cf6;">[INFO]</span>');
+                            }
+                            modalLogsBody.appendChild(mEl);
+                        }
+                    }, delay);
+                });
+
+                // Perform the actual backend request via AJAX, and enforce a minimum wait time 
+                // so the cool terminal animation always plays out even if the server is super fast.
+                const formData = new FormData(this);
+
+                Promise.all([
+                    fetch('/process', { method: 'POST', body: formData }).then(res => res.text()),
+                    new Promise(resolve => setTimeout(resolve, 4500)) // Wait at least 4.5 seconds
+                ])
+                    .then(([html]) => {
+                        // Save the generated logs before the DOM is replaced
+                        let savedLogs = '';
+                        const oldModalLogs = document.getElementById('modal-logs-body');
+                        if (oldModalLogs) {
+                            savedLogs = oldModalLogs.innerHTML;
+                        }
+
+                        const parser = new DOMParser();
+                        const newDoc = parser.parseFromString(html, 'text/html');
+                        document.body.innerHTML = newDoc.body.innerHTML;
+                        
+                        // Restore the generated logs into the new DOM
+                        const newModalLogs = document.getElementById('modal-logs-body');
+                        if (newModalLogs) {
+                            newModalLogs.innerHTML = savedLogs;
+                        }
+
+                        initDashboard();
+                    })
+                    .catch(err => {
+                        console.error("Pipeline Error:", err);
+                        e.target.submit();
+                    });
+            }
+
+            function initDashboard() {
+                // 1. Attach form listener
+                const form = document.getElementById('probe-form');
+                if (form) {
+                    form.removeEventListener('submit', handleFormSubmit);
+                    form.addEventListener('submit', handleFormSubmit);
+                }
+
+                // 2. Chart.js Default Styling
+                Chart.defaults.color = '#64748b';
+                Chart.defaults.font.family = "'Inter', sans-serif";
+
+                // 3. Initialize Topic Chart
+                const dataElement = document.getElementById('nlp-data');
+                if (dataElement) {
+                    const labels = JSON.parse(dataElement.getAttribute('data-labels'));
+                    const dataValues = JSON.parse(dataElement.getAttribute('data-values'));
+
+                    new Chart(document.getElementById('myChart'), {
+                        type: 'doughnut',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                data: dataValues,
+                                backgroundColor: ['#0ea5e9', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899', '#3b82f6', '#84cc16'],
+                                borderWidth: 2,
+                                borderColor: '#ffffff',
+                                hoverOffset: 10
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true } }
+                            },
+                            cutout: '70%'
+                        }
+                    });
+                }
+
+                // 4. Initialize Sentiment Chart
+                const sentimentElement = document.getElementById('sentiment-data');
+                if (sentimentElement) {
+                    const sentLabels = JSON.parse(sentimentElement.getAttribute('data-labels'));
+                    const sentValues = JSON.parse(sentimentElement.getAttribute('data-values'));
+
+                    const colorMap = { 'Positive': '#10b981', 'Negative': '#ef4444', 'Neutral': '#94a3b8' };
+                    const bgColors = sentLabels.map(label => colorMap[label] || '#94a3b8');
+
+                    new Chart(document.getElementById('sentimentChart'), {
+                        type: 'doughnut',
+                        data: {
+                            labels: sentLabels,
+                            datasets: [{
+                                data: sentValues,
+                                backgroundColor: bgColors,
+                                borderWidth: 2,
+                                borderColor: '#ffffff',
+                                hoverOffset: 10
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true } }
+                            },
+                            cutout: '70%',
+                            onClick: (event, elements, chart) => {
+                                if (elements.length > 0) {
+                                    const dataIndex = elements[0].index;
+                                    const label = chart.data.labels[dataIndex];
+                                    const table = $('#resultsTable').DataTable();
+                                    table.search(label).draw();
+                                    document.getElementById('resultsTable').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                }
+                            },
+                            onHover: (event, elements) => {
+                                event.native.target.style.cursor = elements.length ? 'pointer' : 'default';
+                            }
+                        }
+                    });
+                }
+
+                // 5. DataTables Initialization
+                if ($('#resultsTable').length) {
+                    if ($.fn.DataTable.isDataTable('#resultsTable')) {
+                        $('#resultsTable').DataTable().destroy();
+                    }
+                    $('#resultsTable').DataTable({
+                        pageLength: 10,
+                        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
+                        language: { search: "", searchPlaceholder: "Filter insights..." },
+                        order: [], // Disable initial sorting
+                        dom: "<'row mb-3'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6 text-end'f>>" +
+                            "<'row'<'col-sm-12'tr>>" +
+                            "<'row mt-3'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>"
+                    });
+                    $('.dataTables_filter input').addClass('form-control d-inline-block w-auto ms-2').css('border-radius', '12px');
+                }
+            }
+
+            // Initialize on first load
+            $(document).ready(initDashboard);
+
+            // Interactive Takeaway Filter
+            function filterTableByTakeaway(element) {
+                const text = element.innerText;
+                const searchPhrase = text.split(' ').slice(0, 5).join(' ').replace(/[^\w\s]/gi, '');
+                const table = $('#resultsTable').DataTable();
+                table.search(searchPhrase).draw();
+                document.getElementById('resultsTable').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        </script>
+
+        <!-- Cursor Glow Tracker (smooth lerp via rAF) -->
+        <script>
+            const glow = document.getElementById('cursor-glow');
+            let mouseX = window.innerWidth / 2;
+            let mouseY = window.innerHeight / 2;
+            let glowX = mouseX;
+            let glowY = mouseY;
+            let isVisible = false;
+
+            // Smoothing factor: 0.08 = very smooth/laggy, 0.15 = snappier
+            const LERP = 0.10;
+
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                if (!isVisible) {
+                    glow.style.opacity = '1';
+                    isVisible = true;
+                }
+            });
+
+            document.addEventListener('mouseleave', () => {
+                glow.style.opacity = '0';
+                isVisible = false;
+            });
+
+            function animateGlow() {
+                // Lerp: smoothly move glowX/Y toward mouseX/Y each frame
+                glowX += (mouseX - glowX) * LERP;
+                glowY += (mouseY - glowY) * LERP;
+
+                glow.style.left = glowX + 'px';
+                glow.style.top = glowY + 'px';
+
+                requestAnimationFrame(animateGlow);
+            }
+
+            animateGlow();
+        </script>
 
 </body>
 
