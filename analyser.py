@@ -78,14 +78,19 @@ def compute_sentiment(df):
 
     print(f"\n--- Phase 2.5: Sentiment Analysis ---")
     
-    def get_sentiment(text):
-        polarity = TextBlob(str(text)).sentiment.polarity
+    def get_sentiment_and_subjectivity(text):
+        analysis = TextBlob(str(text))
+        polarity = analysis.sentiment.polarity
+        subjectivity = analysis.sentiment.subjectivity
+        
         if polarity > 0.1:
-            return "Positive"
+            label = "Positive"
         elif polarity < -0.1:
-            return "Negative"
+            label = "Negative"
         else:
-            return "Neutral"
+            label = "Neutral"
+            
+        return pd.Series([label, subjectivity])
 
     def get_badge(sentiment):
         if sentiment == "Positive":
@@ -94,10 +99,18 @@ def compute_sentiment(df):
             return "🟥 Negative"
         return "⬜ Neutral"
 
-    df["sentiment_label"] = df["text"].apply(get_sentiment)
+    # Extract sentiment labels and subjectivity scores
+    df[["sentiment_label", "subjectivity"]] = df["text"].apply(get_sentiment_and_subjectivity)
     df["Sentiment"] = df["sentiment_label"].apply(get_badge)
+
+    # Calculate Objectivity Index (Average Subjectivity)
+    avg_subjectivity = df["subjectivity"].mean()
 
     counts = df["sentiment_label"].value_counts().to_dict()
     print(f"Sentiment Distribution: {counts}")
+    print(f"Average Subjectivity: {avg_subjectivity:.2f}")
     
-    return df, counts
+    # Cleanup intermediate columns
+    df = df.drop(columns=["subjectivity"])
+    
+    return df, counts, avg_subjectivity

@@ -59,7 +59,7 @@ def process():
             )
 
         # Phase 2.5: Sentiment Analysis
-        df, sentiment_counts = compute_sentiment(df)
+        df, sentiment_counts, avg_subjectivity = compute_sentiment(df)
 
         # Phase 3: Cluster and Summarize
         df, cluster_counts, takeaways = perform_clustering(df)
@@ -76,13 +76,14 @@ def process():
         else:
             display_df = df[["text", "cluster"]].rename(columns={"cluster": "Cluster"})
             
-        table_html = display_df.to_html(classes="table table-hover", index=False)
+        table_html = display_df.to_html(classes="table table-hover", table_id="resultsTable", index=False)
 
         return render_template(
             "index.html",
             table=table_html,
             cluster_counts=cluster_counts,
             sentiment_counts=sentiment_counts,
+            avg_subjectivity=avg_subjectivity,
             takeaways=takeaways,
             url=url,
             total_items=len(df),
