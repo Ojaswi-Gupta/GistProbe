@@ -4,3 +4,4 @@ venv/
 .env
 data.csv
 results_*.csv
+_probe_cache.json

@@ -93,6 +93,19 @@ python app.py
 
 Open **http://127.0.0.1:5000** in your browser.
 
+### ⚡ Demo Mode
+
+After running at least one successful probe, visit **http://127.0.0.1:5000/demo** to instantly load the cached result — no waiting for a crawl. Perfect for live demos and interviews.
+
+### 🧪 Running Tests
+
+```bash
+python -m unittest tests -v
+```
+
+11 unit tests cover the core NLP pipeline: text cleaning, deduplication, sentiment analysis, clustering, and extractive summarization.
+
+
 ---
 
 ## 🚢 Deployment
@@ -121,6 +134,7 @@ GistProbe/
 ├── crawler.py          # Multi-tier web scraper (BS4 + trafilatura)
 ├── analyser.py         # Text cleaning, deduplication & sentiment scoring
 ├── clustering.py       # TF-IDF vectorization, K-Means, Silhouette Score
+├── tests.py            # Unit tests for the core NLP pipeline
 ├── templates/
 │   └── index.html      # Full-stack SPA-like dashboard (Bootstrap + Chart.js)
 ├── requirements.txt

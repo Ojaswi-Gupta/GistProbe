@@ -274,6 +274,25 @@ def _extract_with_trafilatura(url, html):
         return []
 
 
+def _detect_spa(html, url):
+    """
+    Detect JavaScript-heavy Single Page Applications.
+    These sites render content client-side and return near-empty HTML shells.
+    Warns the user but does not block — the pipeline will still attempt extraction.
+    """
+    soup = BeautifulSoup(html, "lxml")
+    script_count = len(soup.find_all("script"))
+    body = soup.find("body")
+    body_text = body.get_text(separator=" ", strip=True) if body else ""
+    text_len = len(body_text)
+
+    # Heuristic: many scripts + very little visible text = likely SPA
+    if script_count > 10 and text_len < 500:
+        print(f"⚠ SPA detected: {script_count} <script> tags but only {text_len} chars of visible text.")
+        print(f"  → {url} likely requires a JavaScript engine (Playwright/Selenium) for full content.")
+        print(f"  → Proceeding with static extraction (results may be limited).")
+
+
 def scrape_url(url):
     """
     Phase 1: Robust Web Crawling Pipeline.
@@ -299,6 +318,9 @@ def scrape_url(url):
     if not html:
         print("✗ Failed to fetch page.")
         return pd.DataFrame(columns=["text"])
+
+    # Step 2.5: SPA/JavaScript-heavy site detection
+    _detect_spa(html, url)
 
     # Step 3: Tier 1 — BeautifulSoup extraction
     data = _extract_with_beautifulsoup(html)
