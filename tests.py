@@ -109,7 +109,7 @@ class TestClustering(unittest.TestCase):
                 "premier league transfer news today",
             ],
         })
-        result_df, counts, takeaways, metrics = perform_clustering(df)
+        result_df, counts, takeaways, metrics, _ = perform_clustering(df)
         self.assertIn("cluster", result_df.columns)
         self.assertTrue(all(result_df["cluster"].notna()))
 
@@ -131,7 +131,7 @@ class TestClustering(unittest.TestCase):
                 "natural language processing techniques",
             ],
         })
-        _, _, _, metrics = perform_clustering(df)
+        _, _, _, metrics, _ = perform_clustering(df)
         self.assertIn("silhouette_score", metrics)
         self.assertIn("optimal_k", metrics)
         self.assertIn("vocab_size", metrics)
@@ -143,7 +143,7 @@ class TestClustering(unittest.TestCase):
             "text": ["One sentence only", "Two sentences here"],
             "cleaned": ["one sentence only", "two sentences here"],
         })
-        result_df, counts, takeaways, metrics = perform_clustering(df)
+        result_df, counts, takeaways, metrics, _ = perform_clustering(df)
         self.assertEqual(metrics["optimal_k"], 1)
 
     def test_takeaways_are_unique(self):
@@ -166,7 +166,7 @@ class TestClustering(unittest.TestCase):
                 "education reform initiatives focusing stem programs computational thinking skills",
             ],
         })
-        _, _, takeaways, _ = perform_clustering(df)
+        _, _, takeaways, _, _ = perform_clustering(df)
         # Each takeaway should be unique
         self.assertEqual(len(takeaways), len(set(takeaways)))
 

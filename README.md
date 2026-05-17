@@ -47,9 +47,10 @@ Uses `SequenceMatcher` to compute string similarity ratios, filtering out paragr
 **Backend**
 - `Python 3.11`, `Flask` — web framework & routing
 - `BeautifulSoup4`, `Requests`, `Trafilatura` — multi-tier web crawling
-- `NLTK` — text tokenization & cleaning
+- `NLTK`, `spaCy` — text tokenization, cleaning & Named Entity Recognition (NER)
 - `TextBlob` — sentiment polarity & subjectivity scoring
 - `scikit-learn` — TF-IDF Vectorizer, K-Means, Silhouette Score
+- `wordcloud` — TF-IDF visual representation
 - `Pandas`, `NumPy` — data manipulation
 
 **Frontend**
@@ -134,9 +135,12 @@ GistProbe/
 ├── crawler.py          # Multi-tier web scraper (BS4 + trafilatura)
 ├── analyser.py         # Text cleaning, deduplication & sentiment scoring
 ├── clustering.py       # TF-IDF vectorization, K-Means, Silhouette Score
+├── ner.py              # Named Entity Recognition (spaCy)
+├── wordcloud_gen.py    # TF-IDF visualization generator
 ├── tests.py            # Unit tests for the core NLP pipeline
 ├── templates/
-│   └── index.html      # Full-stack SPA-like dashboard (Bootstrap + Chart.js)
+│   ├── index.html      # Full-stack SPA-like dashboard (Bootstrap + Chart.js)
+│   └── compare.html    # Side-by-side URL comparison dashboard
 ├── requirements.txt
 └── README.md
 ```
@@ -146,9 +150,12 @@ GistProbe/
 ## 📊 What the Dashboard Shows
 
 - **AI Executive Summary** — top 3 most information-dense sentences ranked by TF-IDF score
+- **Named Entities Detected** — grouped counts of people, organizations, locations, etc.
+- **Word Cloud** — visual representation of TF-IDF term importance across the whole page
 - **Overall Sentiment** — donut chart (Positive / Negative / Neutral) — click to filter table
 - **Topic Distribution** — donut chart of K-Means cluster sizes
 - **Cluster Dominance** — ranked list of topic clusters with item counts
+- **Compare Mode** — side-by-side analysis of two different URLs
 - **Extracted Insights Table** — full paginated/filterable DataTable of all scraped text
 - **Execution Logs Modal** — simulated NLP pipeline logs + model diagnostics (Silhouette Score, Optimal k, Vocabulary Size)
 

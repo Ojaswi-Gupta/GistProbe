@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compare Mode | GistProbe</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-main: #f8fafc;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --accent-primary: #0ea5e9;
+            --accent-secondary: #6366f1;
+            --glass-bg: rgba(255, 255, 255, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.8);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding-top: 80px;
+        }
+
+        /* Navbar */
+        .gp-navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .gp-navbar-brand {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1.15rem;
+            background: linear-gradient(135deg, #38bdf8, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+            letter-spacing: 0.5px;
+        }
+
+        .gp-nav-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-decoration: none;
+            border: 1px solid transparent;
+            transition: all 0.25s ease;
+        }
+
+        .gp-nav-link:hover {
+            color: var(--accent-primary);
+            background: rgba(14, 165, 233, 0.08);
+            border-color: rgba(14, 165, 233, 0.2);
+        }
+
+        /* Glassmorphism Cards */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.04);
+            padding: 2rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .hero h1 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 3rem;
+            background: linear-gradient(135deg, #38bdf8, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        /* Stats Box */
+        .stat-box {
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 16px;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 15px;
+            border: 1px solid var(--glass-border);
+        }
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-secondary);
+        }
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .compare-column {
+            border-top: 4px solid var(--accent-primary);
+        }
+        .compare-column.right {
+            border-top: 4px solid var(--accent-secondary);
+        }
+        
+        .url-truncate {
+            max-width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: inline-block;
+        }
+
+        /* Loading Animation */
+        #loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(5px);
+            z-index: 9999;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(14, 165, 233, 0.2);
+            border-top-color: var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <nav class="gp-navbar">
+        <a href="/" class="gp-navbar-brand">⚡ GistProbe</a>
+        <div>
+            <a href="/" class="gp-nav-link">← Back to Single Probe</a>
+        </div>
+    </nav>
+
+    <div id="loading-overlay">
+        <div class="spinner mb-3"></div>
+        <h4 style="font-family: 'Outfit', sans-serif;">Comparing Sites...</h4>
+        <p class="text-muted">Crawling and analyzing both URLs (this may take 15-30s)</p>
+    </div>
+
+    <div class="container-fluid px-4 pb-5">
+        <div class="hero">
+            <h1>Compare Mode</h1>
+            <p class="lead text-muted">Analyze two websites side-by-side</p>
+        </div>
+
+        <div class="row justify-content-center mb-5">
+            <div class="col-md-8">
+                <div class="glass-card">
+                    <form method="POST" action="/compare" id="compare-form" onsubmit="document.getElementById('loading-overlay').style.display='flex';">
+                        <div class="row g-3">
+                            <div class="col-md-5">
+                                <label class="form-label text-muted small fw-bold text-uppercase">URL 1 (Left)</label>
+                                <input type="url" name="url1" class="form-control" placeholder="https://news.ycombinator.com" required style="border-radius: 12px; padding: 12px;" value="{{ request.form.get('url1', '') }}">
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end justify-content-center">
+                                <span class="fw-bold text-muted mb-2">VS</span>
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label text-muted small fw-bold text-uppercase">URL 2 (Right)</label>
+                                <input type="url" name="url2" class="form-control" placeholder="https://techcrunch.com" required style="border-radius: 12px; padding: 12px;" value="{{ request.form.get('url2', '') }}">
+                            </div>
+                            <div class="col-12 text-center mt-4">
+                                <button type="submit" class="btn btn-primary px-5 py-2" style="border-radius: 30px; font-weight: 600; background: linear-gradient(135deg, #0ea5e9, #6366f1); border: none;">Run Comparison</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {% if error %}
+        <div class="alert alert-danger text-center" role="alert" style="border-radius: 16px;">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        {% if result1 and result2 %}
+        <div class="row g-4">
+            
+            <!-- LEFT COLUMN (URL 1) -->
+            <div class="col-md-6">
+                <div class="glass-card compare-column">
+                    <div class="text-center mb-4">
+                        <span class="badge bg-primary mb-2">Site A</span>
+                        <h4 class="url-truncate" title="{{ result1.url }}"><a href="{{ result1.url }}" target="_blank" class="text-decoration-none text-dark">{{ result1.url }}</a></h4>
+                    </div>
+                    
+                    <div class="row g-2 mb-4">
+                        <div class="col-6">
+                            <div class="stat-box">
+                                <div class="stat-value">{{ result1.total_items }}</div>
+                                <div class="stat-label">Text Segments</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-box">
+                                <div class="stat-value">{{ "%.0f"|format(result1.avg_subjectivity * 100) }}%</div>
+                                <div class="stat-label">Subjectivity</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5 class="mb-3">✨ Key Takeaways</h5>
+                    <ul class="text-muted mb-4" style="line-height: 1.6; font-size: 0.9rem;">
+                        {% for item in result1.takeaways[:4] %}
+                        <li>{{ item }}</li>
+                        {% endfor %}
+                    </ul>
+
+                    {% if result1.entities %}
+                    <h5 class="mb-3">Top Entities</h5>
+                    <div class="d-flex flex-wrap gap-2 mb-4">
+                        {% for cat, items in result1.entities.items() %}
+                            {% for name, count in items[:2] %}
+                            <span class="badge" style="background: rgba(14,165,233,0.1); color: #0ea5e9;">{{ name }} ({{ count }})</span>
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% if result1.wordcloud_image %}
+                    <h5 class="mb-3 text-center">Word Cloud</h5>
+                    <img src="{{ url_for('static', filename=result1.wordcloud_image) }}" class="img-fluid rounded mb-4" alt="Word Cloud A">
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN (URL 2) -->
+            <div class="col-md-6">
+                <div class="glass-card compare-column right">
+                    <div class="text-center mb-4">
+                        <span class="badge" style="background-color: var(--accent-secondary);">Site B</span>
+                        <h4 class="url-truncate" title="{{ result2.url }}"><a href="{{ result2.url }}" target="_blank" class="text-decoration-none text-dark">{{ result2.url }}</a></h4>
+                    </div>
+                    
+                    <div class="row g-2 mb-4">
+                        <div class="col-6">
+                            <div class="stat-box">
+                                <div class="stat-value">{{ result2.total_items }}</div>
+                                <div class="stat-label">Text Segments</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-box">
+                                <div class="stat-value">{{ "%.0f"|format(result2.avg_subjectivity * 100) }}%</div>
+                                <div class="stat-label">Subjectivity</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5 class="mb-3">✨ Key Takeaways</h5>
+                    <ul class="text-muted mb-4" style="line-height: 1.6; font-size: 0.9rem;">
+                        {% for item in result2.takeaways[:4] %}
+                        <li>{{ item }}</li>
+                        {% endfor %}
+                    </ul>
+
+                    {% if result2.entities %}
+                    <h5 class="mb-3">Top Entities</h5>
+                    <div class="d-flex flex-wrap gap-2 mb-4">
+                        {% for cat, items in result2.entities.items() %}
+                            {% for name, count in items[:2] %}
+                            <span class="badge" style="background: rgba(99,102,241,0.1); color: #6366f1;">{{ name }} ({{ count }})</span>
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% if result2.wordcloud_image %}
+                    <h5 class="mb-3 text-center">Word Cloud</h5>
+                    <img src="{{ url_for('static', filename=result2.wordcloud_image) }}" class="img-fluid rounded mb-4" alt="Word Cloud B">
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+        {% endif %}
+
+    </div>
+</body>
+</html>

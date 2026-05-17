@@ -524,6 +524,9 @@
                 <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
                 GitHub
             </a>
+            <a href="/compare" class="gp-nav-link" title="Compare two URLs side-by-side">
+                ⚖️ Compare
+            </a>
             <a href="/demo" class="gp-nav-link demo-link" title="Instant cached results">
                 ⚡ Demo
             </a>
@@ -829,6 +832,39 @@
                     </div>
                 </div>
             </div>
+
+            {% if wordcloud_image %}
+            <div class="row justify-content-center mb-5 fade-in-up" style="animation-delay: 0.35s;">
+                <div class="col-md-10">
+                    <div class="glass-card p-4 text-center">
+                        <h5 class="mb-4">Word Cloud</h5>
+                        <p class="text-muted small mb-3">Term size reflects TF-IDF importance across all extracted text</p>
+                        <img src="{{ url_for('static', filename=wordcloud_image) }}" alt="Word Cloud"
+                            style="max-width: 100%; height: auto; border-radius: 12px;">
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if entities %}
+            <div class="glass-card p-4 mb-5 fade-in-up" style="animation-delay: 0.38s;">
+                <h4 class="mb-4 text-center">Named Entities Detected</h4>
+                <div class="row">
+                    {% for category, items in entities.items() %}
+                    <div class="col-md-4 mb-4">
+                        <h6 class="text-muted text-uppercase mb-3" style="letter-spacing: 1px; font-size: 0.85rem;">{{ category }}</h6>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for entity_name, count in items %}
+                            <span class="badge rounded-pill" style="background: rgba(99, 102, 241, 0.1); color: var(--accent-primary); border: 1px solid rgba(99, 102, 241, 0.2); padding: 8px 12px; font-size: 0.85rem; font-weight: 500;">
+                                {{ entity_name }} <span style="opacity: 0.6; margin-left: 4px; font-size: 0.75rem;">x{{ count }}</span>
+                            </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
 
             <div class="glass-card p-4 mb-5 fade-in-up" style="animation-delay: 0.4s;">
                 <h4 class="mb-4">Extracted Insights</h4>

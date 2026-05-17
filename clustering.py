@@ -48,7 +48,7 @@ def perform_clustering(df):
         print("Data volume too low for clustering. Defaulting to Cluster 0.")
         df["cluster_name"] = "0: General Topics"
         metrics = {"silhouette_score": "N/A", "optimal_k": 1, "vocab_size": 0}
-        return df, {"0: General Topics": len(df)}, [], metrics
+        return df, {"0: General Topics": len(df)}, [], metrics, None
 
     texts = df["cleaned"]
 
@@ -70,7 +70,7 @@ def perform_clustering(df):
         df["cluster"] = 0
         df["cluster_name"] = "0: General Topics"
         metrics = {"silhouette_score": "N/A", "optimal_k": 1, "vocab_size": 0}
-        return df, {"0: General Topics": len(df)}, [], metrics
+        return df, {"0: General Topics": len(df)}, [], metrics, None
 
     # --- MATHEMATICAL SEARCH FOR OPTIMAL K ---
     best_k = 2
@@ -151,4 +151,7 @@ def perform_clustering(df):
         "vocab_size": vocab_size
     }
 
-    return df, counts, takeaways, metrics
+    # Package TF-IDF data for word cloud generation
+    tfidf_data = {"matrix": X, "terms": terms}
+
+    return df, counts, takeaways, metrics, tfidf_data

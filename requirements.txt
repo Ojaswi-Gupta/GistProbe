@@ -36,3 +36,5 @@ typing_extensions==4.15.0
 tzlocal==5.3.1
 urllib3==2.6.3
 Werkzeug==3.1.8
+spacy==3.8.14
+wordcloud==1.9.6
