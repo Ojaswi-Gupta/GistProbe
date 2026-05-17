@@ -52,6 +52,27 @@
             --modal-bg: #1e293b;
         }
 
+        [data-theme="dark"] h1, 
+        [data-theme="dark"] h2, 
+        [data-theme="dark"] h3, 
+        [data-theme="dark"] h4, 
+        [data-theme="dark"] h5, 
+        [data-theme="dark"] h6 {
+            color: var(--text-main);
+        }
+
+        [data-theme="dark"] .text-muted {
+            color: var(--text-muted) !important;
+        }
+
+        [data-theme="dark"] .text-dark {
+            color: var(--text-main) !important;
+        }
+
+        [data-theme="dark"] .table {
+            color: var(--text-main);
+        }
+
         body {
             background-color: var(--bg-color);
             background-image:
@@ -1310,11 +1331,12 @@
             function downloadPDF() {
                 const element = document.getElementById('main-content');
                 const opt = {
-                    margin:       0.3,
+                    margin:       [0.5, 0.5, 0.5, 0.5],
                     filename:     'GistProbe_Report.pdf',
-                    image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2, useCORS: true },
-                    jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+                    image:        { type: 'jpeg', quality: 1.0 },
+                    html2canvas:  { scale: 2, useCORS: true, scrollY: 0 },
+                    jsPDF:        { unit: 'in', format: 'a3', orientation: 'portrait' },
+                    pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
                 };
                 
                 // Hide elements not needed in PDF
