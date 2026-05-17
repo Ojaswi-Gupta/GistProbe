@@ -7,7 +7,7 @@ import json
 
 from crawler import scrape_url
 from analyser import clean_text_data, compute_sentiment
-from clustering import perform_clustering
+from clustering import perform_clustering, compute_similarity
 from wordcloud_gen import generate_wordcloud, cleanup_old_wordclouds
 from ner import extract_entities
 
@@ -119,6 +119,7 @@ def _process_url(url, cache_result=False):
         "total_items": len(df),
         "wordcloud_image": wordcloud_image,
         "entities": entities,
+        "cleaned_text": df["cleaned"].tolist() if "cleaned" in df.columns else []
     }
 
 
@@ -172,8 +173,39 @@ def compare():
             return render_template("compare.html", error=f"Error in URL 1 ({url1}): {result1['error']}")
         if "error" in result2:
             return render_template("compare.html", error=f"Error in URL 2 ({url2}): {result2['error']}")
+        similarity_score = compute_similarity(result1.get("cleaned_text", []), result2.get("cleaned_text", []))
+        
+        # Calculate Shared Vocabulary (Entities)
+        shared_vocab = []
+        if result1.get("entities") and result2.get("entities"):
+            ents1 = set(item[0].lower() for items in result1["entities"].values() for item in items)
+            ents2 = set(item[0].lower() for items in result2["entities"].values() for item in items)
+            shared = ents1.intersection(ents2)
             
-        return render_template("compare.html", result1=result1, result2=result2)
+            # Keep original casing from result1
+            for items in result1["entities"].values():
+                for item in items:
+                    if item[0].lower() in shared and item[0] not in shared_vocab:
+                        shared_vocab.append(item[0])
+
+        # Generate AI Comparative Summary
+        def extract_top_topic(cluster_counts):
+            if not cluster_counts:
+                return "General Topics"
+            top_cluster = max(cluster_counts, key=cluster_counts.get)
+            if ":" in top_cluster:
+                return top_cluster.split(":", 1)[1].strip()
+            return top_cluster
+
+        topic1 = extract_top_topic(result1.get("cluster_counts", {}))
+        topic2 = extract_top_topic(result2.get("cluster_counts", {}))
+
+        if topic1.lower() == topic2.lower():
+            ai_summary = f"Both sites are primarily focused on '{topic1}'."
+        else:
+            ai_summary = f"Site A focuses heavily on '{topic1}', whereas Site B is more concerned with '{topic2}'."
+            
+        return render_template("compare.html", result1=result1, result2=result2, similarity_score=similarity_score, shared_vocab=shared_vocab, ai_summary=ai_summary)
 
     except Exception as e:
         print(f"Compare Pipeline error: {e}")

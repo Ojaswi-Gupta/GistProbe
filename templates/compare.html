@@ -71,6 +71,21 @@
         {% endif %}
 
         {% if result1 and result2 %}
+        
+        <!-- AI Summary Banner -->
+        <div class="row justify-content-center mb-5 fade-in-up" style="animation-delay: 0.25s;">
+            <div class="col-md-8 text-center">
+                {% if ai_summary %}
+                <div class="glass-card py-3 px-4" style="border-radius: 20px; height: auto !important; border-left: 5px solid #6366f1; background: rgba(255,255,255,0.02);">
+                    <p class="m-0 fw-semibold text-start" style="color: var(--text-main); font-size: 1.1rem; display: flex; align-items: center;">
+                        <span style="font-size: 1.4rem; margin-right: 12px;">🤖</span>
+                        <span><span class="text-muted fst-italic me-1">AI Summary:</span> {{ ai_summary }}</span>
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
         <div class="row g-4 fade-in-up" style="animation-delay: 0.3s;">
             
             <!-- LEFT COLUMN (URL 1) -->
@@ -84,16 +99,10 @@
                     </div>
                     
                     <div class="row g-3 mb-4">
-                        <div class="col-6">
+                        <div class="col-12">
                             <div class="stat-box">
-                                <div class="stat-value">{{ result1.total_items }}</div>
+                                <div class="stat-value" id="val-segments-a" data-val="{{ result1.total_items }}">{{ result1.total_items }}</div>
                                 <div class="stat-label">Text Segments</div>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="stat-box">
-                                <div class="stat-value">{{ "%.0f"|format(result1.avg_subjectivity * 100) }}%</div>
-                                <div class="stat-label">Subjectivity</div>
                             </div>
                         </div>
                     </div>
@@ -138,16 +147,10 @@
                     </div>
                     
                     <div class="row g-3 mb-4">
-                        <div class="col-6">
+                        <div class="col-12">
                             <div class="stat-box">
-                                <div class="stat-value">{{ result2.total_items }}</div>
+                                <div class="stat-value" id="val-segments-b" data-val="{{ result2.total_items }}">{{ result2.total_items }}</div>
                                 <div class="stat-label">Text Segments</div>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="stat-box">
-                                <div class="stat-value">{{ "%.0f"|format(result2.avg_subjectivity * 100) }}%</div>
-                                <div class="stat-label">Subjectivity</div>
                             </div>
                         </div>
                     </div>
@@ -183,18 +186,34 @@
 
         </div>
 
-        <!-- Sentiment Comparison Chart -->
+        <!-- Charts Row: Sentiment & Radar -->
         <div class="row mt-5 fade-in-up" style="animation-delay: 0.4s;">
-            <div class="col-12">
-                <div class="glass-card text-center" style="padding: 3rem;">
+            <!-- Sentiment Breakdown -->
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <div class="glass-card text-center" style="padding: 2rem;">
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h3 class="section-title m-0">📊 Sentiment Breakdown</h3>
-                        <button onclick="downloadPDF()" class="btn btn-outline-danger" style="border-radius: 12px; font-weight: 600;">📄 Export to PDF</button>
+                        <h3 class="section-title m-0">📊 Sentiment</h3>
+                        <button onclick="downloadPDF()" class="btn btn-outline-danger btn-sm" style="border-radius: 8px; font-weight: 600;">📄 Export PDF</button>
                     </div>
                     <div style="height: 300px; position: relative;">
                         <canvas id="sentimentCompareChart"
                             data-site-a="[{{ result1.sentiment_counts.get('Positive', 0) }}, {{ result1.sentiment_counts.get('Neutral', 0) }}, {{ result1.sentiment_counts.get('Negative', 0) }}]"
                             data-site-b="[{{ result2.sentiment_counts.get('Positive', 0) }}, {{ result2.sentiment_counts.get('Neutral', 0) }}, {{ result2.sentiment_counts.get('Negative', 0) }}]"
+                        ></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NLP Metrics Radar -->
+            <div class="col-lg-6">
+                <div class="glass-card text-center" style="padding: 2rem;">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="section-title m-0">🕸️ NLP Metrics Radar</h3>
+                    </div>
+                    <div style="height: 300px; position: relative;">
+                        <canvas id="radarCompareChart"
+                            data-site-a-metrics='{"pos": {{ result1.sentiment_counts.get("Positive", 0) }}, "neg": {{ result1.sentiment_counts.get("Negative", 0) }}, "total": {{ result1.total_items }}, "subj": {{ result1.avg_subjectivity }}, "clusters": {{ result1.cluster_counts|length }} }'
+                            data-site-b-metrics='{"pos": {{ result2.sentiment_counts.get("Positive", 0) }}, "neg": {{ result2.sentiment_counts.get("Negative", 0) }}, "total": {{ result2.total_items }}, "subj": {{ result2.avg_subjectivity }}, "clusters": {{ result2.cluster_counts|length }} }'
                         ></canvas>
                     </div>
                 </div>

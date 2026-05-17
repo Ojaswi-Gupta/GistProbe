@@ -84,4 +84,82 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // Initialize NLP Metrics Radar Chart
+    const radarCtx = document.getElementById('radarCompareChart');
+    if (radarCtx) {
+        const siteAMetrics = JSON.parse(radarCtx.getAttribute('data-site-a-metrics'));
+        const siteBMetrics = JSON.parse(radarCtx.getAttribute('data-site-b-metrics'));
+
+        const calcNormalized = (m) => {
+            const total = m.total || 1;
+            return [
+                m.pos / total,              // Positivity
+                m.neg / total,              // Negativity
+                m.subj,                     // Subjectivity
+                1 - m.subj,                 // Objectivity
+                m.clusters / 10             // Topic Diversity (max 10)
+            ].map(v => Math.max(0, Math.min(1, v))); // Clamp 0-1
+        };
+
+        const siteAData = calcNormalized(siteAMetrics);
+        const siteBData = calcNormalized(siteBMetrics);
+
+        new Chart(radarCtx, {
+            type: 'radar',
+            data: {
+                labels: ['Positivity', 'Negativity', 'Subjectivity', 'Objectivity', 'Topic Diversity'],
+                datasets: [
+                    {
+                        label: 'Site A',
+                        data: siteAData,
+                        backgroundColor: 'rgba(14, 165, 233, 0.2)',
+                        borderColor: 'rgba(14, 165, 233, 1)',
+                        pointBackgroundColor: 'rgba(14, 165, 233, 1)',
+                        borderWidth: 2,
+                    },
+                    {
+                        label: 'Site B',
+                        data: siteBData,
+                        backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                        borderColor: 'rgba(99, 102, 241, 1)',
+                        pointBackgroundColor: 'rgba(99, 102, 241, 1)',
+                        borderWidth: 2,
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        angleLines: { color: 'rgba(0,0,0,0.1)' },
+                        grid: { color: 'rgba(0,0,0,0.1)' },
+                        pointLabels: {
+                            font: { family: "'Inter', sans-serif", size: 12 },
+                            color: '#64748b'
+                        },
+                        ticks: {
+                            display: false,
+                            min: 0,
+                            max: 1
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { font: { family: "'Inter', sans-serif", size: 14 } }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + Math.round(context.raw * 100) + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
 });
