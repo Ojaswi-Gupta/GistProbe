@@ -771,20 +771,11 @@
                             {% if avg_subjectivity is defined %}
                             <div class="text-end">
                                 <span
-                                    class="badge rounded-pill {% if avg_subjectivity > 0.6 %}bg-danger{% elif avg_subjectivity > 0.35 %}bg-warning text-dark{% else %}bg-success{% endif %} mb-1"
+                                    class="badge rounded-pill {% if avg_subjectivity > 0.4 %}bg-danger{% elif avg_subjectivity > 0.2 %}bg-warning text-dark{% else %}bg-success{% endif %} mb-1"
                                     style="font-size: 0.75rem;">
-                                    {% if avg_subjectivity > 0.6 %}Opinionated{% elif avg_subjectivity > 0.35 %}Mixed
+                                    {% if avg_subjectivity > 0.4 %}Opinionated{% elif avg_subjectivity > 0.2 %}Mixed
                                     Fact/Opinion{% else %}Highly Factual{% endif %}
                                 </span>
-                                <div class="progress"
-                                    style="height: 6px; width: 140px; background-color: #e2e8f0; border-radius: 10px;">
-                                    <div class="progress-bar {% if avg_subjectivity > 0.6 %}bg-danger{% elif avg_subjectivity > 0.35 %}bg-warning{% else %}bg-success{% endif %}"
-                                        id="obj-progress" role="progressbar"></div>
-                                </div>
-                                <script>
-                                    // Applied via JS to prevent VS Code CSS linter errors
-                                    document.getElementById('obj-progress').style.width = '{{ avg_subjectivity * 100 }}%';
-                                </script>
                             </div>
                             {% endif %}
                         </div>
