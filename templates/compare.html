@@ -10,31 +10,58 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- HTML2PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <style>
         :root {
-            --bg-main: #f8fafc;
+            --bg-main: #f0f9ff;
             --text-main: #0f172a;
             --text-muted: #64748b;
             --accent-primary: #0ea5e9;
             --accent-secondary: #6366f1;
-            --glass-bg: rgba(255, 255, 255, 0.6);
-            --glass-border: rgba(255, 255, 255, 0.8);
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --card-shadow: rgba(0, 0, 0, 0.05);
+            --card-shadow-hover: rgba(0, 0, 0, 0.1);
+            --grid-line: rgba(99, 102, 241, 0.07);
+            --grid-grad: linear-gradient(135deg, rgba(240, 249, 255, 0.8) 0%, rgba(224, 231, 255, 0.8) 100%);
+            --stat-box-bg: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.4));
+            --takeaway-bg: rgba(255,255,255,0.4);
+            --takeaway-bg-hover: rgba(255,255,255,0.8);
+            --input-bg: rgba(255,255,255,0.9);
+        }
+
+        [data-theme="dark"] {
+            --bg-main: #0f172a;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --card-shadow: rgba(0, 0, 0, 0.2);
+            --card-shadow-hover: rgba(0, 0, 0, 0.4);
+            --grid-line: rgba(255, 255, 255, 0.03);
+            --grid-grad: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.8) 100%);
+            --stat-box-bg: linear-gradient(135deg, rgba(30,41,59,0.9), rgba(30,41,59,0.4));
+            --takeaway-bg: rgba(30,41,59,0.4);
+            --takeaway-bg-hover: rgba(30,41,59,0.8);
+            --input-bg: rgba(30,41,59,0.9);
         }
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f9ff;
+            background-color: var(--bg-main);
             background-image: 
-                linear-gradient(rgba(99, 102, 241, 0.07) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(99, 102, 241, 0.07) 1px, transparent 1px),
-                linear-gradient(135deg, rgba(240, 249, 255, 0.8) 0%, rgba(224, 231, 255, 0.8) 100%);
+                linear-gradient(var(--grid-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
+                var(--grid-grad);
             background-size: 30px 30px, 30px 30px, 100% 100%;
             background-position: center center;
             background-attachment: fixed;
             color: var(--text-main);
             min-height: 100vh;
             padding-top: 90px;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         /* Navbar */
@@ -48,7 +75,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: rgba(255, 255, 255, 0.7);
+            background: var(--glass-bg);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border-bottom: 1px solid var(--glass-border);
@@ -87,12 +114,12 @@
 
         /* Advanced Glassmorphism */
         .glass-card {
-            background: rgba(255, 255, 255, 0.7);
+            background: var(--glass-bg);
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            border: 1px solid var(--glass-border);
             border-radius: 24px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 10px 40px var(--card-shadow);
             padding: 2.5rem;
             transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
             height: 100%;
@@ -100,7 +127,7 @@
 
         .glass-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 15px 50px var(--card-shadow-hover);
         }
 
         .hero {
@@ -120,12 +147,12 @@
         
         /* Stat Boxes */
         .stat-box {
-            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.4));
+            background: var(--stat-box-bg);
             border-radius: 20px;
             padding: 20px;
             text-align: center;
-            border: 1px solid rgba(255,255,255,0.8);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 4px 15px var(--card-shadow);
             transition: all 0.3s ease;
         }
 
@@ -200,9 +227,10 @@
         .form-control {
             border-radius: 16px !important;
             padding: 14px 20px !important;
-            border: 1px solid rgba(0,0,0,0.1);
-            background: rgba(255,255,255,0.9);
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+            border: 1px solid var(--glass-border);
+            background: var(--input-bg);
+            color: var(--text-main);
+            box-shadow: inset 0 2px 4px var(--card-shadow);
             transition: all 0.3s;
         }
         .form-control:focus {
@@ -219,7 +247,7 @@
             position: relative;
             padding: 12px 16px 12px 40px;
             margin-bottom: 12px;
-            background: rgba(255,255,255,0.4);
+            background: var(--takeaway-bg);
             border-radius: 12px;
             color: var(--text-main);
             font-size: 0.95rem;
@@ -227,7 +255,7 @@
             transition: background 0.2s;
         }
         .takeaway-list li:hover {
-            background: rgba(255,255,255,0.8);
+            background: var(--takeaway-bg-hover);
         }
         .takeaway-list li::before {
             content: '✨';
@@ -285,7 +313,7 @@
             display: none;
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(255,255,255,0.85);
+            background: var(--bg-main);
             backdrop-filter: blur(10px);
             z-index: 9999;
             flex-direction: column;
@@ -318,6 +346,9 @@
     <nav class="gp-navbar">
         <a href="/" class="gp-navbar-brand">⚡ GistProbe</a>
         <div>
+            <button class="gp-nav-link" id="theme-toggle" style="background:none; cursor:pointer;" title="Toggle Dark Mode">
+                <span id="theme-icon">🌙</span>
+            </button>
             <a href="/" class="gp-nav-link">← Back to Single Probe</a>
         </div>
     </nav>
@@ -484,7 +515,10 @@
         <div class="row mt-5 fade-in-up" style="animation-delay: 0.4s;">
             <div class="col-12">
                 <div class="glass-card text-center" style="padding: 3rem;">
-                    <h3 class="section-title justify-content-center mb-4">📊 Sentiment Breakdown</h3>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="section-title m-0">📊 Sentiment Breakdown</h3>
+                        <button onclick="downloadPDF()" class="btn btn-outline-danger" style="border-radius: 12px; font-weight: 600;">📄 Export to PDF</button>
+                    </div>
                     <div style="height: 300px; position: relative;">
                         <canvas id="sentimentCompareChart"></canvas>
                     </div>
@@ -493,6 +527,57 @@
         </div>
 
         <script>
+            // --- Theme Toggle Logic ---
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            const themeIcon = document.getElementById('theme-icon');
+            const htmlEl = document.documentElement;
+
+            // Initialize theme
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            if (savedTheme === 'dark') {
+                htmlEl.setAttribute('data-theme', 'dark');
+                if(themeIcon) themeIcon.textContent = '☀️';
+            }
+
+            if(themeToggleBtn) {
+                themeToggleBtn.addEventListener('click', () => {
+                    const currentTheme = htmlEl.getAttribute('data-theme');
+                    if (currentTheme === 'dark') {
+                        htmlEl.removeAttribute('data-theme');
+                        localStorage.setItem('theme', 'light');
+                        themeIcon.textContent = '🌙';
+                    } else {
+                        htmlEl.setAttribute('data-theme', 'dark');
+                        localStorage.setItem('theme', 'dark');
+                        themeIcon.textContent = '☀️';
+                    }
+                });
+            }
+
+            // --- PDF Export Logic ---
+            function downloadPDF() {
+                const element = document.querySelector('.container-fluid');
+                const opt = {
+                    margin:       0.3,
+                    filename:     'GistProbe_Comparison.pdf',
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2, useCORS: true },
+                    jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+                };
+                
+                // Hide elements not needed in PDF
+                const navbar = document.querySelector('.gp-navbar');
+                if (navbar) navbar.style.display = 'none';
+                const dlBtn = document.querySelector('.btn-outline-danger');
+                if (dlBtn) dlBtn.style.display = 'none';
+                
+                html2pdf().set(opt).from(element).save().then(() => {
+                    // Restore elements
+                    if (navbar) navbar.style.display = 'flex';
+                    if (dlBtn) dlBtn.style.display = 'block';
+                });
+            }
+
             // Initialize Sentiment Comparison Chart if data exists
             document.addEventListener('DOMContentLoaded', function() {
                 const ctx = document.getElementById('sentimentCompareChart');

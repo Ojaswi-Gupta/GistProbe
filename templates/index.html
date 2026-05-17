@@ -15,27 +15,53 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- DataTables -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- HTML2PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root {
-            --bg-color: #ffffff;
-            --glass-bg: rgba(255, 255, 255, 0.85);
+            --bg-color: #f8fafc;
+            --glass-bg: rgba(255, 255, 255, 0.75);
             --glass-border: rgba(0, 0, 0, 0.08);
             --text-main: #1e293b;
             --text-muted: #64748b;
             --accent-glow: rgba(14, 165, 233, 0.2);
             --accent-primary: #0ea5e9;
+            --grid-line: rgba(100, 116, 139, 0.05);
+            --card-shadow: rgba(0, 0, 0, 0.04);
+            --card-shadow-hover: rgba(0, 0, 0, 0.08);
+            --input-bg: #f8fafc;
+            --input-bg-focus: #ffffff;
+            --modal-bg: #ffffff;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #0f172a;
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-glow: rgba(14, 165, 233, 0.4);
+            --accent-primary: #38bdf8;
+            --grid-line: rgba(255, 255, 255, 0.03);
+            --card-shadow: rgba(0, 0, 0, 0.2);
+            --card-shadow-hover: rgba(0, 0, 0, 0.4);
+            --input-bg: #1e293b;
+            --input-bg-focus: #0f172a;
+            --modal-bg: #1e293b;
         }
 
         body {
-            background-color: #f8fafc;
+            background-color: var(--bg-color);
             background-image:
-                linear-gradient(rgba(100, 116, 139, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(100, 116, 139, 0.05) 1px, transparent 1px);
+                linear-gradient(var(--grid-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
             background-size: 30px 30px;
             color: var(--text-main);
             font-family: 'Inter', sans-serif;
             min-height: 100vh;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         /* Mouse Tracking Glow */
@@ -64,12 +90,12 @@
 
         /* Glassmorphism Cards */
         .glass-card {
-            background: rgba(255, 255, 255, 0.75);
+            background: var(--glass-bg);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid var(--glass-border);
             border-radius: 20px;
-            box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.04);
+            box-shadow: 0 4px 24px 0 var(--card-shadow);
             color: var(--text-main);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             position: relative;
@@ -77,7 +103,7 @@
         }
 
         .glass-card:hover {
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08);
+            box-shadow: 0 8px 32px 0 var(--card-shadow-hover);
         }
 
         /* Navbar */
@@ -91,7 +117,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: rgba(255, 255, 255, 0.7);
+            background: var(--glass-bg);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border-bottom: 1px solid var(--glass-border);
@@ -181,7 +207,7 @@
 
         /* Form Inputs */
         .form-control {
-            background-color: #f8fafc;
+            background-color: var(--input-bg);
             border: 1px solid var(--glass-border);
             color: var(--text-main);
             border-radius: 12px 0 0 12px !important;
@@ -189,7 +215,7 @@
         }
 
         .form-control:focus {
-            background-color: #ffffff;
+            background-color: var(--input-bg-focus);
             border-color: var(--accent-primary);
             color: var(--text-main);
             box-shadow: 0 0 0 0.25rem var(--accent-glow);
@@ -302,7 +328,7 @@
             padding: 6px 14px;
             font-size: 0.8rem;
             font-weight: 500;
-            background: rgba(255, 255, 255, 0.4);
+            background: var(--input-bg);
             border: 1px solid var(--glass-border);
             color: var(--text-muted);
             cursor: pointer;
@@ -414,13 +440,13 @@
         }
 
         .table tbody tr {
-            background-color: #ffffff;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+            background-color: var(--modal-bg);
+            box-shadow: 0 2px 8px var(--card-shadow);
             transition: transform 0.2s, box-shadow 0.2s;
         }
 
         .table tbody tr:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 4px 12px var(--card-shadow-hover);
             transform: scale(1.01);
         }
 
@@ -530,6 +556,9 @@
             <a href="/demo" class="gp-nav-link demo-link" title="Instant cached results">
                 ⚡ Demo
             </a>
+            <button class="gp-nav-link" id="theme-toggle" style="background:none; cursor:pointer;" title="Toggle Dark Mode">
+                <span id="theme-icon">🌙</span>
+            </button>
         </div>
     </nav>
 
@@ -827,8 +856,10 @@
                             </div>
                             {% endfor %}
                         </div>
-                        <a href="/download" class="btn btn-outline-info w-100 mt-auto"
-                            style="border-radius: 12px; font-weight: 600;">Download CSV Dataset</a>
+                        <div id="action-button-row" class="d-flex gap-2 w-100 mt-auto">
+                            <a href="/download" class="btn btn-outline-info w-50" style="border-radius: 12px; font-weight: 600;">📥 CSV</a>
+                            <button onclick="downloadPDF()" class="btn btn-outline-danger w-50" style="border-radius: 12px; font-weight: 600;">📄 PDF</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1247,6 +1278,57 @@
             }
 
             animateGlow();
+
+            // --- Theme Toggle Logic ---
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            const themeIcon = document.getElementById('theme-icon');
+            const htmlEl = document.documentElement;
+
+            // Initialize theme
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            if (savedTheme === 'dark') {
+                htmlEl.setAttribute('data-theme', 'dark');
+                if(themeIcon) themeIcon.textContent = '☀️';
+            }
+
+            if(themeToggleBtn) {
+                themeToggleBtn.addEventListener('click', () => {
+                    const currentTheme = htmlEl.getAttribute('data-theme');
+                    if (currentTheme === 'dark') {
+                        htmlEl.removeAttribute('data-theme');
+                        localStorage.setItem('theme', 'light');
+                        themeIcon.textContent = '🌙';
+                    } else {
+                        htmlEl.setAttribute('data-theme', 'dark');
+                        localStorage.setItem('theme', 'dark');
+                        themeIcon.textContent = '☀️';
+                    }
+                });
+            }
+
+            // --- PDF Export Logic ---
+            function downloadPDF() {
+                const element = document.getElementById('main-content');
+                const opt = {
+                    margin:       0.3,
+                    filename:     'GistProbe_Report.pdf',
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2, useCORS: true },
+                    jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+                };
+                
+                // Hide elements not needed in PDF
+                const navbar = document.querySelector('.gp-navbar');
+                if (navbar) navbar.style.display = 'none';
+                const actionRow = document.getElementById('action-button-row');
+                if (actionRow) actionRow.style.display = 'none';
+                
+                html2pdf().set(opt).from(element).save().then(() => {
+                    // Restore elements
+                    if (navbar) navbar.style.display = 'flex';
+                    if (actionRow) actionRow.style.display = 'flex';
+                });
+            }
         </script>
 
 </body>
