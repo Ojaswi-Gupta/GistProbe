@@ -8,6 +8,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
         :root {
@@ -22,10 +24,17 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%);
+            background-color: #f0f9ff;
+            background-image: 
+                linear-gradient(rgba(99, 102, 241, 0.07) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99, 102, 241, 0.07) 1px, transparent 1px),
+                linear-gradient(135deg, rgba(240, 249, 255, 0.8) 0%, rgba(224, 231, 255, 0.8) 100%);
+            background-size: 30px 30px, 30px 30px, 100% 100%;
+            background-position: center center;
+            background-attachment: fixed;
             color: var(--text-main);
             min-height: 100vh;
-            padding-top: 80px;
+            padding-top: 90px;
         }
 
         /* Navbar */
@@ -76,60 +85,83 @@
             border-color: rgba(14, 165, 233, 0.2);
         }
 
-        /* Glassmorphism Cards */
+        /* Advanced Glassmorphism */
         .glass-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
             border-radius: 24px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.04);
-            padding: 2rem;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+            padding: 2.5rem;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
             height: 100%;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
         }
 
         .hero {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 3rem;
         }
 
         .hero h1 {
             font-family: 'Outfit', sans-serif;
             font-weight: 800;
-            font-size: 3rem;
+            font-size: 3.5rem;
             background: linear-gradient(135deg, #38bdf8, #8b5cf6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 10px;
         }
         
-        /* Stats Box */
+        /* Stat Boxes */
         .stat-box {
-            background: rgba(255, 255, 255, 0.5);
-            border-radius: 16px;
-            padding: 15px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.4));
+            border-radius: 20px;
+            padding: 20px;
             text-align: center;
-            margin-bottom: 15px;
-            border: 1px solid var(--glass-border);
-        }
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--accent-secondary);
-        }
-        .stat-label {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            border: 1px solid rgba(255,255,255,0.8);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            transition: all 0.3s ease;
         }
 
-        .compare-column {
-            border-top: 4px solid var(--accent-primary);
+        .stat-box:hover {
+            transform: scale(1.05);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #0ea5e9, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+
+        .right .stat-value {
+            background: linear-gradient(135deg, #6366f1, #d946ef);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+        }
+
+        .compare-column.left {
+            border-top: 6px solid #0ea5e9;
         }
         .compare-column.right {
-            border-top: 4px solid var(--accent-secondary);
+            border-top: 6px solid #6366f1;
         }
         
         .url-truncate {
@@ -140,27 +172,145 @@
             display: inline-block;
         }
 
+        .domain-header {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        .vs-badge {
+            background: linear-gradient(135deg, #0f172a, #334155);
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            margin: 0 auto;
+            position: relative;
+            top: 25px;
+            z-index: 10;
+        }
+
+        /* Form styling */
+        .form-control {
+            border-radius: 16px !important;
+            padding: 14px 20px !important;
+            border: 1px solid rgba(0,0,0,0.1);
+            background: rgba(255,255,255,0.9);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+            transition: all 0.3s;
+        }
+        .form-control:focus {
+            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15);
+            border-color: #0ea5e9;
+        }
+
+        /* Custom Lists */
+        .takeaway-list {
+            list-style: none;
+            padding: 0;
+        }
+        .takeaway-list li {
+            position: relative;
+            padding: 12px 16px 12px 40px;
+            margin-bottom: 12px;
+            background: rgba(255,255,255,0.4);
+            border-radius: 12px;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            transition: background 0.2s;
+        }
+        .takeaway-list li:hover {
+            background: rgba(255,255,255,0.8);
+        }
+        .takeaway-list li::before {
+            content: '✨';
+            position: absolute;
+            left: 14px;
+            top: 12px;
+            font-size: 1.1rem;
+        }
+
+        .section-title {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+            margin-top: 2rem;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .entity-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+        .left-badge {
+            background: rgba(14, 165, 233, 0.1);
+            color: #0284c7;
+            border: 1px solid rgba(14, 165, 233, 0.2);
+        }
+        .right-badge {
+            background: rgba(99, 102, 241, 0.1);
+            color: #4f46e5;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .img-wordcloud {
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+        }
+        .img-wordcloud:hover {
+            transform: scale(1.02);
+        }
+
         /* Loading Animation */
         #loading-overlay {
             display: none;
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(255,255,255,0.8);
-            backdrop-filter: blur(5px);
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(10px);
             z-index: 9999;
             flex-direction: column;
             align-items: center;
             justify-content: center;
         }
         .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(14, 165, 233, 0.2);
+            width: 60px;
+            height: 60px;
+            border: 6px solid rgba(14, 165, 233, 0.2);
             border-top-color: var(--accent-primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
         @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in-up {
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+        }
     </style>
 </head>
 <body>
@@ -173,35 +323,37 @@
     </nav>
 
     <div id="loading-overlay">
-        <div class="spinner mb-3"></div>
-        <h4 style="font-family: 'Outfit', sans-serif;">Comparing Sites...</h4>
-        <p class="text-muted">Crawling and analyzing both URLs (this may take 15-30s)</p>
+        <div class="spinner mb-4"></div>
+        <h3 style="font-family: 'Outfit', sans-serif; font-weight: 700; color: #0f172a;">Comparing Sites...</h3>
+        <p class="text-muted fw-medium mt-2">Crawling and analyzing both URLs simultaneously (this may take 15-30s)</p>
     </div>
 
     <div class="container-fluid px-4 pb-5">
-        <div class="hero">
+        <div class="hero fade-in-up" style="animation-delay: 0.1s;">
             <h1>Compare Mode</h1>
-            <p class="lead text-muted">Analyze two websites side-by-side</p>
+            <p class="lead text-muted">Analyze the sentiment, topics, and entities of two websites side-by-side</p>
         </div>
 
-        <div class="row justify-content-center mb-5">
-            <div class="col-md-8">
-                <div class="glass-card">
+        <div class="row justify-content-center mb-5 fade-in-up" style="animation-delay: 0.2s;">
+            <div class="col-md-9">
+                <div class="glass-card" style="padding: 2rem;">
                     <form method="POST" action="/compare" id="compare-form" onsubmit="document.getElementById('loading-overlay').style.display='flex';">
-                        <div class="row g-3">
+                        <div class="row g-3 align-items-center">
                             <div class="col-md-5">
-                                <label class="form-label text-muted small fw-bold text-uppercase">URL 1 (Left)</label>
-                                <input type="url" name="url1" class="form-control" placeholder="https://news.ycombinator.com" required style="border-radius: 12px; padding: 12px;" value="{{ request.form.get('url1', '') }}">
+                                <label class="form-label text-muted small fw-bold text-uppercase ms-1">Site A (Left)</label>
+                                <input type="url" name="url1" class="form-control" placeholder="https://news.ycombinator.com" required value="{{ request.form.get('url1', '') }}">
                             </div>
-                            <div class="col-md-2 d-flex align-items-end justify-content-center">
-                                <span class="fw-bold text-muted mb-2">VS</span>
+                            <div class="col-md-2 text-center">
+                                <div class="vs-badge">VS</div>
                             </div>
                             <div class="col-md-5">
-                                <label class="form-label text-muted small fw-bold text-uppercase">URL 2 (Right)</label>
-                                <input type="url" name="url2" class="form-control" placeholder="https://techcrunch.com" required style="border-radius: 12px; padding: 12px;" value="{{ request.form.get('url2', '') }}">
+                                <label class="form-label text-muted small fw-bold text-uppercase ms-1">Site B (Right)</label>
+                                <input type="url" name="url2" class="form-control" placeholder="https://techcrunch.com" required value="{{ request.form.get('url2', '') }}">
                             </div>
-                            <div class="col-12 text-center mt-4">
-                                <button type="submit" class="btn btn-primary px-5 py-2" style="border-radius: 30px; font-weight: 600; background: linear-gradient(135deg, #0ea5e9, #6366f1); border: none;">Run Comparison</button>
+                            <div class="col-12 text-center mt-5">
+                                <button type="submit" class="btn btn-primary px-5 py-3" style="border-radius: 30px; font-weight: 700; font-size: 1.1rem; background: linear-gradient(135deg, #0ea5e9, #6366f1); border: none; box-shadow: 0 10px 20px rgba(14, 165, 233, 0.3); transition: all 0.3s;">
+                                    🔍 Run Comparison
+                                </button>
                             </div>
                         </div>
                     </form>
@@ -210,23 +362,25 @@
         </div>
 
         {% if error %}
-        <div class="alert alert-danger text-center" role="alert" style="border-radius: 16px;">
+        <div class="alert alert-danger text-center fade-in-up" role="alert" style="border-radius: 16px; font-weight: 500;">
             {{ error }}
         </div>
         {% endif %}
 
         {% if result1 and result2 %}
-        <div class="row g-4">
+        <div class="row g-4 fade-in-up" style="animation-delay: 0.3s;">
             
             <!-- LEFT COLUMN (URL 1) -->
-            <div class="col-md-6">
-                <div class="glass-card compare-column">
-                    <div class="text-center mb-4">
-                        <span class="badge bg-primary mb-2">Site A</span>
-                        <h4 class="url-truncate" title="{{ result1.url }}"><a href="{{ result1.url }}" target="_blank" class="text-decoration-none text-dark">{{ result1.url }}</a></h4>
+            <div class="col-lg-6">
+                <div class="glass-card compare-column left">
+                    <div class="text-center mb-5">
+                        <span class="badge mb-3" style="background: rgba(14, 165, 233, 0.15); color: #0284c7; padding: 6px 12px; border-radius: 10px; font-weight: 700; letter-spacing: 1px;">SITE A</span>
+                        <h4 class="domain-header url-truncate" title="{{ result1.url }}">
+                            <a href="{{ result1.url }}" target="_blank" class="text-decoration-none text-dark">{{ result1.url }}</a>
+                        </h4>
                     </div>
                     
-                    <div class="row g-2 mb-4">
+                    <div class="row g-3 mb-4">
                         <div class="col-6">
                             <div class="stat-box">
                                 <div class="stat-value">{{ result1.total_items }}</div>
@@ -241,40 +395,46 @@
                         </div>
                     </div>
 
-                    <h5 class="mb-3">✨ Key Takeaways</h5>
-                    <ul class="text-muted mb-4" style="line-height: 1.6; font-size: 0.9rem;">
+                    <div class="section-title">💡 Key Takeaways</div>
+                    <ul class="takeaway-list mb-4">
                         {% for item in result1.takeaways[:4] %}
                         <li>{{ item }}</li>
                         {% endfor %}
                     </ul>
 
                     {% if result1.entities %}
-                    <h5 class="mb-3">Top Entities</h5>
+                    <div class="section-title">🏷️ Top Entities</div>
                     <div class="d-flex flex-wrap gap-2 mb-4">
                         {% for cat, items in result1.entities.items() %}
                             {% for name, count in items[:2] %}
-                            <span class="badge" style="background: rgba(14,165,233,0.1); color: #0ea5e9;">{{ name }} ({{ count }})</span>
+                            <span class="entity-badge left-badge">
+                                {{ name }} <span class="badge bg-white text-muted rounded-pill" style="font-size: 0.7rem;">{{ count }}</span>
+                            </span>
                             {% endfor %}
                         {% endfor %}
                     </div>
                     {% endif %}
 
                     {% if result1.wordcloud_image %}
-                    <h5 class="mb-3 text-center">Word Cloud</h5>
-                    <img src="{{ url_for('static', filename=result1.wordcloud_image) }}" class="img-fluid rounded mb-4" alt="Word Cloud A">
+                    <div class="section-title text-center d-block">☁️ Word Cloud</div>
+                    <div class="text-center">
+                        <img src="{{ url_for('static', filename=result1.wordcloud_image) }}" class="img-fluid img-wordcloud mb-4" alt="Word Cloud A">
+                    </div>
                     {% endif %}
                 </div>
             </div>
 
             <!-- RIGHT COLUMN (URL 2) -->
-            <div class="col-md-6">
+            <div class="col-lg-6">
                 <div class="glass-card compare-column right">
-                    <div class="text-center mb-4">
-                        <span class="badge" style="background-color: var(--accent-secondary);">Site B</span>
-                        <h4 class="url-truncate" title="{{ result2.url }}"><a href="{{ result2.url }}" target="_blank" class="text-decoration-none text-dark">{{ result2.url }}</a></h4>
+                    <div class="text-center mb-5">
+                        <span class="badge mb-3" style="background: rgba(99, 102, 241, 0.15); color: #4f46e5; padding: 6px 12px; border-radius: 10px; font-weight: 700; letter-spacing: 1px;">SITE B</span>
+                        <h4 class="domain-header url-truncate" title="{{ result2.url }}">
+                            <a href="{{ result2.url }}" target="_blank" class="text-decoration-none text-dark">{{ result2.url }}</a>
+                        </h4>
                     </div>
                     
-                    <div class="row g-2 mb-4">
+                    <div class="row g-3 mb-4">
                         <div class="col-6">
                             <div class="stat-box">
                                 <div class="stat-value">{{ result2.total_items }}</div>
@@ -289,34 +449,116 @@
                         </div>
                     </div>
 
-                    <h5 class="mb-3">✨ Key Takeaways</h5>
-                    <ul class="text-muted mb-4" style="line-height: 1.6; font-size: 0.9rem;">
+                    <div class="section-title">💡 Key Takeaways</div>
+                    <ul class="takeaway-list mb-4">
                         {% for item in result2.takeaways[:4] %}
                         <li>{{ item }}</li>
                         {% endfor %}
                     </ul>
 
                     {% if result2.entities %}
-                    <h5 class="mb-3">Top Entities</h5>
+                    <div class="section-title">🏷️ Top Entities</div>
                     <div class="d-flex flex-wrap gap-2 mb-4">
                         {% for cat, items in result2.entities.items() %}
                             {% for name, count in items[:2] %}
-                            <span class="badge" style="background: rgba(99,102,241,0.1); color: #6366f1;">{{ name }} ({{ count }})</span>
+                            <span class="entity-badge right-badge">
+                                {{ name }} <span class="badge bg-white text-muted rounded-pill" style="font-size: 0.7rem;">{{ count }}</span>
+                            </span>
                             {% endfor %}
                         {% endfor %}
                     </div>
                     {% endif %}
 
                     {% if result2.wordcloud_image %}
-                    <h5 class="mb-3 text-center">Word Cloud</h5>
-                    <img src="{{ url_for('static', filename=result2.wordcloud_image) }}" class="img-fluid rounded mb-4" alt="Word Cloud B">
+                    <div class="section-title text-center d-block">☁️ Word Cloud</div>
+                    <div class="text-center">
+                        <img src="{{ url_for('static', filename=result2.wordcloud_image) }}" class="img-fluid img-wordcloud mb-4" alt="Word Cloud B">
+                    </div>
                     {% endif %}
                 </div>
             </div>
 
         </div>
-        {% endif %}
 
+        <!-- Sentiment Comparison Chart -->
+        <div class="row mt-5 fade-in-up" style="animation-delay: 0.4s;">
+            <div class="col-12">
+                <div class="glass-card text-center" style="padding: 3rem;">
+                    <h3 class="section-title justify-content-center mb-4">📊 Sentiment Breakdown</h3>
+                    <div style="height: 300px; position: relative;">
+                        <canvas id="sentimentCompareChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Initialize Sentiment Comparison Chart if data exists
+            document.addEventListener('DOMContentLoaded', function() {
+                const ctx = document.getElementById('sentimentCompareChart');
+                if (ctx) {
+                    const labels = ['Positive', 'Neutral', 'Negative'];
+                    
+                    // Extract data from jinja templates
+                    const siteA = [
+                        {{ result1.sentiment_counts.get('Positive', 0) }},
+                        {{ result1.sentiment_counts.get('Neutral', 0) }},
+                        {{ result1.sentiment_counts.get('Negative', 0) }}
+                    ];
+                    
+                    const siteB = [
+                        {{ result2.sentiment_counts.get('Positive', 0) }},
+                        {{ result2.sentiment_counts.get('Neutral', 0) }},
+                        {{ result2.sentiment_counts.get('Negative', 0) }}
+                    ];
+
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [
+                                {
+                                    label: 'Site A',
+                                    data: siteA,
+                                    backgroundColor: 'rgba(14, 165, 233, 0.7)',
+                                    borderColor: 'rgba(14, 165, 233, 1)',
+                                    borderWidth: 1,
+                                    borderRadius: 6
+                                },
+                                {
+                                    label: 'Site B',
+                                    data: siteB,
+                                    backgroundColor: 'rgba(99, 102, 241, 0.7)',
+                                    borderColor: 'rgba(99, 102, 241, 1)',
+                                    borderWidth: 1,
+                                    borderRadius: 6
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                    labels: { font: { family: "'Inter', sans-serif", size: 14 } }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    grid: { color: 'rgba(0,0,0,0.05)' }
+                                },
+                                x: {
+                                    grid: { display: false }
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+        </script>
+        {% endif %}
     </div>
 </body>
 </html>
