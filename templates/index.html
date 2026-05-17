@@ -17,9 +17,29 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- HTML2PDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
+        /* Print Styles */
+        @media print {
+            * {
+                transition: none !important;
+                animation: none !important;
+                opacity: 1 !important;
+                transform: none !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+            }
+            body { background: white !important; color: black !important; padding-top: 0 !important; }
+            .gp-navbar, #action-button-row, .cursor-glow, .hero, #probe-form, .quick-chip { display: none !important; }
+            .glass-card { 
+                background: white !important; 
+                border: 1px solid #ccc !important; 
+                box-shadow: none !important; 
+                break-inside: avoid;
+                color: black !important;
+            }
+            .text-muted { color: #666 !important; }
+            canvas { max-width: 100% !important; }
+        }
         :root {
             --bg-color: #f8fafc;
             --glass-bg: rgba(255, 255, 255, 0.75);
@@ -1327,29 +1347,9 @@
                 });
             }
 
-            // --- PDF Export Logic ---
+            // --- PDF Export Logic (Native Print) ---
             function downloadPDF() {
-                const element = document.getElementById('main-content');
-                const opt = {
-                    margin:       [0.5, 0.5, 0.5, 0.5],
-                    filename:     'GistProbe_Report.pdf',
-                    image:        { type: 'jpeg', quality: 1.0 },
-                    html2canvas:  { scale: 2, useCORS: true, scrollY: 0 },
-                    jsPDF:        { unit: 'in', format: 'a3', orientation: 'portrait' },
-                    pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
-                };
-                
-                // Hide elements not needed in PDF
-                const navbar = document.querySelector('.gp-navbar');
-                if (navbar) navbar.style.display = 'none';
-                const actionRow = document.getElementById('action-button-row');
-                if (actionRow) actionRow.style.display = 'none';
-                
-                html2pdf().set(opt).from(element).save().then(() => {
-                    // Restore elements
-                    if (navbar) navbar.style.display = 'flex';
-                    if (actionRow) actionRow.style.display = 'flex';
-                });
+                window.print();
             }
         </script>
 
