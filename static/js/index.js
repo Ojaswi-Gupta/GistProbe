@@ -420,3 +420,107 @@ function clearTableFilters() {
         indicator.style.display = 'none';
     }
 }
+
+// --- Chat with Website Logic ---
+(function() {
+    function appendMessage(role, text) {
+        const historyBox = document.getElementById('chat-history');
+        const placeholder = document.getElementById('chat-placeholder');
+        if (!historyBox) return;
+
+        if (placeholder) placeholder.style.display = 'none';
+        
+        const msgDiv = document.createElement('div');
+        msgDiv.style.padding = '10px 15px';
+        msgDiv.style.borderRadius = '8px';
+        msgDiv.style.maxWidth = '85%';
+        msgDiv.style.lineHeight = '1.5';
+        msgDiv.style.fontSize = '0.95rem';
+        
+        if (role === 'user') {
+            msgDiv.style.alignSelf = 'flex-end';
+            msgDiv.style.background = 'linear-gradient(135deg, #0ea5e9, #6366f1)';
+            msgDiv.style.color = 'white';
+            msgDiv.innerHTML = `<strong>You:</strong> ${text}`;
+        } else {
+            msgDiv.style.alignSelf = 'flex-start';
+            msgDiv.style.background = 'var(--glass-bg)';
+            msgDiv.style.border = '1px solid var(--glass-border)';
+            msgDiv.style.color = 'var(--text-main)';
+            
+            const formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+            msgDiv.innerHTML = `<strong>Groq AI:</strong><br>${formattedText}`;
+        }
+        
+        historyBox.appendChild(msgDiv);
+        historyBox.scrollTop = historyBox.scrollHeight;
+    }
+
+    async function sendMessage() {
+        const inputField = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('chat-send-btn');
+        const historyBox = document.getElementById('chat-history');
+        
+        if (!inputField || !sendBtn || !historyBox) return;
+
+        const question = inputField.value.trim();
+        if (!question) return;
+
+        appendMessage('user', question);
+        inputField.value = '';
+        inputField.disabled = true;
+        sendBtn.disabled = true;
+
+        const loadingId = 'loading-' + Date.now();
+        const loadingDiv = document.createElement('div');
+        loadingDiv.id = loadingId;
+        loadingDiv.style.alignSelf = 'flex-start';
+        loadingDiv.style.color = 'var(--text-muted)';
+        loadingDiv.style.fontSize = '0.85rem';
+        loadingDiv.innerHTML = '<em>⚡ Groq AI is thinking...</em>';
+        historyBox.appendChild(loadingDiv);
+        historyBox.scrollTop = historyBox.scrollHeight;
+
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question })
+            });
+            const data = await response.json();
+            
+            const lDiv = document.getElementById(loadingId);
+            if (lDiv) lDiv.remove();
+            
+            if (data.error) {
+                appendMessage('ai', `<span style="color: #ef4444;">Error: ${data.error}</span>`);
+            } else {
+                appendMessage('ai', data.answer);
+            }
+        } catch (err) {
+            const lDiv = document.getElementById(loadingId);
+            if (lDiv) lDiv.remove();
+            appendMessage('ai', `<span style="color: #ef4444;">Network Error: Failed to reach the server.</span>`);
+        } finally {
+            inputField.disabled = false;
+            sendBtn.disabled = false;
+            inputField.focus();
+        }
+    }
+
+    // Event Delegation for Button Click
+    document.addEventListener('click', function(e) {
+        if (e.target && (e.target.id === 'chat-send-btn' || e.target.closest('#chat-send-btn'))) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+
+    // Event Delegation for Enter Key
+    document.addEventListener('keypress', function(e) {
+        if (e.target && e.target.id === 'chat-input' && e.key === 'Enter') {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+})();

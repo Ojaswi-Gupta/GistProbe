@@ -6,3 +6,4 @@ data.csv
 results_*.csv
 _probe_cache.json
 static/wordcloud_*.png
+instance/

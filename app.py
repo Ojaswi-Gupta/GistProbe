@@ -1,9 +1,16 @@
-from flask import Flask, render_template, request, send_file, redirect, url_for
+from flask import Flask, render_template, request, send_file, redirect, url_for, jsonify
 import pandas as pd
 import uuid
 import os
 import glob
 import json
+from dotenv import load_dotenv
+
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user, login_required
+from authlib.integrations.flask_client import OAuth
+from authlib.integrations.base_client.errors import OAuthError
+from groq import Groq
 
 from crawler import scrape_url
 from analyser import clean_text_data, compute_sentiment
@@ -11,42 +18,127 @@ from clustering import perform_clustering, compute_similarity
 from wordcloud_gen import generate_wordcloud, cleanup_old_wordclouds
 from ner import extract_entities
 
-app = Flask(__name__)
-active_files = {}
+load_dotenv()
 
-CACHE_FILE = "_probe_cache.json"
+app = Flask(__name__)
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "fallback-secret-key")
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///gistprobe.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'
+
+oauth = OAuth(app)
+google = oauth.register(
+    name='google',
+    client_id=os.getenv('GOOGLE_CLIENT_ID'),
+    client_secret=os.getenv('GOOGLE_CLIENT_SECRET'),
+    access_token_url='https://accounts.google.com/o/oauth2/token',
+    authorize_url='https://accounts.google.com/o/oauth2/auth',
+    api_base_url='https://www.googleapis.com/oauth2/v1/',
+    userinfo_endpoint='https://www.googleapis.com/oauth2/v1/userinfo',
+    client_kwargs={'scope': 'email profile'}
+)
+
+active_files = {}
+chat_contexts = {}
+try:
+    groq_client = Groq(api_key=os.getenv("GROQ_API_KEY")) if os.getenv("GROQ_API_KEY") else None
+except Exception as e:
+    print(f"Failed to initialize Groq: {e}")
+    groq_client = None
+
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    name = db.Column(db.String(120))
+    probes = db.relationship('ProbeResult', backref='user', lazy=True)
+
+class ProbeResult(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    url = db.Column(db.String(2048), nullable=False)
+    timestamp = db.Column(db.DateTime, default=db.func.current_timestamp())
+    total_items = db.Column(db.Integer)
+    avg_subjectivity = db.Column(db.Float)
+    results_json = db.Column(db.Text)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+@app.route('/login')
+def login():
+    redirect_uri = url_for('auth', _external=True)
+    return google.authorize_redirect(redirect_uri)
+
+@app.route('/login/callback')
+def auth():
+    try:
+        token = google.authorize_access_token()
+    except OAuthError:
+        # User canceled the login prompt or access was denied
+        return redirect(url_for('home'))
+        
+    userinfo = token.get('userinfo')
+    if not userinfo:
+        userinfo = google.get('userinfo').json()
+    email = userinfo.get('email')
+    name = userinfo.get('name')
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        user = User(email=email, name=name)
+        db.session.add(user)
+        db.session.commit()
+    login_user(user)
+    return redirect(url_for('home'))
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('home'))
 
 
 def _save_cache(url, table_html, cluster_counts, sentiment_counts, avg_subjectivity, takeaways, metrics, total_items, wordcloud_image=None, entities=None):
-    """Save the last successful probe result to disk for instant demo loading."""
-    try:
-        cache = {
-            "url": url,
-            "table": table_html,
-            "cluster_counts": cluster_counts,
-            "sentiment_counts": sentiment_counts,
-            "avg_subjectivity": avg_subjectivity,
-            "takeaways": takeaways,
-            "metrics": metrics,
-            "total_items": total_items,
-            "wordcloud_image": wordcloud_image,
-            "entities": entities,
-        }
-        with open(CACHE_FILE, "w") as f:
-            json.dump(cache, f)
-        print(f"Cache saved for: {url}")
-    except Exception as e:
-        print(f"Cache save error: {e}")
-
+    """Save the last successful probe result to database for the current user."""
+    if current_user.is_authenticated:
+        try:
+            cache = {
+                "table": table_html,
+                "cluster_counts": cluster_counts,
+                "sentiment_counts": sentiment_counts,
+                "takeaways": takeaways,
+                "metrics": metrics,
+                "wordcloud_image": wordcloud_image,
+                "entities": entities,
+            }
+            probe = ProbeResult(
+                user_id=current_user.id,
+                url=url,
+                total_items=total_items,
+                avg_subjectivity=avg_subjectivity,
+                results_json=json.dumps(cache)
+            )
+            db.session.add(probe)
+            db.session.commit()
+        except Exception as e:
+            print(f"DB save error: {e}")
 
 def _load_cache():
-    """Load the last probe result from disk cache."""
-    try:
-        if os.path.exists(CACHE_FILE):
-            with open(CACHE_FILE, "r") as f:
-                return json.load(f)
-    except Exception as e:
-        print(f"Cache load error: {e}")
+    """Load the last probe result from database."""
+    if current_user.is_authenticated:
+        try:
+            probe = ProbeResult.query.filter_by(user_id=current_user.id).order_by(ProbeResult.timestamp.desc()).first()
+            if probe:
+                cache = json.loads(probe.results_json)
+                cache['url'] = probe.url
+                cache['total_items'] = probe.total_items
+                cache['avg_subjectivity'] = probe.avg_subjectivity
+                return cache
+        except Exception as e:
+            print(f"DB load error: {e}")
     return None
 
 
@@ -139,6 +231,10 @@ def process():
         if "error" in result:
             return render_template("index.html", error=result["error"], url=result["url"])
             
+        # Save context for Groq chat
+        user_key = current_user.id if current_user.is_authenticated else request.remote_addr
+        chat_contexts[user_key] = " ".join(result.get("cleaned_text", []))
+            
         return render_template("index.html", cached=False, **result)
 
     except Exception as e:
@@ -148,6 +244,41 @@ def process():
             error=f"Something went wrong: {str(e)}. Please check the URL and try again.",
             url=request.form.get("url", ""),
         )
+
+@app.route("/api/chat", methods=["POST"])
+def chat_api():
+    if not groq_client:
+        return jsonify({"error": "Groq API key not configured."}), 500
+        
+    data = request.json
+    question = data.get("question", "").strip()
+    
+    if not question:
+        return jsonify({"error": "Empty question."}), 400
+        
+    user_key = current_user.id if current_user.is_authenticated else request.remote_addr
+    context_text = chat_contexts.get(user_key, "")
+    
+    if not context_text:
+        return jsonify({"error": "No website context found. Please probe a URL first."}), 400
+        
+    # Truncate context to ~25k chars to fit inside Groq token limit safely
+    context_text = context_text[:25000]
+    
+    prompt = f"You are GistProbe AI, a friendly and intelligent assistant. If the user greets you casually, respond naturally and offer to help analyze the webpage. For informational questions, use the provided webpage context as your foundation, but feel free to seamlessly weave in relevant real-world knowledge and background details to provide a richer, more comprehensive answer.\n\nContext:\n{context_text}\n\nQuestion: {question}\n\nAnswer:"
+    
+    try:
+        completion = groq_client.chat.completions.create(
+            model="llama-3.1-8b-instant",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.5,
+            max_tokens=500
+        )
+        answer = completion.choices[0].message.content
+        return jsonify({"answer": answer})
+    except Exception as e:
+        print(f"Groq API Error: {e}")
+        return jsonify({"error": "An error occurred while generating the answer."}), 500
 
 
 @app.route("/compare", methods=["GET"])
@@ -246,5 +377,38 @@ def download():
     return "File not found. Please run a probe first."
 
 
+@app.route('/history')
+@login_required
+def history():
+    probes = ProbeResult.query.filter_by(user_id=current_user.id).order_by(ProbeResult.timestamp.desc()).all()
+    return render_template('history.html', probes=probes)
+
+@app.route('/history/<int:probe_id>')
+@login_required
+def load_history(probe_id):
+    probe = ProbeResult.query.get_or_404(probe_id)
+    if probe.user_id != current_user.id:
+        return redirect(url_for('home'))
+    cache = json.loads(probe.results_json)
+    cache['url'] = probe.url
+    cache['total_items'] = probe.total_items
+    cache['avg_subjectivity'] = probe.avg_subjectivity
+    return render_template(
+        "index.html",
+        table=cache["table"],
+        cluster_counts=cache["cluster_counts"],
+        sentiment_counts=cache["sentiment_counts"],
+        avg_subjectivity=cache["avg_subjectivity"],
+        takeaways=cache["takeaways"],
+        metrics=cache["metrics"],
+        url=cache["url"],
+        total_items=cache["total_items"],
+        cached=True,
+        wordcloud_image=cache.get("wordcloud_image"),
+        entities=cache.get("entities"),
+    )
+
 if __name__ == "__main__":
+    with app.app_context():
+        db.create_all()
     app.run(debug=True)

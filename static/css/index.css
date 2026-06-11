@@ -68,6 +68,8 @@
     --input-bg: #f8fafc;
     --input-bg-focus: #ffffff;
     --modal-bg: #ffffff;
+    --chat-bg: rgba(0, 0, 0, 0.03);
+    --chat-shadow: rgba(0, 0, 0, 0.05);
 }
 
 [data-theme="dark"] {
@@ -84,6 +86,8 @@
     --input-bg: #1e293b;
     --input-bg-focus: #0f172a;
     --modal-bg: #1e293b;
+    --chat-bg: rgba(10, 15, 30, 0.7);
+    --chat-shadow: rgba(0, 0, 0, 0.3);
 }
 
 [data-theme="dark"] h1, 
