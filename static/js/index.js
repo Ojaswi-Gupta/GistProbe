@@ -25,6 +25,23 @@ function fillAndProbe(url) {
 function handleFormSubmit(e) {
     e.preventDefault(); // Prevent native navigation to keep JS alive
 
+    // Hide current page content under the form card
+    const initialFeatures = document.getElementById('initial-features');
+    if (initialFeatures) initialFeatures.style.display = 'none';
+
+    const resultsDashboard = document.getElementById('results-dashboard');
+    if (resultsDashboard) resultsDashboard.style.display = 'none';
+
+    const errorAlert = document.querySelector('.alert.alert-danger');
+    if (errorAlert) errorAlert.style.display = 'none';
+
+    // Show skeleton loader
+    const skeleton = document.getElementById('skeleton-loader');
+    if (skeleton) {
+        skeleton.style.display = 'block';
+        skeleton.classList.add('fade-in-up');
+    }
+
     document.getElementById('loading').style.display = 'block';
     const btn = document.getElementById('submit-btn');
     if (btn) {
@@ -166,7 +183,17 @@ function initDashboard() {
                 plugins: {
                     legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true } }
                 },
-                cutout: '70%'
+                cutout: '70%',
+                onClick: (event, elements, chart) => {
+                    if (elements.length > 0) {
+                        const dataIndex = elements[0].index;
+                        const label = chart.data.labels[dataIndex];
+                        filterTableByTopic(label);
+                    }
+                },
+                onHover: (event, elements) => {
+                    event.native.target.style.cursor = elements.length ? 'pointer' : 'default';
+                }
             }
         });
     }
@@ -203,9 +230,7 @@ function initDashboard() {
                     if (elements.length > 0) {
                         const dataIndex = elements[0].index;
                         const label = chart.data.labels[dataIndex];
-                        const table = $('#resultsTable').DataTable();
-                        table.search(label).draw();
-                        document.getElementById('resultsTable').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        filterTableBySentiment(label);
                     }
                 },
                 onHover: (event, elements) => {
@@ -239,9 +264,11 @@ $(document).ready(initDashboard);
 // Interactive Takeaway Filter
 function filterTableByTakeaway(element) {
     const text = element.innerText;
-    const searchPhrase = text.split(' ').slice(0, 5).join(' ').replace(/[^\w\s]/gi, '');
+    const searchPhrase = text.split(' ').slice(0, 5).join(' ').replace(/[^\w\s]/gi, '').trim();
     const table = $('#resultsTable').DataTable();
+    table.columns().search('');
     table.search(searchPhrase).draw();
+    showFilterIndicator(`Takeaway: "${searchPhrase}..."`);
     document.getElementById('resultsTable').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
@@ -295,33 +322,101 @@ function animateGlow() {
 animateGlow();
 
 // --- Theme Toggle Logic ---
-const themeToggleBtn = document.getElementById('theme-toggle');
-const themeIcon = document.getElementById('theme-icon');
 const htmlEl = document.documentElement;
 
 // Initialize theme
 const savedTheme = localStorage.getItem('theme') || 'light';
 if (savedTheme === 'dark') {
     htmlEl.setAttribute('data-theme', 'dark');
+    const themeIcon = document.getElementById('theme-icon');
     if(themeIcon) themeIcon.textContent = '☀️';
 }
 
-if(themeToggleBtn) {
-    themeToggleBtn.addEventListener('click', () => {
+// Use event delegation so the listener survives DOM replacement via fetch
+document.addEventListener('click', (e) => {
+    const themeToggleBtn = e.target.closest('#theme-toggle');
+    if (themeToggleBtn) {
         const currentTheme = htmlEl.getAttribute('data-theme');
+        const themeIcon = document.getElementById('theme-icon');
         if (currentTheme === 'dark') {
             htmlEl.removeAttribute('data-theme');
             localStorage.setItem('theme', 'light');
-            themeIcon.textContent = '🌙';
+            if (themeIcon) themeIcon.textContent = '🌙';
         } else {
             htmlEl.setAttribute('data-theme', 'dark');
             localStorage.setItem('theme', 'dark');
-            themeIcon.textContent = '☀️';
+            if (themeIcon) themeIcon.textContent = '☀️';
         }
-    });
-}
+    }
+});
 
-// --- PDF Export Logic (Native Print) ---
+// --- PDF Export Logic ---
 function downloadPDF() {
     window.print();
+}
+
+// --- Cross-Filtering Helper Functions ---
+function filterTableByTopic(label) {
+    const clusterId = label.split(':')[0].trim();
+    const table = $('#resultsTable').DataTable();
+    
+    // Clear previous search and search column 1 (Cluster) specifically
+    table.search('');
+    table.columns().search('');
+    table.column(1).search('^' + clusterId + '$', true, false).draw();
+    
+    showFilterIndicator(`Cluster ${clusterId} (${label.split(':').slice(1).join(':').trim()})`);
+    document.getElementById('resultsTable').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function filterTableBySentiment(label) {
+    const table = $('#resultsTable').DataTable();
+    
+    // Clear previous search and search column 2 (Sentiment) specifically
+    table.search('');
+    table.columns().search('');
+    table.column(2).search(label).draw();
+    
+    showFilterIndicator(`${label} Sentiment`);
+    document.getElementById('resultsTable').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function filterTableByEntity(element) {
+    // Clone to avoid modifying the original element
+    const clone = element.cloneNode(true);
+    const spans = clone.getElementsByTagName('span');
+    while (spans.length > 0) {
+        spans[0].parentNode.removeChild(spans[0]);
+    }
+    const entityName = clone.textContent.trim();
+    const table = $('#resultsTable').DataTable();
+    
+    // Clear previous search and search table-wide
+    table.columns().search('');
+    table.search(entityName).draw();
+    
+    showFilterIndicator(`Entity: "${entityName}"`);
+    document.getElementById('resultsTable').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function showFilterIndicator(value) {
+    const indicator = document.getElementById('table-filter-indicator');
+    const valSpan = document.getElementById('active-filter-val');
+    if (indicator && valSpan) {
+        valSpan.textContent = value;
+        indicator.style.display = 'inline-flex';
+        indicator.style.alignItems = 'center';
+    }
+}
+
+function clearTableFilters() {
+    const table = $('#resultsTable').DataTable();
+    table.search('');
+    table.columns().search('');
+    table.draw();
+    
+    const indicator = document.getElementById('table-filter-indicator');
+    if (indicator) {
+        indicator.style.display = 'none';
+    }
 }

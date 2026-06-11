@@ -5,19 +5,53 @@
         animation: none !important;
         opacity: 1 !important;
         transform: none !important;
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
     }
-    body { background: white !important; color: black !important; padding-top: 0 !important; }
-    .gp-navbar, #action-button-row, .cursor-glow, .hero, #probe-form, .quick-chip { display: none !important; }
+    body { 
+        background-color: var(--bg-color) !important; 
+        color: var(--text-main) !important; 
+        padding-top: 20px !important;
+        width: 1024px !important;
+        min-width: 1024px !important;
+        margin: 0 auto !important;
+    }
+    .container, #report-container {
+        width: 1024px !important;
+        max-width: 1024px !important;
+        min-width: 1024px !important;
+        padding: 0 !important;
+        margin: 0 auto !important;
+    }
+    .gp-navbar, #action-button-row, .cursor-glow, .hero, #probe-form, .quick-chip, .no-pdf, .modal, .modal-backdrop { 
+        display: none !important; 
+    }
     .glass-card { 
-        background: white !important; 
-        border: 1px solid #ccc !important; 
+        background: var(--glass-bg) !important; 
+        border: 1px solid var(--glass-border) !important; 
         box-shadow: none !important; 
         break-inside: avoid;
-        color: black !important;
+        page-break-inside: avoid;
+        color: var(--text-main) !important;
     }
-    .text-muted { color: #666 !important; }
+    /* Force side-by-side grid ratios on print */
+    .row {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        width: 100% !important;
+    }
+    .col-md-4 {
+        width: 33.3333% !important;
+        float: left !important;
+        flex: 0 0 33.3333% !important;
+        max-width: 33.3333% !important;
+    }
+    .col-lg-6 {
+        width: 50% !important;
+        float: left !important;
+        flex: 0 0 50% !important;
+        max-width: 50% !important;
+    }
     canvas { max-width: 100% !important; }
 }
 :root {
@@ -446,7 +480,11 @@ h5,
 
 /* Table Styling */
 .table {
-    color: var(--text-main);
+    --bs-table-color: var(--text-main);
+    --bs-table-bg: transparent;
+    --bs-table-hover-color: var(--text-main);
+    --bs-table-hover-bg: transparent;
+    color: var(--text-main) !important;
     border-collapse: separate;
     border-spacing: 0 8px;
 }
@@ -455,13 +493,14 @@ h5,
     border: none;
     text-transform: uppercase;
     font-size: 0.85rem;
-    color: var(--text-muted);
+    color: var(--text-muted) !important;
     letter-spacing: 1px;
     padding-bottom: 10px;
+    background: transparent !important;
 }
 
 .table tbody tr {
-    background-color: var(--modal-bg);
+    background-color: var(--modal-bg) !important;
     box-shadow: 0 2px 8px var(--card-shadow);
     transition: transform 0.2s, box-shadow 0.2s;
 }
@@ -472,10 +511,12 @@ h5,
 }
 
 .table tbody td {
-    border: 1px solid #f1f5f9;
+    border: 1px solid var(--glass-border);
     border-width: 1px 0;
     padding: 16px;
     vertical-align: middle;
+    background: transparent !important;
+    color: var(--text-main) !important;
 }
 
 .table tbody td:first-child {
@@ -547,3 +588,113 @@ h5,
 .connect-link:hover svg {
     transform: scale(1.15);
 }
+
+/* Shimmer Animation & Skeleton UI */
+.shimmer {
+    background: linear-gradient(
+        90deg,
+        var(--glass-bg) 25%,
+        var(--accent-glow) 50%,
+        var(--glass-bg) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer-anim 1.5s infinite linear;
+}
+
+@keyframes shimmer-anim {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.skeleton-text {
+    height: 12px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    background: var(--glass-border);
+    position: relative;
+    overflow: hidden;
+}
+.skeleton-text::after {
+    content: "";
+    position: absolute;
+    top: 0; right: 0; bottom: 0; left: 0;
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0%,
+        var(--accent-glow) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer-anim 1.5s infinite linear;
+}
+
+.skeleton-title {
+    height: 20px;
+    margin-bottom: 15px;
+    border-radius: 6px;
+}
+
+.skeleton-circle {
+    border-radius: 50%;
+    background: var(--glass-border);
+    position: relative;
+    overflow: hidden;
+}
+.skeleton-circle::after {
+    content: "";
+    position: absolute;
+    top: 0; right: 0; bottom: 0; left: 0;
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0%,
+        var(--accent-glow) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer-anim 1.5s infinite linear;
+}
+
+.skeleton-badge {
+    border-radius: 20px;
+    background: var(--glass-border);
+    position: relative;
+    overflow: hidden;
+}
+.skeleton-badge::after {
+    content: "";
+    position: absolute;
+    top: 0; right: 0; bottom: 0; left: 0;
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0%,
+        var(--accent-glow) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer-anim 1.5s infinite linear;
+}
+
+/* PDF Generation Overrides */
+.pdf-generating .no-pdf {
+    display: none !important;
+}
+/* Fix Word Cloud rendering in PDF (html2canvas object-fit issues) */
+.pdf-generating img[alt*="Word Cloud"] {
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    object-fit: unset !important;
+    display: block !important;
+    margin: 0 auto !important;
+}
+.pdf-generating .dataTables_filter,
+.pdf-generating .dataTables_length,
+.pdf-generating .dataTables_info,
+.pdf-generating .dataTables_paginate {
+    display: none !important;
+}
+

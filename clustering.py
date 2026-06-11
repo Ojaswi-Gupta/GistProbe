@@ -2,10 +2,29 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
+from sklearn.metrics.pairwise import cosine_similarity
 from difflib import SequenceMatcher
 
 def _similarity(a, b):
     return SequenceMatcher(None, a, b).ratio()
+
+def compute_similarity(texts1, texts2):
+    """
+    Compute cosine similarity between two lists of texts (Site A vs Site B).
+    """
+    if not texts1 or not texts2:
+        return 0
+    
+    vectorizer = TfidfVectorizer(stop_words="english", max_features=1000)
+    all_texts = [" ".join(texts1), " ".join(texts2)]
+    
+    try:
+        tfidf = vectorizer.fit_transform(all_texts)
+        score = cosine_similarity(tfidf[0:1], tfidf[1:2])[0][0]
+        return round(score * 100)
+    except Exception as e:
+        print(f"Similarity computation error: {e}")
+        return 0
 
 
 def _generate_cluster_name(cluster_id, center, terms):

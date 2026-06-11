@@ -1,42 +1,98 @@
 // --- Theme Toggle Logic ---
-const themeToggleBtn = document.getElementById('theme-toggle');
-const themeIcon = document.getElementById('theme-icon');
 const htmlEl = document.documentElement;
 
 // Initialize theme
 const savedTheme = localStorage.getItem('theme') || 'light';
 if (savedTheme === 'dark') {
     htmlEl.setAttribute('data-theme', 'dark');
-    if(themeIcon) themeIcon.textContent = '☀️';
+    const themeIcon = document.getElementById('theme-icon');
+    if (themeIcon) themeIcon.textContent = '☀️';
 }
 
-if(themeToggleBtn) {
-    themeToggleBtn.addEventListener('click', () => {
+// Event delegation for theme toggle (so it survives DOM replacement)
+document.addEventListener('click', (e) => {
+    const themeToggleBtn = e.target.closest('#theme-toggle');
+    if (themeToggleBtn) {
         const currentTheme = htmlEl.getAttribute('data-theme');
+        const themeIcon = document.getElementById('theme-icon');
         if (currentTheme === 'dark') {
             htmlEl.removeAttribute('data-theme');
             localStorage.setItem('theme', 'light');
-            themeIcon.textContent = '🌙';
+            if (themeIcon) themeIcon.textContent = '🌙';
         } else {
             htmlEl.setAttribute('data-theme', 'dark');
             localStorage.setItem('theme', 'dark');
-            themeIcon.textContent = '☀️';
+            if (themeIcon) themeIcon.textContent = '☀️';
         }
-    });
-}
+    }
+});
 
-// --- PDF Export Logic (Native Print) ---
+// --- PDF Export Logic ---
 function downloadPDF() {
     window.print();
 }
 
-// Initialize Sentiment Comparison Chart if data exists
-document.addEventListener('DOMContentLoaded', function() {
+// --- AJAX Compare Submission & Dashboard Init ---
+function handleCompareSubmit(e) {
+    e.preventDefault();
+
+    const form = document.getElementById('compare-form');
+    if (!form) return;
+
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'Comparing Sites... ⏳';
+    }
+
+    // Hide old results & error alerts
+    const compareResults = document.getElementById('compare-results');
+    if (compareResults) compareResults.style.display = 'none';
+
+    const errorAlert = document.querySelector('.alert.alert-danger');
+    if (errorAlert) errorAlert.style.display = 'none';
+
+    // Show compare skeleton loader
+    const skeleton = document.getElementById('compare-skeleton');
+    if (skeleton) {
+        skeleton.style.display = 'block';
+        skeleton.classList.add('fade-in-up');
+    }
+
+    const formData = new FormData(form);
+
+    fetch('/compare', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.text())
+    .then(html => {
+        const parser = new DOMParser();
+        const newDoc = parser.parseFromString(html, 'text/html');
+        document.body.innerHTML = newDoc.body.innerHTML;
+        
+        // Re-initialize charts and event bindings
+        initCompareDashboard();
+    })
+    .catch(err => {
+        console.error("Compare Pipeline Error:", err);
+        // Fallback to standard submit
+        form.submit();
+    });
+}
+
+function initCompareDashboard() {
+    // 1. Attach AJAX submit listener
+    const form = document.getElementById('compare-form');
+    if (form) {
+        form.removeEventListener('submit', handleCompareSubmit);
+        form.addEventListener('submit', handleCompareSubmit);
+    }
+
+    // 2. Initialize Sentiment Comparison Chart if data exists
     const ctx = document.getElementById('sentimentCompareChart');
     if (ctx) {
         const labels = ['Positive', 'Neutral', 'Negative'];
-        
-        // Extract data from data attributes
         const siteA = JSON.parse(ctx.getAttribute('data-site-a'));
         const siteB = JSON.parse(ctx.getAttribute('data-site-b'));
 
@@ -85,7 +141,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Initialize NLP Metrics Radar Chart
+    // 3. Initialize NLP Metrics Radar Chart
     const radarCtx = document.getElementById('radarCompareChart');
     if (radarCtx) {
         const siteAMetrics = JSON.parse(radarCtx.getAttribute('data-site-a-metrics'));
@@ -162,4 +218,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-});
+}
+
+// Trigger initial dashboard bindings on DOM ready
+document.addEventListener('DOMContentLoaded', initCompareDashboard);

@@ -5,27 +5,65 @@
         animation: none !important;
         opacity: 1 !important;
         transform: none !important;
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
     }
-    body { background: white !important; color: black !important; padding-top: 0 !important; }
-    .gp-navbar, .btn-outline-danger, .hero, .glass-card form { display: none !important; }
+    body { 
+        background-color: var(--bg-main) !important; 
+        color: var(--text-main) !important; 
+        padding-top: 20px !important;
+        width: 1024px !important;
+        min-width: 1024px !important;
+        margin: 0 auto !important;
+    }
+    .container-fluid, #compare-report-container {
+        width: 1024px !important;
+        max-width: 1024px !important;
+        min-width: 1024px !important;
+        padding: 0 !important;
+        margin: 0 auto !important;
+    }
+    .gp-navbar, .btn-outline-danger, .hero, .glass-card form, .no-pdf, .btn-outline-info { 
+        display: none !important; 
+    }
     .glass-card { 
-        background: white !important; 
-        border: 1px solid #ccc !important; 
+        background: var(--glass-bg) !important; 
+        border: 1px solid var(--glass-border) !important; 
         box-shadow: none !important; 
         break-inside: avoid;
-        color: black !important;
+        page-break-inside: avoid;
+        color: var(--text-main) !important;
         padding: 1.5rem !important;
     }
-    .stat-box, .takeaway-list li {
-        background: #f8fafc !important;
-        border: 1px solid #e2e8f0 !important;
-        color: black !important;
+    .stat-box {
+        background: var(--stat-box-bg) !important;
+        border: 1px solid var(--glass-border) !important;
+        color: var(--text-main) !important;
     }
-    .text-muted { color: #666 !important; }
+    .takeaway-list li {
+        background: var(--takeaway-bg) !important;
+        border: 1px solid var(--glass-border) !important;
+        color: var(--text-main) !important;
+    }
+    /* Force side-by-side grid ratios on print */
+    .row {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        width: 100% !important;
+    }
+    .col-md-4 {
+        width: 33.3333% !important;
+        float: left !important;
+        flex: 0 0 33.3333% !important;
+        max-width: 33.3333% !important;
+    }
+    .col-lg-6 {
+        width: 50% !important;
+        float: left !important;
+        flex: 0 0 50% !important;
+        max-width: 50% !important;
+    }
     canvas { max-width: 100% !important; }
-    .col-md-6 { width: 50% !important; float: left !important; }
 }
 :root {
     --bg-main: #f0f9ff;
@@ -33,6 +71,7 @@
     --text-muted: #64748b;
     --accent-primary: #0ea5e9;
     --accent-secondary: #6366f1;
+    --accent-glow: rgba(14, 165, 233, 0.2);
     --glass-bg: rgba(255, 255, 255, 0.7);
     --glass-border: rgba(255, 255, 255, 0.5);
     --card-shadow: rgba(0, 0, 0, 0.05);
@@ -49,6 +88,7 @@
     --bg-main: #0f172a;
     --text-main: #f8fafc;
     --text-muted: #94a3b8;
+    --accent-glow: rgba(14, 165, 233, 0.4);
     --glass-bg: rgba(30, 41, 59, 0.7);
     --glass-border: rgba(255, 255, 255, 0.1);
     --card-shadow: rgba(0, 0, 0, 0.2);
@@ -140,6 +180,17 @@ body {
     color: var(--accent-primary);
     background: rgba(14, 165, 233, 0.08);
     border-color: rgba(14, 165, 233, 0.2);
+}
+
+.active-url {
+    color: #38bdf8;
+    text-decoration: none;
+    word-break: break-all;
+}
+
+.active-url:hover {
+    text-decoration: underline;
+    color: #bae6fd;
 }
 
 /* Advanced Glassmorphism */
@@ -369,3 +420,113 @@ body {
     animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     opacity: 0;
 }
+
+/* Shimmer Animation & Skeleton UI */
+.shimmer {
+    background: linear-gradient(
+        90deg,
+        var(--glass-bg) 25%,
+        var(--accent-glow) 50%,
+        var(--glass-bg) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer-anim 1.5s infinite linear;
+}
+
+@keyframes shimmer-anim {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.skeleton-text {
+    height: 12px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    background: var(--glass-border);
+    position: relative;
+    overflow: hidden;
+}
+.skeleton-text::after {
+    content: "";
+    position: absolute;
+    top: 0; right: 0; bottom: 0; left: 0;
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0%,
+        var(--accent-glow) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer-anim 1.5s infinite linear;
+}
+
+.skeleton-title {
+    height: 20px;
+    margin-bottom: 15px;
+    border-radius: 6px;
+}
+
+.skeleton-circle {
+    border-radius: 50%;
+    background: var(--glass-border);
+    position: relative;
+    overflow: hidden;
+}
+.skeleton-circle::after {
+    content: "";
+    position: absolute;
+    top: 0; right: 0; bottom: 0; left: 0;
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0%,
+        var(--accent-glow) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer-anim 1.5s infinite linear;
+}
+
+.skeleton-badge {
+    border-radius: 20px;
+    background: var(--glass-border);
+    position: relative;
+    overflow: hidden;
+}
+.skeleton-badge::after {
+    content: "";
+    position: absolute;
+    top: 0; right: 0; bottom: 0; left: 0;
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0%,
+        var(--accent-glow) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer-anim 1.5s infinite linear;
+}
+
+/* PDF Generation Overrides */
+.pdf-generating .no-pdf {
+    display: none !important;
+}
+/* Fix Word Cloud rendering in PDF (html2canvas object-fit issues) */
+.pdf-generating img[alt*="Word Cloud"] {
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    object-fit: unset !important;
+    display: block !important;
+    margin: 0 auto !important;
+}
+.pdf-generating .dataTables_filter,
+.pdf-generating .dataTables_length,
+.pdf-generating .dataTables_info,
+.pdf-generating .dataTables_paginate {
+    display: none !important;
+}
+

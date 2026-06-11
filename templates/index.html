@@ -17,6 +17,8 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- html2pdf.js -->
+    <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
     <!-- External CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 </head>
@@ -97,9 +99,144 @@
                 </div>
             </div>
 
+            <!-- Skeleton Loader (Mimics the dashboard structure) -->
+            <div id="skeleton-loader" style="display: none;" class="w-100">
+                <!-- Skeleton Active Target -->
+                <div class="text-center mb-5">
+                    <div class="skeleton-text skeleton-title mx-auto" style="width: 320px; height: 24px;"></div>
+                    <div class="skeleton-text mx-auto mt-2" style="width: 140px; height: 14px;"></div>
+                </div>
+
+                <!-- Skeleton AI Summary -->
+                <div class="row justify-content-center mb-5">
+                    <div class="col-md-10">
+                        <div class="glass-card p-4" style="border-left: 4px solid var(--accent-primary);">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="skeleton-circle me-3" style="width: 24px; height: 24px;"></div>
+                                <div class="skeleton-text" style="width: 220px; height: 20px;"></div>
+                            </div>
+                            <div class="skeleton-text w-75 mb-2"></div>
+                            <div class="skeleton-text w-100 mb-2"></div>
+                            <div class="skeleton-text w-50"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Skeleton 3-Card Row (Charts & Dominance) -->
+                <div class="row mb-5">
+                    <div class="col-md-4 mb-4">
+                        <div class="glass-card p-4 h-100 d-flex flex-column align-items-center justify-content-center" style="min-height: 350px;">
+                            <div class="skeleton-text mb-4" style="width: 150px; height: 18px;"></div>
+                            <div class="skeleton-circle" style="width: 180px; height: 180px;"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="glass-card p-4 h-100 d-flex flex-column align-items-center justify-content-center" style="min-height: 350px;">
+                            <div class="skeleton-text mb-4" style="width: 150px; height: 18px;"></div>
+                            <div class="skeleton-circle" style="width: 180px; height: 180px;"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="glass-card p-4 h-100 d-flex flex-column" style="min-height: 350px;">
+                            <div class="skeleton-text mb-4" style="width: 150px; height: 18px;"></div>
+                            <div class="list-group list-group-flush mb-4 flex-grow-1">
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div class="skeleton-text" style="width: 120px;"></div>
+                                    <div class="skeleton-badge" style="width: 60px; height: 18px;"></div>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div class="skeleton-text" style="width: 90px;"></div>
+                                    <div class="skeleton-badge" style="width: 60px; height: 18px;"></div>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div class="skeleton-text" style="width: 110px;"></div>
+                                    <div class="skeleton-badge" style="width: 60px; height: 18px;"></div>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2 w-100 mt-auto">
+                                <div class="skeleton-badge w-50" style="height: 38px;"></div>
+                                <div class="skeleton-badge w-50" style="height: 38px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Skeleton Word Cloud -->
+                <div class="row justify-content-center mb-5">
+                    <div class="col-md-10">
+                        <div class="glass-card p-4 text-center">
+                            <div class="skeleton-text mb-2 mx-auto" style="width: 150px; height: 20px;"></div>
+                            <div class="skeleton-text mb-4 mx-auto" style="width: 350px; height: 12px;"></div>
+                            <div class="skeleton-text w-100" style="height: 300px; border-radius: 12px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Skeleton Entities -->
+                <div class="glass-card p-4 mb-5">
+                    <div class="skeleton-text mb-4 mx-auto" style="width: 220px; height: 22px;"></div>
+                    <div class="row">
+                        <div class="col-md-4 mb-4">
+                            <div class="skeleton-text mb-3" style="width: 100px; height: 14px;"></div>
+                            <div class="d-flex flex-wrap gap-2">
+                                <div class="skeleton-badge" style="width: 90px; height: 32px;"></div>
+                                <div class="skeleton-badge" style="width: 110px; height: 32px;"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-4">
+                            <div class="skeleton-text mb-3" style="width: 120px; height: 14px;"></div>
+                            <div class="d-flex flex-wrap gap-2">
+                                <div class="skeleton-badge" style="width: 80px; height: 32px;"></div>
+                                <div class="skeleton-badge" style="width: 100px; height: 32px;"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-4">
+                            <div class="skeleton-text mb-3" style="width: 80px; height: 14px;"></div>
+                            <div class="d-flex flex-wrap gap-2">
+                                <div class="skeleton-badge" style="width: 90px; height: 32px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Skeleton Table -->
+                <div class="glass-card p-4 mb-5">
+                    <div class="skeleton-text mb-4" style="width: 180px; height: 22px;"></div>
+                    <div class="table-responsive">
+                        <table class="table" style="opacity: 0.5;">
+                            <thead>
+                                <tr>
+                                    <th><div class="skeleton-text" style="width: 120px;"></div></th>
+                                    <th><div class="skeleton-text" style="width: 80px;"></div></th>
+                                    <th><div class="skeleton-text" style="width: 90px;"></div></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><div class="skeleton-text w-100"></div></td>
+                                    <td><div class="skeleton-text" style="width: 30px;"></div></td>
+                                    <td><div class="skeleton-badge" style="width: 80px; height: 24px;"></div></td>
+                                </tr>
+                                <tr>
+                                    <td><div class="skeleton-text w-75"></div></td>
+                                    <td><div class="skeleton-text" style="width: 30px;"></div></td>
+                                    <td><div class="skeleton-badge" style="width: 80px; height: 24px;"></div></td>
+                                </tr>
+                                <tr>
+                                    <td><div class="skeleton-text w-100"></div></td>
+                                    <td><div class="skeleton-text" style="width: 30px;"></div></td>
+                                    <td><div class="skeleton-badge" style="width: 80px; height: 24px;"></div></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             {% if not cluster_counts and not error %}
-            <!-- Feature Highlight Grid (Only visible on initial load) -->
-            <div class="row mt-4 mb-5 pt-3 fade-in-up" style="animation-delay: 0.2s;">
+            <div id="initial-features" class="w-100">
+                <!-- Feature Highlight Grid (Only visible on initial load) -->
+                <div class="row mt-4 mb-5 pt-3 fade-in-up" style="animation-delay: 0.2s;">
                 <div class="col-md-4 mb-4">
                     <div class="glass-card p-4 h-100 text-center">
                         <div class="feature-icon">🧠</div>
@@ -243,7 +380,7 @@
                     </div>
                 </div>
             </div>
-
+            </div> <!-- End initial-features -->
             {% endif %}
 
             {% if error %}
@@ -257,29 +394,31 @@
             {% endif %}
 
             {% if cluster_counts %}
-            {% if cached %}
-            <div class="row justify-content-center mb-3 fade-in-up">
-                <div class="col-md-8">
-                    <div class="glass-card p-3 text-center"
-                        style="border: 1px solid rgba(245,158,11,0.3); background: rgba(245,158,11,0.05);">
-                        <span style="color: #f59e0b; font-size: 0.85rem;">⚡ Cached Result — Loaded instantly from last
-                            probe. <a href="/" style="color: #0ea5e9;">Run a fresh probe →</a></span>
+            <div id="results-dashboard" class="w-100">
+                <div id="report-container" class="w-100">
+                    {% if cached %}
+                    <div class="row justify-content-center mb-3 fade-in-up no-pdf">
+                        <div class="col-md-8">
+                            <div class="glass-card p-3 text-center"
+                                style="border: 1px solid rgba(245,158,11,0.3); background: rgba(245,158,11,0.05);">
+                                <span style="color: #f59e0b; font-size: 0.85rem;">⚡ Cached Result — Loaded instantly from last
+                                    probe. <a href="/" style="color: #0ea5e9;">Run a fresh probe →</a></span>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-            {% endif %}
+                    {% endif %}
 
-            <div class="text-center mb-5 fade-in-up" style="animation-delay: 0.1s;">
-                <p class="text-muted mb-1 small text-uppercase fw-bold">Active Probe Target</p>
-                <a href="{{ url }}" target="_blank" class="active-url fw-bold fs-5">{{ url }}</a>
-                <div class="mt-3">
-                    <button class="btn btn-outline-info btn-sm"
-                        style="border-radius: 20px; font-size: 0.8rem; border-color: rgba(14, 165, 233, 0.4);"
-                        data-bs-toggle="modal" data-bs-target="#logsModal">
-                        View Execution Logs ⚙️
-                    </button>
-                </div>
-            </div>
+                    <div class="text-center mb-5 fade-in-up" style="animation-delay: 0.1s;">
+                        <p class="text-muted mb-1 small text-uppercase fw-bold">Active Probe Target</p>
+                        <a href="{{ url }}" target="_blank" class="active-url fw-bold fs-5">{{ url }}</a>
+                        <div class="mt-3 no-pdf">
+                            <button class="btn btn-outline-info btn-sm"
+                                style="border-radius: 20px; font-size: 0.8rem; border-color: rgba(14, 165, 233, 0.4);"
+                                data-bs-toggle="modal" data-bs-target="#logsModal">
+                                View Execution Logs ⚙️
+                            </button>
+                        </div>
+                    </div>
 
             <div id="nlp-data" data-labels='{{ cluster_counts.keys()|list|tojson | safe }}'
                 data-values='{{ cluster_counts.values()|list|tojson | safe }}' style="display:none;">
@@ -349,7 +488,7 @@
                             </div>
                             {% endfor %}
                         </div>
-                        <div id="action-button-row" class="d-flex gap-2 w-100 mt-auto">
+                        <div id="action-button-row" class="d-flex gap-2 w-100 mt-auto no-pdf">
                             <a href="/download" class="btn btn-outline-info w-50" style="border-radius: 12px; font-weight: 600;">📥 CSV</a>
                             <button onclick="downloadPDF()" class="btn btn-outline-danger w-50" style="border-radius: 12px; font-weight: 600;">📄 PDF</button>
                         </div>
@@ -379,7 +518,7 @@
                         <h6 class="text-muted text-uppercase mb-3" style="letter-spacing: 1px; font-size: 0.85rem;">{{ category }}</h6>
                         <div class="d-flex flex-wrap gap-2">
                             {% for entity_name, count in items %}
-                            <span class="badge rounded-pill" style="background: rgba(99, 102, 241, 0.1); color: var(--accent-primary); border: 1px solid rgba(99, 102, 241, 0.2); padding: 8px 12px; font-size: 0.85rem; font-weight: 500;">
+                            <span class="badge rounded-pill entity-badge" onclick="filterTableByEntity(this)" style="cursor: pointer; background: rgba(99, 102, 241, 0.1); color: var(--accent-primary); border: 1px solid rgba(99, 102, 241, 0.2); padding: 8px 12px; font-size: 0.85rem; font-weight: 500;">
                                 {{ entity_name }} <span style="opacity: 0.6; margin-left: 4px; font-size: 0.75rem;">x{{ count }}</span>
                             </span>
                             {% endfor %}
@@ -391,11 +530,19 @@
             {% endif %}
 
             <div class="glass-card p-4 mb-5 fade-in-up" style="animation-delay: 0.4s;">
-                <h4 class="mb-4">Extracted Insights</h4>
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                    <h4 class="m-0">Extracted Insights</h4>
+                    <div id="table-filter-indicator" class="badge bg-info p-2" style="display: none; border-radius: 12px; font-size: 0.85rem; font-weight: 500; align-items: center; gap: 8px; background: rgba(14, 165, 233, 0.1) !important; color: var(--accent-primary); border: 1px solid rgba(14, 165, 233, 0.3);">
+                        Filtered by: <span id="active-filter-val" class="fw-bold"></span>
+                        <button onclick="clearTableFilters()" class="btn-close btn-close-white" style="font-size: 0.65rem; filter: var(--bs-btn-close-white-filter, invert(1)); cursor: pointer;" aria-label="Clear"></button>
+                    </div>
+                </div>
                 <div class="table-responsive" style="padding-bottom: 20px;">
                     {{ table|safe }}
                 </div>
             </div>
+            </div> <!-- End report-container -->
+            </div> <!-- End results-dashboard -->
             {% endif %}
 
             <!-- Execution Logs Modal -->

@@ -9,6 +9,8 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- html2pdf.js -->
+    <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
     
     <!-- External CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/compare.css') }}">
@@ -25,12 +27,6 @@
         </div>
     </nav>
 
-    <div id="loading-overlay">
-        <div class="spinner mb-4"></div>
-        <h3 style="font-family: 'Outfit', sans-serif; font-weight: 700; color: #0f172a;">Comparing Sites...</h3>
-        <p class="text-muted fw-medium mt-2">Crawling and analyzing both URLs simultaneously (this may take 15-30s)</p>
-    </div>
-
     <div class="container-fluid px-4 pb-5">
         <div class="hero fade-in-up" style="animation-delay: 0.1s;">
             <h1>Compare Mode</h1>
@@ -40,7 +36,7 @@
         <div class="row justify-content-center mb-5 fade-in-up" style="animation-delay: 0.2s;">
             <div class="col-md-9">
                 <div class="glass-card" style="padding: 2rem;">
-                    <form method="POST" action="/compare" id="compare-form" onsubmit="document.getElementById('loading-overlay').style.display='flex';">
+                    <form method="POST" action="/compare" id="compare-form">
                         <div class="row g-3 align-items-center">
                             <div class="col-md-5">
                                 <label class="form-label text-muted small fw-bold text-uppercase ms-1">Site A (Left)</label>
@@ -64,6 +60,119 @@
             </div>
         </div>
 
+        <!-- Shimmering Comparison Skeleton Loader -->
+        <div id="compare-skeleton" style="display: none;" class="w-100">
+            <!-- Loading message inside skeleton context -->
+            <div id="compare-loader-status" class="text-center mb-5">
+                <div class="spinner mb-3"></div>
+                <h4 style="font-family: 'Outfit', sans-serif; font-weight: 700; color: var(--text-main);">Comparing Sites...</h4>
+                <p class="text-muted fw-medium mt-2">Crawling targets and computing semantic similarity (this may take 15-30s)</p>
+            </div>
+
+            <!-- Shimmering Summary Banner -->
+            <div class="row justify-content-center mb-5">
+                <div class="col-md-8">
+                    <div class="glass-card py-3 px-4" style="border-radius: 20px;">
+                        <div class="d-flex align-items-center">
+                            <div class="skeleton-circle me-3" style="width: 24px; height: 24px;"></div>
+                            <div class="skeleton-text" style="width: 120px; height: 16px;"></div>
+                            <div class="skeleton-text ms-3 w-50" style="height: 12px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shimmering Side-by-Side Columns -->
+            <div class="row g-4 mb-5">
+                <!-- Site A Skeleton -->
+                <div class="col-lg-6">
+                    <div class="glass-card compare-column left" style="padding: 2.5rem;">
+                        <div class="text-center mb-5">
+                            <div class="skeleton-badge mx-auto mb-3" style="width: 80px; height: 24px;"></div>
+                            <div class="skeleton-text mx-auto" style="width: 220px; height: 22px;"></div>
+                        </div>
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <div class="stat-box">
+                                    <div class="skeleton-text mx-auto mb-2" style="width: 50px; height: 32px;"></div>
+                                    <div class="skeleton-text mx-auto" style="width: 100px; height: 12px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="skeleton-text mb-4" style="width: 150px; height: 18px;"></div>
+                        <div class="takeaway-list mb-4">
+                            <div class="skeleton-text w-100 mb-3" style="height: 48px; border-radius: 12px;"></div>
+                            <div class="skeleton-text w-100 mb-3" style="height: 48px; border-radius: 12px;"></div>
+                            <div class="skeleton-text w-100" style="height: 48px; border-radius: 12px;"></div>
+                        </div>
+                        <div class="skeleton-text mb-4" style="width: 120px; height: 18px;"></div>
+                        <div class="d-flex flex-wrap gap-2 mb-4">
+                            <div class="skeleton-badge" style="width: 90px; height: 32px;"></div>
+                            <div class="skeleton-badge" style="width: 110px; height: 32px;"></div>
+                        </div>
+                        <div class="skeleton-text mx-auto mb-4" style="width: 100px; height: 18px;"></div>
+                        <div class="text-center">
+                            <div class="skeleton-text w-100" style="height: 250px; border-radius: 16px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Site B Skeleton -->
+                <div class="col-lg-6">
+                    <div class="glass-card compare-column right" style="padding: 2.5rem;">
+                        <div class="text-center mb-5">
+                            <div class="skeleton-badge mx-auto mb-3" style="width: 80px; height: 24px;"></div>
+                            <div class="skeleton-text mx-auto" style="width: 220px; height: 22px;"></div>
+                        </div>
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <div class="stat-box">
+                                    <div class="skeleton-text mx-auto mb-2" style="width: 50px; height: 32px;"></div>
+                                    <div class="skeleton-text mx-auto" style="width: 100px; height: 12px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="skeleton-text mb-4" style="width: 150px; height: 18px;"></div>
+                        <div class="takeaway-list mb-4">
+                            <div class="skeleton-text w-100 mb-3" style="height: 48px; border-radius: 12px;"></div>
+                            <div class="skeleton-text w-100 mb-3" style="height: 48px; border-radius: 12px;"></div>
+                            <div class="skeleton-text w-100" style="height: 48px; border-radius: 12px;"></div>
+                        </div>
+                        <div class="skeleton-text mb-4" style="width: 120px; height: 18px;"></div>
+                        <div class="d-flex flex-wrap gap-2 mb-4">
+                            <div class="skeleton-badge" style="width: 100px; height: 32px;"></div>
+                            <div class="skeleton-badge" style="width: 80px; height: 32px;"></div>
+                        </div>
+                        <div class="skeleton-text mx-auto mb-4" style="width: 100px; height: 18px;"></div>
+                        <div class="text-center">
+                            <div class="skeleton-text w-100" style="height: 250px; border-radius: 16px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shimmering Charts Row -->
+            <div class="row">
+                <div class="col-lg-6 mb-4">
+                    <div class="glass-card text-center" style="padding: 2rem;">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div class="skeleton-text" style="width: 120px; height: 20px;"></div>
+                            <div class="skeleton-text" style="width: 100px; height: 30px; border-radius: 8px;"></div>
+                        </div>
+                        <div class="skeleton-text w-100" style="height: 300px; border-radius: 12px;"></div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <div class="glass-card text-center" style="padding: 2rem;">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div class="skeleton-text" style="width: 150px; height: 20px;"></div>
+                        </div>
+                        <div class="skeleton-text w-100" style="height: 300px; border-radius: 12px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         {% if error %}
         <div class="alert alert-danger text-center fade-in-up" role="alert" style="border-radius: 16px; font-weight: 500;">
             {{ error }}
@@ -71,6 +180,8 @@
         {% endif %}
 
         {% if result1 and result2 %}
+        <div id="compare-results" class="w-100">
+            <div id="compare-report-container" class="w-100">
         
         <!-- AI Summary Banner -->
         <div class="row justify-content-center mb-5 fade-in-up" style="animation-delay: 0.25s;">
@@ -94,7 +205,7 @@
                     <div class="text-center mb-5">
                         <span class="badge mb-3" style="background: rgba(14, 165, 233, 0.15); color: #0284c7; padding: 6px 12px; border-radius: 10px; font-weight: 700; letter-spacing: 1px;">SITE A</span>
                         <h4 class="domain-header url-truncate" title="{{ result1.url }}">
-                            <a href="{{ result1.url }}" target="_blank" class="text-decoration-none text-dark">{{ result1.url }}</a>
+                            <a href="{{ result1.url }}" target="_blank" class="active-url">{{ result1.url }}</a>
                         </h4>
                     </div>
                     
@@ -142,7 +253,7 @@
                     <div class="text-center mb-5">
                         <span class="badge mb-3" style="background: rgba(99, 102, 241, 0.15); color: #4f46e5; padding: 6px 12px; border-radius: 10px; font-weight: 700; letter-spacing: 1px;">SITE B</span>
                         <h4 class="domain-header url-truncate" title="{{ result2.url }}">
-                            <a href="{{ result2.url }}" target="_blank" class="text-decoration-none text-dark">{{ result2.url }}</a>
+                            <a href="{{ result2.url }}" target="_blank" class="active-url">{{ result2.url }}</a>
                         </h4>
                     </div>
                     
@@ -193,7 +304,7 @@
                 <div class="glass-card text-center" style="padding: 2rem;">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h3 class="section-title m-0">📊 Sentiment</h3>
-                        <button onclick="downloadPDF()" class="btn btn-outline-danger btn-sm" style="border-radius: 8px; font-weight: 600;">📄 Export PDF</button>
+                        <button onclick="downloadPDF()" class="btn btn-outline-danger btn-sm no-pdf" style="border-radius: 8px; font-weight: 600;">📄 Export PDF</button>
                     </div>
                     <div style="height: 300px; position: relative;">
                         <canvas id="sentimentCompareChart"
@@ -219,10 +330,12 @@
                 </div>
             </div>
         </div>
-
-        <!-- External JS -->
-        <script src="{{ url_for('static', filename='js/compare.js') }}"></script>
+        </div> <!-- End compare-report-container -->
+        </div> <!-- End compare-results -->
         {% endif %}
     </div>
+
+    <!-- External JS -->
+    <script src="{{ url_for('static', filename='js/compare.js') }}"></script>
 </body>
 </html>
