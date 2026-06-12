@@ -2,7 +2,7 @@
 const htmlEl = document.documentElement;
 
 // Initialize theme
-const savedTheme = localStorage.getItem('theme') || 'light';
+const savedTheme = localStorage.getItem('theme') || 'dark';
 if (savedTheme === 'dark') {
     htmlEl.setAttribute('data-theme', 'dark');
     const themeIcon = document.getElementById('theme-icon');

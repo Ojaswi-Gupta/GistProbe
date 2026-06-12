@@ -13,7 +13,7 @@
     <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
     
     <!-- External CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/compare.css') }}?v=2.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/compare.css') }}?v=5.0">
 </head>
 <body>
 
@@ -82,24 +82,33 @@
         {% if not result1 and not result2 and not error %}
         <div class="row g-4 mt-2 fade-in-up" id="compare-initial-features" style="animation-delay: 0.3s; max-width: 1000px; margin: 0 auto;">
             <div class="col-md-4">
-                <div class="glass-card text-center p-4 h-100" style="border-radius: 20px;">
-                    <div style="font-size: 2.5rem; margin-bottom: 1rem;">⚖️</div>
-                    <h5 class="fw-bold" style="color: var(--text-main);">Media Analyst AI</h5>
-                    <p class="text-muted small">Uses Llama-3 AI to read both articles simultaneously and generate an Executive Summary contrasting their tone, biases, and framing.</p>
+                <div class="glass-card feature-card text-center p-4 h-100" style="border-radius: 24px; border: 1px solid var(--glass-border); background: var(--glass-bg); position: relative; overflow: hidden;">
+                    <div style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(14,165,233,0.05) 0%, transparent 60%); z-index: 0; pointer-events: none;"></div>
+                    <div class="mx-auto d-flex justify-content-center align-items-center mb-4" style="width: 80px; height: 80px; background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(99, 102, 241, 0.15)); border-radius: 20px; box-shadow: 0 8px 32px rgba(99, 102, 241, 0.2); transform: rotate(-3deg); transition: transform 0.3s ease; position: relative; z-index: 1;">
+                        <span style="font-size: 2.5rem; filter: drop-shadow(0 4px 6px rgba(99, 102, 241, 0.4)); transform: rotate(3deg);">⚖️</span>
+                    </div>
+                    <h5 class="fw-bold mb-3" style="color: var(--text-main); letter-spacing: 0.5px; position: relative; z-index: 1;">Media Analyst AI</h5>
+                    <p class="text-muted small" style="line-height: 1.7; position: relative; z-index: 1;">Uses Llama-3 AI to read both articles simultaneously and generate an Executive Summary contrasting their tone, biases, and framing.</p>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="glass-card text-center p-4 h-100" style="border-radius: 20px;">
-                    <div style="font-size: 2.5rem; margin-bottom: 1rem;">📊</div>
-                    <h5 class="fw-bold" style="color: var(--text-main);">Side-by-Side NLP</h5>
-                    <p class="text-muted small">Compare extracted entities, sentiment analysis, and topic clusters from both websites in a clean, interactive layout.</p>
+                <div class="glass-card feature-card text-center p-4 h-100" style="border-radius: 24px; border: 1px solid var(--glass-border); background: var(--glass-bg); position: relative; overflow: hidden;">
+                    <div style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(16,185,129,0.05) 0%, transparent 60%); z-index: 0; pointer-events: none;"></div>
+                    <div class="mx-auto d-flex justify-content-center align-items-center mb-4" style="width: 80px; height: 80px; background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(20, 184, 166, 0.15)); border-radius: 20px; box-shadow: 0 8px 32px rgba(16, 185, 129, 0.2); transition: transform 0.3s ease; position: relative; z-index: 1;">
+                        <span style="font-size: 2.5rem; filter: drop-shadow(0 4px 6px rgba(16, 185, 129, 0.4));">📊</span>
+                    </div>
+                    <h5 class="fw-bold mb-3" style="color: var(--text-main); letter-spacing: 0.5px; position: relative; z-index: 1;">Side-by-Side NLP</h5>
+                    <p class="text-muted small" style="line-height: 1.7; position: relative; z-index: 1;">Compare extracted entities, sentiment analysis, and topic clusters from both websites in a clean, interactive layout.</p>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="glass-card text-center p-4 h-100" style="border-radius: 20px;">
-                    <div style="font-size: 2.5rem; margin-bottom: 1rem;">🔗</div>
-                    <h5 class="fw-bold" style="color: var(--text-main);">Shared Vocabulary</h5>
-                    <p class="text-muted small">Calculates semantic similarity and highlights the exact keywords and named entities that both articles chose to focus on.</p>
+                <div class="glass-card feature-card text-center p-4 h-100" style="border-radius: 24px; border: 1px solid var(--glass-border); background: var(--glass-bg); position: relative; overflow: hidden;">
+                    <div style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(245,158,11,0.05) 0%, transparent 60%); z-index: 0; pointer-events: none;"></div>
+                    <div class="mx-auto d-flex justify-content-center align-items-center mb-4" style="width: 80px; height: 80px; background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(239, 68, 68, 0.15)); border-radius: 20px; box-shadow: 0 8px 32px rgba(245, 158, 11, 0.2); transform: rotate(3deg); transition: transform 0.3s ease; position: relative; z-index: 1;">
+                        <span style="font-size: 2.5rem; filter: drop-shadow(0 4px 6px rgba(245, 158, 11, 0.4)); transform: rotate(-3deg);">🔗</span>
+                    </div>
+                    <h5 class="fw-bold mb-3" style="color: var(--text-main); letter-spacing: 0.5px; position: relative; z-index: 1;">Shared Vocabulary</h5>
+                    <p class="text-muted small" style="line-height: 1.7; position: relative; z-index: 1;">Calculates semantic similarity and highlights the exact keywords and named entities that both articles chose to focus on.</p>
                 </div>
             </div>
             <div class="col-12 text-center mt-5 mb-5">
@@ -387,6 +396,6 @@
     </div>
 
     <!-- Custom JS for Compare Page -->
-    <script src="{{ url_for('static', filename='js/compare.js') }}?v=2.0"></script>
+    <script src="{{ url_for('static', filename='js/compare.js') }}?v=3.0"></script>
 </body>
 </html>

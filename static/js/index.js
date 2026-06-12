@@ -270,16 +270,22 @@ function initDashboard() {
                         nodes: new vis.DataSet(graphData.nodes),
                         edges: new vis.DataSet(graphData.edges)
                     };
+                    
+                    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                    const baseColor = isDark ? '#f8fafc' : '#1e293b';
+                    
+                    const edgeColor = isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.2)';
+                    
                     const options = {
                         nodes: {
                             shape: 'dot',
                             scaling: { min: 10, max: 30, label: { enabled: true, min: 12, max: 20 } },
-                            font: { color: 'var(--text-main)', face: 'Outfit' },
-                            color: { border: 'var(--accent-primary)', background: 'var(--glass-bg)', highlight: { border: '#6366f1', background: '#e0e7ff' } }
+                            font: { color: baseColor, face: 'Outfit' }
+                            // Global color override removed so individual entity group colors render
                         },
                         edges: {
                             width: 2,
-                            color: { color: 'var(--glass-border)', highlight: 'var(--accent-primary)' },
+                            color: { color: edgeColor, highlight: '#0ea5e9' },
                             smooth: { type: 'continuous' }
                         },
                         physics: { 
@@ -295,6 +301,7 @@ function initDashboard() {
                     };
                     const network = new vis.Network(kgContainer, data, options);
                     window.kgNetwork = network;
+                    window.kgDatasetNodes = data.nodes;
                     
                     // Enforce zoom limits
                     network.on("zoom", function (params) {
@@ -307,18 +314,33 @@ function initDashboard() {
                         }
                     });
                     
+                    // Handle Bootstrap Modal redraw
+                    const graphModalEl = document.getElementById('graphModal');
+                    if (graphModalEl) {
+                        graphModalEl.addEventListener('shown.bs.modal', function () {
+                            network.redraw();
+                            network.fit({ animation: { duration: 500 } });
+                        });
+                    }
+                    
                     // Dimming effect on hover
                     network.on("hoverNode", function (params) {
                         const nodeId = params.node;
                         const connectedNodes = network.getConnectedNodes(nodeId);
                         const connectedEdges = network.getConnectedEdges(nodeId);
                         
+                        const currentIsDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                        const cMain = currentIsDark ? '#f8fafc' : '#1e293b';
+                        const cDim = currentIsDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.15)';
+                        
                         const updateNodes = [];
                         data.nodes.forEach(node => {
                             if (node.id === nodeId || connectedNodes.includes(node.id)) {
-                                updateNodes.push({ id: node.id, color: { opacity: 1.0 } });
+                                // Restore original theme color + highlight config
+                                updateNodes.push({ id: node.id, color: null, font: { color: cMain } });
                             } else {
-                                updateNodes.push({ id: node.id, color: { opacity: 0.15 } });
+                                // Apply dim color explicitly
+                                updateNodes.push({ id: node.id, color: { background: cDim, border: cDim, highlight: { background: cDim, border: cDim } }, font: { color: cDim } });
                             }
                         });
                         data.nodes.update(updateNodes);
@@ -335,14 +357,18 @@ function initDashboard() {
                     });
                     
                     network.on("blurNode", function () {
+                        const currentIsDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                        const cMain = currentIsDark ? '#f8fafc' : '#1e293b';
                         const updateNodes = [];
                         data.nodes.forEach(node => {
-                            updateNodes.push({ id: node.id, color: { opacity: 1.0 } });
+                            // Reset node color back to global options
+                            updateNodes.push({ id: node.id, color: null, font: { color: cMain } });
                         });
                         data.nodes.update(updateNodes);
                         
                         const updateEdges = [];
                         data.edges.forEach(edge => {
+                            // Reset edge opacity back to global options
                             updateEdges.push({ id: edge.id, color: { opacity: 1.0 } });
                         });
                         data.edges.update(updateEdges);
@@ -445,7 +471,7 @@ animateGlow();
 const htmlEl = document.documentElement;
 
 // Initialize theme
-const savedTheme = localStorage.getItem('theme') || 'light';
+const savedTheme = localStorage.getItem('theme') || 'dark';
 if (savedTheme === 'dark') {
     htmlEl.setAttribute('data-theme', 'dark');
     const themeIcon = document.getElementById('theme-icon');
@@ -458,14 +484,35 @@ document.addEventListener('click', (e) => {
     if (themeToggleBtn) {
         const currentTheme = htmlEl.getAttribute('data-theme');
         const themeIcon = document.getElementById('theme-icon');
+        let newTheme = 'dark';
         if (currentTheme === 'dark') {
             htmlEl.removeAttribute('data-theme');
             localStorage.setItem('theme', 'light');
             if (themeIcon) themeIcon.textContent = '🌙';
+            newTheme = 'light';
         } else {
             htmlEl.setAttribute('data-theme', 'dark');
             localStorage.setItem('theme', 'dark');
             if (themeIcon) themeIcon.textContent = '☀️';
+            newTheme = 'dark';
+        }
+        
+        // Dynamically update Knowledge Graph colors if active
+        if (window.kgNetwork && window.kgDatasetNodes) {
+            const mainColor = newTheme === 'dark' ? '#f8fafc' : '#1e293b';
+            const edgeColor = newTheme === 'dark' ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.2)';
+            window.kgNetwork.setOptions({
+                nodes: {
+                    font: { color: mainColor }
+                    // Removed global color override so group colors shine through
+                },
+                edges: {
+                    color: { color: edgeColor }
+                }
+            });
+            // Reset node color overrides (so group colors are restored) and update font color
+            const updates = window.kgDatasetNodes.get().map(n => ({ id: n.id, color: null, font: { color: mainColor } }));
+            window.kgDatasetNodes.update(updates);
         }
     }
 });

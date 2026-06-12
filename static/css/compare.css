@@ -85,20 +85,20 @@
 }
 
 [data-theme="dark"] {
-    --bg-main: #0f172a;
+    --bg-main: #050505;
     --text-main: #f8fafc;
-    --text-muted: #94a3b8;
-    --accent-glow: rgba(14, 165, 233, 0.4);
-    --glass-bg: rgba(30, 41, 59, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.1);
-    --card-shadow: rgba(0, 0, 0, 0.2);
-    --card-shadow-hover: rgba(0, 0, 0, 0.4);
+    --text-muted: #a1a1aa;
+    --accent-glow: rgba(14, 165, 233, 0.3);
+    --glass-bg: rgba(15, 15, 15, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --card-shadow: rgba(0, 0, 0, 0.5);
+    --card-shadow-hover: rgba(0, 0, 0, 0.8);
     --grid-line: rgba(255, 255, 255, 0.03);
-    --grid-grad: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.8) 100%);
-    --stat-box-bg: linear-gradient(135deg, rgba(30,41,59,0.9), rgba(30,41,59,0.4));
-    --takeaway-bg: rgba(30,41,59,0.4);
-    --takeaway-bg-hover: rgba(30,41,59,0.8);
-    --input-bg: rgba(30,41,59,0.9);
+    --grid-grad: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(15, 15, 15, 0.8) 100%);
+    --stat-box-bg: linear-gradient(135deg, rgba(20, 20, 20, 0.9), rgba(5, 5, 5, 0.6));
+    --takeaway-bg: rgba(20, 20, 20, 0.6);
+    --takeaway-bg-hover: rgba(35, 35, 35, 0.8);
+    --input-bg: rgba(10, 10, 10, 0.9);
 }
 
 [data-theme="dark"] h1, 
@@ -317,6 +317,11 @@ body {
 .form-control:focus {
     box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15);
     border-color: #0ea5e9;
+    color: var(--text-main);
+}
+.form-control::placeholder {
+    color: var(--text-muted);
+    opacity: 0.6;
 }
 
 /* Custom Lists */
@@ -432,6 +437,16 @@ body {
     );
     background-size: 200% 100%;
     animation: shimmer-anim 1.5s infinite linear;
+}
+
+/* Feature Cards Hover */
+.feature-card {
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.feature-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2), 0 0 20px var(--accent-glow);
+    border-color: rgba(14, 165, 233, 0.4) !important;
 }
 
 @keyframes shimmer-anim {
