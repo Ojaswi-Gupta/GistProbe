@@ -21,6 +21,8 @@
     <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
     <!-- External CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <!-- vis.js for Network Graph -->
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
 </head>
 
 <body>
@@ -536,6 +538,26 @@
                     {% endfor %}
                 </div>
             </div>
+            </div>
+            {% endif %}
+
+            {% if graph_data %}
+            <div class="glass-card p-4 mb-5 fade-in-up" style="animation-delay: 0.39s;">
+                <h4 class="mb-2 text-center">Entity Knowledge Graph</h4>
+                <p class="text-muted small text-center mb-4">Interactive map of how entities co-occur in the text</p>
+                <!-- Safely embed JSON data -->
+                <script id="graph-data-json" type="application/json">
+                    {{ graph_data | tojson | safe }}
+                </script>
+                <div class="position-relative">
+                    <div id="knowledge-graph" style="width: 100%; height: 350px; border-radius: 12px; border: 1px solid var(--glass-border); background: var(--input-bg);"></div>
+                    <div class="position-absolute top-0 end-0 p-3 d-flex flex-column gap-2" style="z-index: 10;">
+                        <button class="btn btn-sm btn-light shadow-sm fw-bold" onclick="window.kgNetwork && window.kgNetwork.moveTo({scale: window.kgNetwork.getScale() + 0.2})" title="Zoom In">+</button>
+                        <button class="btn btn-sm btn-light shadow-sm fw-bold" onclick="window.kgNetwork && window.kgNetwork.moveTo({scale: window.kgNetwork.getScale() - 0.2})" title="Zoom Out">-</button>
+                        <button class="btn btn-sm btn-light shadow-sm" onclick="window.kgNetwork && window.kgNetwork.fit({ animation: { duration: 500 } })" title="Fit to Screen">⛶</button>
+                    </div>
+                </div>
+            </div>
             {% endif %}
 
             <div class="glass-card p-4 mb-5 fade-in-up" style="animation-delay: 0.4s;">
@@ -607,7 +629,16 @@
                                     Ask your first question about this article!
                                 </div>
                             </div>
-                            <div class="d-flex gap-3 mt-2">
+                            
+                            <!-- Fact Check Toggle -->
+                            <div class="d-flex align-items-center justify-content-end mb-2 pe-1">
+                                <div class="form-check form-switch" title="When enabled, the AI will use its internal knowledge to verify claims made in the article.">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="fact-check-toggle" style="cursor: pointer;">
+                                    <label class="form-check-label text-muted small ms-2" for="fact-check-toggle" style="font-weight: 600; letter-spacing: 0.5px; cursor: pointer;">🔍 Fact Check Mode</label>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-3">
                                 <input type="text" id="chat-input" class="form-control glass-input py-3 px-4" placeholder="e.g. What is the main argument?" style="border-radius: 16px; font-size: 1rem; box-shadow: inset 0 2px 4px var(--card-shadow); border: 1px solid var(--glass-border);">
                                 <button class="btn px-4 d-flex align-items-center justify-content-center gap-2" id="chat-send-btn" style="border-radius: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; background: linear-gradient(135deg, #0ea5e9, #6366f1); color: white; border: none; box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4); min-width: 120px; transition: all 0.2s ease;">
                                     <span>Send</span>
@@ -663,7 +694,7 @@
         <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
         <!-- External JS -->
-        <script src="{{ url_for('static', filename='js/index.js') }}?v=4.0"></script>
+        <script src="{{ url_for('static', filename='js/index.js') }}?v=11.0"></script>
 
 </body>
 

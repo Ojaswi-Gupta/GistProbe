@@ -13,7 +13,7 @@
     <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
     
     <!-- External CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/compare.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/compare.css') }}?v=2.0">
 </head>
 <body>
 
@@ -77,6 +77,39 @@
                 </div>
             </div>
         </div>
+
+        <!-- Initial Information / Features (Only shown before probing) -->
+        {% if not result1 and not result2 and not error %}
+        <div class="row g-4 mt-2 fade-in-up" id="compare-initial-features" style="animation-delay: 0.3s; max-width: 1000px; margin: 0 auto;">
+            <div class="col-md-4">
+                <div class="glass-card text-center p-4 h-100" style="border-radius: 20px;">
+                    <div style="font-size: 2.5rem; margin-bottom: 1rem;">⚖️</div>
+                    <h5 class="fw-bold" style="color: var(--text-main);">Media Analyst AI</h5>
+                    <p class="text-muted small">Uses Llama-3 AI to read both articles simultaneously and generate an Executive Summary contrasting their tone, biases, and framing.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="glass-card text-center p-4 h-100" style="border-radius: 20px;">
+                    <div style="font-size: 2.5rem; margin-bottom: 1rem;">📊</div>
+                    <h5 class="fw-bold" style="color: var(--text-main);">Side-by-Side NLP</h5>
+                    <p class="text-muted small">Compare extracted entities, sentiment analysis, and topic clusters from both websites in a clean, interactive layout.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="glass-card text-center p-4 h-100" style="border-radius: 20px;">
+                    <div style="font-size: 2.5rem; margin-bottom: 1rem;">🔗</div>
+                    <h5 class="fw-bold" style="color: var(--text-main);">Shared Vocabulary</h5>
+                    <p class="text-muted small">Calculates semantic similarity and highlights the exact keywords and named entities that both articles chose to focus on.</p>
+                </div>
+            </div>
+            <div class="col-12 text-center mt-5 mb-5">
+                <p class="text-muted small fw-medium mb-3">Need some test URLs? Try comparing these:</p>
+                <button type="button" class="btn btn-sm btn-outline-secondary" style="border-radius: 20px; font-weight: 500; transition: all 0.3s;" onmouseover="this.style.background='var(--glass-bg)'; this.style.color='var(--accent-primary)';" onmouseout="this.style.background='transparent'; this.style.color='inherit';" onclick="fillCompareAndProbe('https://en.wikipedia.org/wiki/Artificial_intelligence', 'https://en.wikipedia.org/wiki/Machine_learning')">
+                    AI vs Machine Learning (Wikipedia)
+                </button>
+            </div>
+        </div>
+        {% endif %}
 
         <!-- Shimmering Comparison Skeleton Loader -->
         <div id="compare-skeleton" style="display: none;" class="w-100">
@@ -208,7 +241,7 @@
                 <div class="glass-card py-3 px-4" style="border-radius: 20px; height: auto !important; border-left: 5px solid #6366f1; background: rgba(255,255,255,0.02);">
                     <p class="m-0 fw-semibold text-start" style="color: var(--text-main); font-size: 1.1rem; display: flex; align-items: center;">
                         <span style="font-size: 1.4rem; margin-right: 12px;">🤖</span>
-                        <span><span class="text-muted fst-italic me-1">AI Summary:</span> {{ ai_summary }}</span>
+                        <span><span class="text-muted fst-italic me-1">AI Summary:</span> {{ ai_summary | safe }}</span>
                     </p>
                 </div>
                 {% endif %}
@@ -353,7 +386,7 @@
         {% endif %}
     </div>
 
-    <!-- External JS -->
-    <script src="{{ url_for('static', filename='js/compare.js') }}"></script>
+    <!-- Custom JS for Compare Page -->
+    <script src="{{ url_for('static', filename='js/compare.js') }}?v=2.0"></script>
 </body>
 </html>

@@ -222,3 +222,17 @@ function initCompareDashboard() {
 
 // Trigger initial dashboard bindings on DOM ready
 document.addEventListener('DOMContentLoaded', initCompareDashboard);
+
+// Helper function to autofill the form and submit it for demonstrations
+function fillCompareAndProbe(url1, url2) {
+    const u1 = document.querySelector('input[name="url1"]');
+    const u2 = document.querySelector('input[name="url2"]');
+    if (u1 && u2) {
+        u1.value = url1;
+        u2.value = url2;
+        const form = document.getElementById('compare-form');
+        if (form) {
+            form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+        }
+    }
+}

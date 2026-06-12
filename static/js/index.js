@@ -256,6 +256,126 @@ function initDashboard() {
         });
         $('.dataTables_filter input').addClass('form-control d-inline-block w-auto ms-2').css('border-radius', '12px');
     }
+
+    // 6. Initialize Knowledge Graph
+    const kgContainer = document.getElementById('knowledge-graph');
+    const kgJsonTag = document.getElementById('graph-data-json');
+    if (kgContainer && kgJsonTag && window.vis) {
+        try {
+            const graphDataStr = kgJsonTag.textContent.trim();
+            if (graphDataStr) {
+                const graphData = JSON.parse(graphDataStr);
+                if (graphData.nodes && graphData.edges) {
+                    const data = {
+                        nodes: new vis.DataSet(graphData.nodes),
+                        edges: new vis.DataSet(graphData.edges)
+                    };
+                    const options = {
+                        nodes: {
+                            shape: 'dot',
+                            scaling: { min: 10, max: 30, label: { enabled: true, min: 12, max: 20 } },
+                            font: { color: 'var(--text-main)', face: 'Outfit' },
+                            color: { border: 'var(--accent-primary)', background: 'var(--glass-bg)', highlight: { border: '#6366f1', background: '#e0e7ff' } }
+                        },
+                        edges: {
+                            width: 2,
+                            color: { color: 'var(--glass-border)', highlight: 'var(--accent-primary)' },
+                            smooth: { type: 'continuous' }
+                        },
+                        physics: { 
+                            barnesHut: { 
+                                gravitationalConstant: -3000, 
+                                centralGravity: 0.1, 
+                                springLength: 200, 
+                                springConstant: 0.04 
+                            }, 
+                            minVelocity: 0.75 
+                        },
+                        interaction: { hover: true, tooltipDelay: 200 }
+                    };
+                    const network = new vis.Network(kgContainer, data, options);
+                    window.kgNetwork = network;
+                    
+                    // Enforce zoom limits
+                    network.on("zoom", function (params) {
+                        const minZoom = 0.3;
+                        const maxZoom = 2.5;
+                        if (params.scale < minZoom) {
+                            network.moveTo({ scale: minZoom });
+                        } else if (params.scale > maxZoom) {
+                            network.moveTo({ scale: maxZoom });
+                        }
+                    });
+                    
+                    // Dimming effect on hover
+                    network.on("hoverNode", function (params) {
+                        const nodeId = params.node;
+                        const connectedNodes = network.getConnectedNodes(nodeId);
+                        const connectedEdges = network.getConnectedEdges(nodeId);
+                        
+                        const updateNodes = [];
+                        data.nodes.forEach(node => {
+                            if (node.id === nodeId || connectedNodes.includes(node.id)) {
+                                updateNodes.push({ id: node.id, color: { opacity: 1.0 } });
+                            } else {
+                                updateNodes.push({ id: node.id, color: { opacity: 0.15 } });
+                            }
+                        });
+                        data.nodes.update(updateNodes);
+                        
+                        const updateEdges = [];
+                        data.edges.forEach(edge => {
+                            if (connectedEdges.includes(edge.id)) {
+                                updateEdges.push({ id: edge.id, color: { opacity: 1.0 } });
+                            } else {
+                                updateEdges.push({ id: edge.id, color: { opacity: 0.1 } });
+                            }
+                        });
+                        data.edges.update(updateEdges);
+                    });
+                    
+                    network.on("blurNode", function () {
+                        const updateNodes = [];
+                        data.nodes.forEach(node => {
+                            updateNodes.push({ id: node.id, color: { opacity: 1.0 } });
+                        });
+                        data.nodes.update(updateNodes);
+                        
+                        const updateEdges = [];
+                        data.edges.forEach(edge => {
+                            updateEdges.push({ id: edge.id, color: { opacity: 1.0 } });
+                        });
+                        data.edges.update(updateEdges);
+                    });
+                    
+                    // Interactive Table Filtering on Node Click
+                    network.on("click", function (params) {
+                        if (params.nodes.length > 0) {
+                            const nodeId = params.nodes[0];
+                            if ($('#resultsTable').length && $.fn.DataTable.isDataTable('#resultsTable')) {
+                                const table = $('#resultsTable').DataTable();
+                                table.columns().search('');
+                                table.search(nodeId).draw();
+                                
+                                // Show global filter indicator
+                                const indicator = document.getElementById('table-filter-indicator');
+                                const valSpan = document.getElementById('active-filter-val');
+                                if (indicator && valSpan) {
+                                    valSpan.textContent = `Graph Entity: "${nodeId}"`;
+                                    indicator.style.display = 'inline-flex';
+                                    indicator.style.alignItems = 'center';
+                                }
+                                
+                                document.getElementById('resultsTable').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }
+                        }
+                    });
+                }
+            }
+        } catch(e) {
+            console.error("Failed to parse knowledge graph data:", e);
+        }
+    }
 }
 
 // Initialize on first load
@@ -481,11 +601,14 @@ function clearTableFilters() {
         historyBox.appendChild(loadingDiv);
         historyBox.scrollTop = historyBox.scrollHeight;
 
+        const factCheckToggle = document.getElementById('fact-check-toggle');
+        const fact_check = factCheckToggle ? factCheckToggle.checked : false;
+
         try {
             const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ question })
+                body: JSON.stringify({ question, fact_check })
             });
             const data = await response.json();
             

@@ -101,7 +101,7 @@ def logout():
     return redirect(url_for('home'))
 
 
-def _save_cache(url, table_html, cluster_counts, sentiment_counts, avg_subjectivity, takeaways, metrics, total_items, wordcloud_image=None, entities=None):
+def _save_cache(url, table_html, cluster_counts, sentiment_counts, avg_subjectivity, takeaways, metrics, total_items, wordcloud_image=None, entities=None, graph_data=None):
     """Save the last successful probe result to database for the current user."""
     if current_user.is_authenticated:
         try:
@@ -113,6 +113,7 @@ def _save_cache(url, table_html, cluster_counts, sentiment_counts, avg_subjectiv
                 "metrics": metrics,
                 "wordcloud_image": wordcloud_image,
                 "entities": entities,
+                "graph_data": graph_data,
             }
             probe = ProbeResult(
                 user_id=current_user.id,
@@ -173,7 +174,7 @@ def _process_url(url, cache_result=False):
     df, sentiment_counts, avg_subjectivity = compute_sentiment(df)
 
     # Phase 2.8: Named Entity Recognition
-    entities = extract_entities(df)
+    entities, graph_data = extract_entities(df)
 
     # Phase 3: Cluster and Summarize
     df, cluster_counts, takeaways, metrics, tfidf_data = perform_clustering(df)
@@ -198,7 +199,7 @@ def _process_url(url, cache_result=False):
     table_html = display_df.to_html(classes="table table-hover", table_id="resultsTable", index=False)
 
     if cache_result:
-        _save_cache(url, table_html, cluster_counts, sentiment_counts, avg_subjectivity, takeaways, metrics, len(df), wordcloud_image, entities)
+        _save_cache(url, table_html, cluster_counts, sentiment_counts, avg_subjectivity, takeaways, metrics, len(df), wordcloud_image, entities, graph_data)
 
     return {
         "table": table_html,
@@ -211,6 +212,7 @@ def _process_url(url, cache_result=False):
         "total_items": len(df),
         "wordcloud_image": wordcloud_image,
         "entities": entities,
+        "graph_data": graph_data,
         "cleaned_text": df["cleaned"].tolist() if "cleaned" in df.columns else []
     }
 
@@ -265,7 +267,12 @@ def chat_api():
     # Truncate context to ~25k chars to fit inside Groq token limit safely
     context_text = context_text[:25000]
     
-    prompt = f"You are GistProbe AI, a friendly and intelligent assistant. If the user greets you casually, respond naturally and offer to help analyze the webpage. For informational questions, use the provided webpage context as your foundation, but feel free to seamlessly weave in relevant real-world knowledge and background details to provide a richer, more comprehensive answer.\n\nContext:\n{context_text}\n\nQuestion: {question}\n\nAnswer:"
+    fact_check = data.get("fact_check", False)
+    
+    if fact_check:
+        prompt = f"You are a rigorous Fact-Checking and Media Analysis AI. Carefully evaluate the following user question against the provided webpage context. CRITICAL: Do NOT blindly trust the context. Use your extensive real-world knowledge to independently verify the claims made in the context. Highlight any factual inaccuracies, missing nuance, misleading framing, or strong biases present in the article while answering the user's question.\n\nContext:\n{context_text}\n\nQuestion: {question}\n\nAnswer:"
+    else:
+        prompt = f"You are GistProbe AI, a friendly and intelligent assistant. If the user greets you casually, respond naturally and offer to help analyze the webpage. For informational questions, use the provided webpage context as your foundation, but feel free to seamlessly weave in relevant real-world knowledge and background details to provide a richer, more comprehensive answer.\n\nContext:\n{context_text}\n\nQuestion: {question}\n\nAnswer:"
     
     try:
         completion = groq_client.chat.completions.create(
@@ -319,24 +326,53 @@ def compare():
                     if item[0].lower() in shared and item[0] not in shared_vocab:
                         shared_vocab.append(item[0])
 
-        # Generate AI Comparative Summary
-        def extract_top_topic(cluster_counts):
-            if not cluster_counts:
-                return "General Topics"
-            top_cluster = max(cluster_counts, key=cluster_counts.get)
-            if ":" in top_cluster:
-                return top_cluster.split(":", 1)[1].strip()
-            return top_cluster
-
-        topic1 = extract_top_topic(result1.get("cluster_counts", {}))
-        topic2 = extract_top_topic(result2.get("cluster_counts", {}))
-
-        if topic1.lower() == topic2.lower():
-            ai_summary = f"Both sites are primarily focused on '{topic1}'."
-        else:
-            ai_summary = f"Site A focuses heavily on '{topic1}', whereas Site B is more concerned with '{topic2}'."
+        # Generate AI Comparative Summary (Debate Mode)
+        debate_summary = "AI Summary generation failed or Groq API key is missing."
+        if groq_client:
+            # Truncate text to fit in prompt limits (~12k chars each)
+            text1 = " ".join(result1.get("cleaned_text", []))[:12000]
+            text2 = " ".join(result2.get("cleaned_text", []))[:12000]
             
-        return render_template("compare.html", result1=result1, result2=result2, similarity_score=similarity_score, shared_vocab=shared_vocab, ai_summary=ai_summary)
+            prompt = f"""You are an expert media analyst. Compare how the following two webpages framed the same event or topic.
+
+Analyze differences in tone, focus, biases, and what facts each omitted. Provide your analysis strictly in HTML format using exactly this structure:
+
+<div style="margin-bottom: 20px;">
+    <h5 style="color: var(--accent-primary); margin-bottom: 10px; font-weight: 700;">Tone & Framing</h5>
+    <p style="margin-left: 15px; line-height: 1.6;">[Your analysis here]</p>
+</div>
+<div style="margin-bottom: 20px;">
+    <h5 style="color: var(--accent-primary); margin-bottom: 10px; font-weight: 700;">Biases & Omissions</h5>
+    <p style="margin-left: 15px; line-height: 1.6;">[Your analysis here]</p>
+</div>
+<div style="margin-bottom: 20px;">
+    <h5 style="color: var(--accent-primary); margin-bottom: 10px; font-weight: 700;">Key Divergence</h5>
+    <p style="margin-left: 15px; line-height: 1.6;">[Your analysis here]</p>
+</div>
+
+Use <b> tags to highlight key entities or stark differences. Do NOT use markdown code blocks (like ```html). Output ONLY the raw HTML.
+
+Webpage 1 ({url1}):
+{text1}
+
+Webpage 2 ({url2}):
+{text2}
+
+Executive Comparison Summary (HTML only):"""
+
+            try:
+                completion = groq_client.chat.completions.create(
+                    model="llama-3.1-8b-instant",
+                    messages=[{"role": "user", "content": prompt}],
+                    temperature=0.6,
+                    max_tokens=800
+                )
+                debate_summary = completion.choices[0].message.content
+            except Exception as e:
+                print(f"Groq API Error in Debate Mode: {e}")
+                debate_summary = f"Error generating comparison: {str(e)}"
+            
+        return render_template("compare.html", result1=result1, result2=result2, similarity_score=similarity_score, shared_vocab=shared_vocab, ai_summary=debate_summary)
 
     except Exception as e:
         print(f"Compare Pipeline error: {e}")
@@ -366,6 +402,7 @@ def demo():
         cached=True,
         wordcloud_image=cache.get("wordcloud_image"),
         entities=cache.get("entities"),
+        graph_data=cache.get("graph_data"),
     )
 
 
@@ -406,6 +443,7 @@ def load_history(probe_id):
         cached=True,
         wordcloud_image=cache.get("wordcloud_image"),
         entities=cache.get("entities"),
+        graph_data=cache.get("graph_data"),
     )
 
 if __name__ == "__main__":
