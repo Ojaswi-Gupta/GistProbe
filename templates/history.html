@@ -37,7 +37,29 @@
 
     <div class="container" style="padding-top: 120px; padding-bottom: 50px;">
         <h2 class="mb-1" style="font-family: 'Outfit', sans-serif; font-weight: 700;">Welcome, {{ current_user.name or current_user.email }}</h2>
-        <h5 class="mb-5 text-muted">Your Probe History</h5>
+        
+        {% if current_user.subscriptions %}
+        <h5 class="mb-4 mt-5 text-muted">Active Subscriptions (Tracked URLs)</h5>
+        <div class="row g-4 mb-5">
+            {% for sub in current_user.subscriptions %}
+            <div class="col-md-6 col-lg-4">
+                <div class="glass-card p-4 d-flex flex-column h-100 fade-in-up" style="animation-delay: {{ loop.index0 * 0.1 }}s; border-left: 4px solid #0ea5e9;">
+                    <h6 class="url-truncate mb-2" style="font-family: 'Outfit', sans-serif; font-weight: 600;">
+                        <a href="{{ sub.url }}" target="_blank" class="active-url">{{ sub.url }}</a>
+                    </h6>
+                    <div class="text-muted small mb-3">Subscribed since: {{ sub.created_at.strftime('%B %d, %Y') }}</div>
+                    <form action="/subscribe" method="POST" class="mt-auto pt-2">
+                        <input type="hidden" name="url" value="{{ sub.url }}">
+                        <button type="submit" class="btn btn-outline-danger btn-sm w-100" style="border-radius: 8px;">Unsubscribe 🔕</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <hr class="mb-5" style="border-color: var(--glass-border);">
+        {% endif %}
+
+        <h5 class="mb-4 text-muted">Your Probe History</h5>
 
         {% if probes %}
         <div class="row g-4">

@@ -65,6 +65,7 @@ def perform_clustering(df):
 
     if df.empty or len(df) < 3:
         print("Data volume too low for clustering. Defaulting to Cluster 0.")
+        df["cluster"] = 0
         df["cluster_name"] = "0: General Topics"
         metrics = {"silhouette_score": "N/A", "optimal_k": 1, "vocab_size": 0}
         return df, {"0: General Topics": len(df)}, [], metrics, None

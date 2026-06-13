@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, send_file, redirect, url_for, jsonify
+from flask import Flask, render_template, request, send_file, redirect, url_for, jsonify, Response, has_request_context
 import pandas as pd
 import uuid
 import os
@@ -11,19 +11,27 @@ from flask_login import LoginManager, UserMixin, login_user, logout_user, curren
 from authlib.integrations.flask_client import OAuth
 from authlib.integrations.base_client.errors import OAuthError
 from groq import Groq
+from flask_apscheduler import APScheduler
 
 from crawler import scrape_url
 from analyser import clean_text_data, compute_sentiment
 from clustering import perform_clustering, compute_similarity
 from wordcloud_gen import generate_wordcloud, cleanup_old_wordclouds
 from ner import extract_entities
+from audio_gen import generate_summary_audio, cleanup_old_audio
 
 load_dotenv()
+
+latest_anon_csvs = {}
 
 app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "fallback-secret-key")
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///gistprobe.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+scheduler = APScheduler()
+scheduler.init_app(app)
+scheduler.start()
 
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
@@ -41,7 +49,7 @@ google = oauth.register(
     client_kwargs={'scope': 'email profile'}
 )
 
-active_files = {}
+
 chat_contexts = {}
 try:
     groq_client = Groq(api_key=os.getenv("GROQ_API_KEY")) if os.getenv("GROQ_API_KEY") else None
@@ -54,6 +62,14 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     name = db.Column(db.String(120))
     probes = db.relationship('ProbeResult', backref='user', lazy=True)
+    subscriptions = db.relationship('Subscription', backref='user', lazy=True, cascade="all, delete-orphan")
+
+class Subscription(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    url = db.Column(db.String(2048), nullable=False)
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+    __table_args__ = (db.UniqueConstraint('user_id', 'url', name='_user_url_uc'),)
 
 class ProbeResult(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -63,6 +79,7 @@ class ProbeResult(db.Model):
     total_items = db.Column(db.Integer)
     avg_subjectivity = db.Column(db.Float)
     results_json = db.Column(db.Text)
+    csv_data = db.Column(db.Text)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -100,10 +117,51 @@ def logout():
     logout_user()
     return redirect(url_for('home'))
 
+@scheduler.task('interval', id='run_probes', minutes=1)
+def run_scheduled_probes():
+    """Background task to run probes for all subscribed URLs."""
+    with app.app_context():
+        print("[SCHEDULER] Running scheduled probes...")
+        _cleanup_old_results()
+        subscriptions = Subscription.query.all()
+        if not subscriptions:
+            return
+            
+        urls_to_users = {}
+        for sub in subscriptions:
+            urls_to_users.setdefault(sub.url, []).append(sub.user_id)
+            
+        for url, user_ids in urls_to_users.items():
+            print(f"[SCHEDULER] Processing URL: {url} for {len(user_ids)} users")
+            try:
+                # Process URL without caching yet (to avoid current_user dependency)
+                result = _process_url(url, cache_result=False)
+                if "error" not in result:
+                    # Save cache for each subscribed user manually
+                    for uid in user_ids:
+                        _save_cache(
+                            url=result["url"],
+                            table_html=result["table"],
+                            cluster_counts=result["cluster_counts"],
+                            sentiment_counts=result["sentiment_counts"],
+                            avg_subjectivity=result["avg_subjectivity"],
+                            takeaways=result["takeaways"],
+                            metrics=result["metrics"],
+                            total_items=result["total_items"],
+                            wordcloud_image=result["wordcloud_image"],
+                            entities=result["entities"],
+                            graph_data=result["graph_data"],
+                            audio_file=result["audio_file"],
+                            override_user_id=uid,
+                            csv_string=result.get("csv_string")
+                        )
+            except Exception as e:
+                print(f"[SCHEDULER] Error processing {url}: {e}")
 
-def _save_cache(url, table_html, cluster_counts, sentiment_counts, avg_subjectivity, takeaways, metrics, total_items, wordcloud_image=None, entities=None, graph_data=None):
-    """Save the last successful probe result to database for the current user."""
-    if current_user.is_authenticated:
+def _save_cache(url, table_html, cluster_counts, sentiment_counts, avg_subjectivity, takeaways, metrics, total_items, wordcloud_image=None, entities=None, graph_data=None, audio_file=None, override_user_id=None, csv_string=None):
+    """Save the last successful probe result to database for the current user or override user."""
+    target_user_id = override_user_id if override_user_id else (current_user.id if current_user.is_authenticated else None)
+    if target_user_id:
         try:
             cache = {
                 "table": table_html,
@@ -114,13 +172,15 @@ def _save_cache(url, table_html, cluster_counts, sentiment_counts, avg_subjectiv
                 "wordcloud_image": wordcloud_image,
                 "entities": entities,
                 "graph_data": graph_data,
+                "audio_file": audio_file,
             }
             probe = ProbeResult(
-                user_id=current_user.id,
+                user_id=target_user_id,
                 url=url,
                 total_items=total_items,
                 avg_subjectivity=avg_subjectivity,
-                results_json=json.dumps(cache)
+                results_json=json.dumps(cache),
+                csv_data=csv_string
             )
             db.session.add(probe)
             db.session.commit()
@@ -144,13 +204,9 @@ def _load_cache():
 
 
 def _cleanup_old_results():
-    """Remove old result CSV files and word clouds to prevent disk clutter."""
-    for f in glob.glob("results_*.csv"):
-        try:
-            os.remove(f)
-        except OSError:
-            pass
+    """Remove old word clouds and audio files to prevent disk clutter."""
     cleanup_old_wordclouds()
+    cleanup_old_audio()
 
 
 @app.route("/")
@@ -185,10 +241,13 @@ def _process_url(url, cache_result=False):
     if tfidf_data:
         wordcloud_image = generate_wordcloud(tfidf_data["matrix"], tfidf_data["terms"], session_id)
 
-    # Save results
-    filename = f"results_{session_id}.csv"
-    df.to_csv(filename, index=False)
-    active_files["latest"] = filename
+    # Phase 5: Audio Summary
+    audio_file = generate_summary_audio(takeaways, session_id)
+
+    # Save results in memory
+    csv_string = df.to_csv(index=False)
+    if has_request_context() and not current_user.is_authenticated:
+        latest_anon_csvs[request.remote_addr] = csv_string
 
     # Build display table
     if "Sentiment" in df.columns:
@@ -199,7 +258,7 @@ def _process_url(url, cache_result=False):
     table_html = display_df.to_html(classes="table table-hover", table_id="resultsTable", index=False)
 
     if cache_result:
-        _save_cache(url, table_html, cluster_counts, sentiment_counts, avg_subjectivity, takeaways, metrics, len(df), wordcloud_image, entities, graph_data)
+        _save_cache(url, table_html, cluster_counts, sentiment_counts, avg_subjectivity, takeaways, metrics, len(df), wordcloud_image, entities, graph_data, audio_file, csv_string=csv_string)
 
     return {
         "table": table_html,
@@ -213,39 +272,62 @@ def _process_url(url, cache_result=False):
         "wordcloud_image": wordcloud_image,
         "entities": entities,
         "graph_data": graph_data,
+        "audio_file": audio_file,
+        "csv_string": csv_string,
         "cleaned_text": df["cleaned"].tolist() if "cleaned" in df.columns else []
     }
 
 
 @app.route("/process", methods=["POST"])
-def process():
-    try:
-        url = request.form["url"].strip()
+def process_url():
+    url = request.form.get("url")
+    if not url:
+        return redirect(url_for("home"))
 
-        if not url:
-            return render_template("index.html", error="Please enter a valid URL.")
+    _cleanup_old_results()
+    result = _process_url(url, cache_result=True)
+    if "error" in result:
+        return render_template("index.html", error=result["error"])
 
-        # Clean up old result files
-        _cleanup_old_results()
+    _add_time_series(result, url)
+    
+    # Save context for Groq chat
+    user_key = current_user.id if current_user.is_authenticated else request.remote_addr
+    chat_contexts[user_key] = " ".join(result.get("cleaned_text", []))
+    
+    return render_template("index.html", cached=False, **result)
 
-        result = _process_url(url, cache_result=True)
+def _add_time_series(result, url):
+    """Helper to add subscription and time series data to a probe result."""
+    result["time_series_data"] = []
+    result["is_subscribed"] = False
+    if current_user and current_user.is_authenticated:
+        sub = Subscription.query.filter_by(user_id=current_user.id, url=url).first()
+        result["is_subscribed"] = sub is not None
+        history = ProbeResult.query.filter_by(user_id=current_user.id, url=url).order_by(ProbeResult.timestamp.asc()).all()
+        for h in history:
+            result["time_series_data"].append({
+                "timestamp": h.timestamp.strftime('%m-%d %H:%M'),
+                "subjectivity": h.avg_subjectivity
+            })
+
+@app.route("/subscribe", methods=["POST"])
+@login_required
+def subscribe():
+    url = request.form.get("url")
+    if not url:
+        return redirect(url_for("home"))
         
-        if "error" in result:
-            return render_template("index.html", error=result["error"], url=result["url"])
-            
-        # Save context for Groq chat
-        user_key = current_user.id if current_user.is_authenticated else request.remote_addr
-        chat_contexts[user_key] = " ".join(result.get("cleaned_text", []))
-            
-        return render_template("index.html", cached=False, **result)
-
-    except Exception as e:
-        print(f"Pipeline error: {e}")
-        return render_template(
-            "index.html",
-            error=f"Something went wrong: {str(e)}. Please check the URL and try again.",
-            url=request.form.get("url", ""),
-        )
+    sub = Subscription.query.filter_by(user_id=current_user.id, url=url).first()
+    if sub:
+        db.session.delete(sub)
+        db.session.commit()
+    else:
+        new_sub = Subscription(user_id=current_user.id, url=url)
+        db.session.add(new_sub)
+        db.session.commit()
+        
+    return redirect(request.referrer or url_for("home"))
 
 @app.route("/api/chat", methods=["POST"])
 def chat_api():
@@ -382,6 +464,28 @@ Executive Comparison Summary (HTML only):"""
         )
 
 
+@app.route("/download")
+def download():
+    """Serves the most recent results CSV from memory or database."""
+    if current_user.is_authenticated:
+        latest_probe = ProbeResult.query.filter_by(user_id=current_user.id).order_by(ProbeResult.timestamp.desc()).first()
+        if latest_probe and latest_probe.csv_data:
+            return Response(
+                latest_probe.csv_data,
+                mimetype="text/csv",
+                headers={"Content-disposition": "attachment; filename=gistprobe_results.csv"}
+            )
+    else:
+        ip = request.remote_addr
+        if ip in latest_anon_csvs:
+            return Response(
+                latest_anon_csvs[ip],
+                mimetype="text/csv",
+                headers={"Content-disposition": "attachment; filename=gistprobe_results.csv"}
+            )
+    return redirect(url_for("home"))
+
+
 @app.route("/demo")
 def demo():
     """Load the last successful probe result from cache — instant demo mode."""
@@ -389,29 +493,23 @@ def demo():
     if not cache:
         return redirect(url_for("home"))
 
-    return render_template(
-        "index.html",
-        table=cache["table"],
-        cluster_counts=cache["cluster_counts"],
-        sentiment_counts=cache["sentiment_counts"],
-        avg_subjectivity=cache["avg_subjectivity"],
-        takeaways=cache["takeaways"],
-        metrics=cache["metrics"],
-        url=cache["url"],
-        total_items=cache["total_items"],
-        cached=True,
-        wordcloud_image=cache.get("wordcloud_image"),
-        entities=cache.get("entities"),
-        graph_data=cache.get("graph_data"),
-    )
+    result = {
+        "table": cache["table"],
+        "cluster_counts": cache["cluster_counts"],
+        "sentiment_counts": cache["sentiment_counts"],
+        "avg_subjectivity": cache["avg_subjectivity"],
+        "takeaways": cache["takeaways"],
+        "metrics": cache["metrics"],
+        "url": cache["url"],
+        "total_items": cache["total_items"],
+        "wordcloud_image": cache.get("wordcloud_image"),
+        "entities": cache.get("entities"),
+        "graph_data": cache.get("graph_data"),
+        "audio_file": cache.get("audio_file"),
+    }
+    _add_time_series(result, cache["url"])
+    return render_template("index.html", cached=True, **result)
 
-
-@app.route("/download")
-def download():
-    path = active_files.get("latest")
-    if path and os.path.exists(path):
-        return send_file(path, as_attachment=True)
-    return "File not found. Please run a probe first."
 
 
 @app.route('/history')
@@ -430,6 +528,15 @@ def load_history(probe_id):
     cache['url'] = probe.url
     cache['total_items'] = probe.total_items
     cache['avg_subjectivity'] = probe.avg_subjectivity
+    # Check if files still exist on disk to prevent broken images/audio
+    wc_img = cache.get("wordcloud_image")
+    if wc_img and not os.path.exists(os.path.join("static", wc_img)):
+        wc_img = None
+        
+    audio = cache.get("audio_file")
+    if audio and not os.path.exists(os.path.join("static", audio)):
+        audio = None
+
     return render_template(
         "index.html",
         table=cache["table"],
@@ -441,9 +548,10 @@ def load_history(probe_id):
         url=cache["url"],
         total_items=cache["total_items"],
         cached=True,
-        wordcloud_image=cache.get("wordcloud_image"),
+        wordcloud_image=wc_img,
         entities=cache.get("entities"),
         graph_data=cache.get("graph_data"),
+        audio_file=audio,
     )
 
 if __name__ == "__main__":

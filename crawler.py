@@ -14,6 +14,14 @@ try:
 except ImportError:
     HAS_TRAFILATURA = False
 
+# Fallback 2: Playwright for bypassing bot protection and SPAs
+try:
+    from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
+    from playwright_stealth.stealth import Stealth
+    HAS_PLAYWRIGHT = True
+except ImportError:
+    HAS_PLAYWRIGHT = False
+
 
 # --- ROTATING USER AGENTS ---
 USER_AGENTS = [
@@ -91,6 +99,59 @@ def _fetch_page(url, retries=3):
             return None
 
     print("All retries exhausted.")
+    return None
+
+
+def _fetch_page_playwright(url, retries=2):
+    """Fetch a page using Playwright to bypass bot protection and render SPAs."""
+    if not HAS_PLAYWRIGHT:
+        print("Playwright not installed. Skipping headless browser fallback.")
+        return None
+
+    print(f"Launching Playwright to fetch: {url}")
+    for attempt in range(retries):
+        try:
+            with sync_playwright() as p:
+                browser = p.chromium.launch(headless=True)
+                ua = random.choice(USER_AGENTS)
+                context = browser.new_context(
+                    user_agent=ua,
+                    viewport={'width': 1920, 'height': 1080},
+                    java_script_enabled=True,
+                    bypass_csp=True,
+                )
+                page = context.new_page()
+                Stealth().apply_stealth_sync(page) # Apply stealth masks to defeat DataDome/Cloudflare
+                
+                # Wait until dom is loaded, then wait a bit for dynamic content
+                response = page.goto(url, timeout=30000, wait_until="domcontentloaded")
+                page.wait_for_timeout(3000)
+                
+                if response:
+                    # Some aggressive protections might still block us
+                    if response.status in [403, 401]:
+                        print(f"→ Playwright also blocked (HTTP {response.status})")
+                        browser.close()
+                        return None
+                    if response.status == 429:
+                        wait = (attempt + 1) * 3
+                        print(f"→ Rate limited in Playwright. Waiting {wait}s...")
+                        time.sleep(wait)
+                        browser.close()
+                        continue
+
+                html = page.content()
+                browser.close()
+                print(f"Playwright Fetched: {url} | Size: {len(html)} chars")
+                return html
+                
+        except PlaywrightTimeoutError:
+            print(f"Playwright Timeout (attempt {attempt + 1}/{retries})")
+        except Exception as e:
+            print(f"Playwright Unexpected error (attempt {attempt + 1}/{retries}): {e}")
+            time.sleep(2)
+
+    print("Playwright retries exhausted.")
     return None
 
 
@@ -278,7 +339,7 @@ def _detect_spa(html, url):
     """
     Detect JavaScript-heavy Single Page Applications.
     These sites render content client-side and return near-empty HTML shells.
-    Warns the user but does not block — the pipeline will still attempt extraction.
+    Returns True if SPA is detected, False otherwise.
     """
     soup = BeautifulSoup(html, "lxml")
     script_count = len(soup.find_all("script"))
@@ -289,8 +350,9 @@ def _detect_spa(html, url):
     # Heuristic: many scripts + very little visible text = likely SPA
     if script_count > 10 and text_len < 500:
         print(f"⚠ SPA detected: {script_count} <script> tags but only {text_len} chars of visible text.")
-        print(f"  → {url} likely requires a JavaScript engine (Playwright/Selenium) for full content.")
-        print(f"  → Proceeding with static extraction (results may be limited).")
+        print(f"  → {url} likely requires a JavaScript engine for full content.")
+        return True
+    return False
 
 
 def scrape_url(url):
@@ -313,14 +375,24 @@ def scrape_url(url):
     # Polite delay
     time.sleep(1)
 
-    # Step 2: Fetch the page
     html = _fetch_page(url)
+    
+    # Check if requests was blocked (html is None)
     if not html:
-        print("✗ Failed to fetch page.")
-        return pd.DataFrame(columns=["text"])
+        print("✗ requests failed to fetch page (likely blocked). Attempting fallback with Playwright...")
+        html = _fetch_page_playwright(url)
+    else:
+        # Check if it's a SPA that returned mostly empty content
+        is_spa = _detect_spa(html, url)
+        if is_spa:
+            print("Attempting fallback with Playwright to render JavaScript...")
+            pw_html = _fetch_page_playwright(url)
+            if pw_html:
+                html = pw_html
 
-    # Step 2.5: SPA/JavaScript-heavy site detection
-    _detect_spa(html, url)
+    if not html:
+        print("✗ All fetching methods failed.")
+        return pd.DataFrame(columns=["text"])
 
     # Step 3: Tier 1 — BeautifulSoup extraction
     data = _extract_with_beautifulsoup(html)

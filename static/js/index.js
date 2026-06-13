@@ -240,6 +240,53 @@ function initDashboard() {
         });
     }
 
+    // 4.5 Initialize Time Series Chart
+    const timeSeriesElement = document.getElementById('time-series-data');
+    if (timeSeriesElement) {
+        const timeSeriesData = JSON.parse(timeSeriesElement.getAttribute('data-series'));
+        if (timeSeriesData && timeSeriesData.length > 0) {
+            const labels = timeSeriesData.map(d => d.timestamp);
+            const values = timeSeriesData.map(d => d.subjectivity);
+
+            new Chart(document.getElementById('timeSeriesChart'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Average Subjectivity',
+                        data: values,
+                        borderColor: '#0ea5e9',
+                        backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#10b981',
+                        pointBorderColor: '#ffffff',
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 1.0,
+                            grid: { color: 'rgba(100, 116, 139, 0.1)' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+    }
+
     // 5. DataTables Initialization
     if ($('#resultsTable').length) {
         if ($.fn.DataTable.isDataTable('#resultsTable')) {

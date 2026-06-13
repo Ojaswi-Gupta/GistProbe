@@ -1,183 +1,188 @@
-# GistProbe — NLP-Driven Web Content Analyzer
+# GistProbe: Real-Time Unsupervised Web NLP Analyzer
 
-> An end-to-end NLP pipeline that crawls any URL, analyses text using unsupervised machine learning, and surfaces semantic clusters, sentiment scores, and extractive summaries through an interactive web dashboard.
+> **🎥 Watch the 1-Minute Video Demo Here: [Insert YouTube/Loom Link Here]**
 
-**Built by Ojaswi Gupta**
+**Built by Ojaswi Gupta** | **Domain:** Natural Language Processing (NLP) & Unsupervised Machine Learning
 
----
-
-## ✨ What It Does
-
-Paste any URL — a news article, blog, Wikipedia page, or financial site — and GistProbe runs it through a 5-stage NLP pipeline:
-
-| Stage | What Happens |
-|---|---|
-| **1. Crawl** | BeautifulSoup scrapes the DOM with rotating user-agents & robots.txt compliance |
-| **2. Extract** | Multi-tier text extraction (targeted DOM → trafilatura fallback) |
-| **3. Analyse** | NLTK deduplication + TextBlob sentiment polarity & subjectivity scoring |
-| **4. Cluster** | TF-IDF vectorization + K-Means with automatic `k` selection via Silhouette Score |
-| **5. Summarize** | Extractive NLP summary using TF-IDF document density ranking |
+An end-to-end Machine Learning web application that dynamically crawls any URL, analyzes text using unsupervised machine learning, and surfaces semantic clusters, sentiment scores, and extractive summaries through an interactive web dashboard.
 
 ---
 
-## 🚀 NEW: Advanced Features
+## 🌟 Why This Project Stands Out
 
-GistProbe has recently been upgraded with powerful LLM integrations and interactive visualizers to push the boundaries of media analysis:
+GistProbe is not a standard wrapper around an API. It is a full-fledged NLP pipeline that builds custom datasets in real-time and applies mathematical heuristics to understand text:
 
-### 🤖 Chat with Website & Fact Check Mode
-Chat directly with the scraped contents of any webpage using **Llama-3 (via Groq API)**. Enable the **Fact Check Mode** toggle to force the AI to cross-reference claims in the article against real-world knowledge, highlighting biases and inaccuracies in real time.
-
-### 🕸️ Interactive Entity Knowledge Graph
-Entities (People, Organizations, Locations) extracted via **spaCy** are mapped into a beautiful interactive network graph using **vis.js**. The physics engine groups entities based on sentence co-occurrences. Clicking on an entity node instantly filters the raw data tables to show exactly what the article says about them!
-
-### ⚖️ Multi-URL Debate Mode
-Compare two URLs side-by-side. The Llama-3 AI acts as an Expert Media Analyst, reading both articles and generating an **Executive Comparison Summary** that highlights differences in tone, framing, biases, and factual omissions between the two sources.
+- **Dynamic Dataset Generation:** Uses **Playwright** and **BeautifulSoup** to scrape the DOM dynamically, bypassing basic blocks.
+- **Unsupervised Optimization:** Instead of hardcoding K-Means clusters, it dynamically evaluates **k = 2 to 10** and selects the value with the highest **Silhouette Score** for the specific webpage.
+- **Intelligent Deduplication:** Uses `SequenceMatcher` to compute string similarity ratios, filtering out paragraphs with >85% overlap to ensure cluster quality.
+- **Generative AI Chat (RAG):** Integrates **Llama-3.1 (via Groq API)** to allow users to chat directly with the scraped contents of any webpage or compare two URLs side-by-side.
 
 ---
 
-## 🧠 Key Technical Decisions
+## ⚙️ System Architecture & Data Flow
 
-### Silhouette Score for Optimal `k`
-Rather than hardcoding a fixed number of clusters, GistProbe mathematically evaluates **k = 2 to 10** and selects the value with the highest Silhouette Score. A score closer to `1.0` indicates well-separated, meaningful clusters.
-
-```python
-for k in range(2, max_k):
-    model = KMeans(n_clusters=k, random_state=42, n_init=10)
-    labels = model.fit_predict(X)
-    score = silhouette_score(X, labels)  # Evaluate separation quality
-    if score > best_score:
-        best_score, best_k = score, k
+```mermaid
+graph TD
+    A[User Inputs URL] -->|Flask Route| B[Playwright Scraper]
+    B -->|Raw HTML| C[BeautifulSoup Parser]
+    C -->|Raw Text Nodes| D[Regex & NLTK Cleaner]
+    D -->|>85% Similarity Filter| E[Cleaned Dataset]
+    
+    E --> F[Scikit-learn TF-IDF]
+    F --> G[K-Means Clustering]
+    G -->|Silhouette Score Optimization| H[Semantic Topic Clusters]
+    
+    E --> I[TextBlob Sentiment Analysis]
+    I --> J[Polarity & Subjectivity Scores]
+    
+    E --> K[spaCy NER]
+    K --> L[vis.js Knowledge Graph]
+    
+    H & J & L --> M[Flask UI & SQLite Database]
+    M <--> N[Groq Llama-3.1 RAG Engine]
 ```
 
-### Near-Duplicate Removal
-Uses `SequenceMatcher` to compute string similarity ratios, filtering out paragraphs with >85% overlap before clustering — ensuring cluster quality isn't diluted by repeated boilerplate.
+### 5-Stage ML Pipeline
+
+| Stage | Component | What Happens |
+|---|---|---|
+| **1. Crawl** | Playwright & BeautifulSoup | Scrapes the DOM with rotating user-agents & extracts raw text nodes. |
+| **2. Clean & Deduplicate** | Python (Regex) & NLTK | Removes non-alphanumeric noise, normalizes text, and removes near-duplicates (>85% similarity). |
+| **3. Sentiment Analysis**| TextBlob | Computes sentiment polarity & subjectivity scoring for every extracted sentence. |
+| **4. Cluster** | scikit-learn (TF-IDF & K-Means) | Vectorizes text, computes optimal `k` via Silhouette Score, and assigns sentences to semantic clusters. |
+| **5. Entity Extraction** | spaCy (en_core_web_sm) | Performs Named Entity Recognition (NER) to map People, Organizations, and Locations. |
+
+---
+
+## 💾 Database Schema
+
+GistProbe uses **SQLAlchemy** with an SQLite database to cache NLP results, reducing redundant compute load for previously analyzed URLs.
+
+**1. `User` Table** (OAuth handled via Authlib Google Login)
+- `id` (Integer, Primary Key)
+- `email` (String)
+- `name` (String)
+
+**2. `ProbeResult` Table** (Caches expensive ML outputs)
+- `id` (Integer, Primary Key)
+- `user_id` (Foreign Key -> User.id)
+- `url` (String)
+- `timestamp` (DateTime)
+- `total_items` (Integer)
+- `avg_subjectivity` (Float)
+- `results_json` (Text) — *Stores JSON blobs of K-Means cluster arrays, SpaCy entity graphs, and TF-IDF metrics for instant "Demo Mode" loading.*
 
 ---
 
 ## 🛠️ Tech Stack
 
-**Backend & AI**
-- `Python 3.11`, `Flask` — web framework & routing
-- `BeautifulSoup4`, `Requests`, `Trafilatura` — multi-tier web crawling
-- `NLTK`, `spaCy` — text tokenization, cleaning & Named Entity Recognition (NER)
-- `Groq API (Llama-3.1)` — conversational agent and media debate analysis
-- `TextBlob` — sentiment polarity & subjectivity scoring
-- `scikit-learn` — TF-IDF Vectorizer, K-Means, Silhouette Score
-- `wordcloud` — TF-IDF visual representation
-- `Pandas`, `NumPy` — data manipulation
+**Machine Learning & NLP:**
+- `scikit-learn` — TF-IDF Vectorizer, K-Means Clustering, Silhouette Score
+- `spaCy` — Named Entity Recognition (NER)
+- `NLTK` — Text tokenization & stop words
+- `TextBlob` — Sentiment polarity & subjectivity scoring
+- `Pandas` & `NumPy` — Data manipulation & mathematical operations
+- `Groq API (Llama-3.1)` — Conversational RAG agent and media debate analysis
 
-**Frontend**
-- `Bootstrap 5` — responsive layout
-- `vis.js` — interactive physics-based network graphs
-- `Chart.js` — interactive donut charts (sentiment & topic distribution)
-- `DataTables.js` — filterable, paginated results table
-- Glassmorphism CSS + cursor-glow effect (vanilla JS `requestAnimationFrame`)
+**Backend & Web Scraping:**
+- `Python 3.11` & `Flask` — Web framework & orchestration
+- `Playwright` & `BeautifulSoup4` — Dynamic web crawling
+- `SQLAlchemy` — ORM for Database management
 
----
-
-## 🖥️ Screenshots
-
-> Probe BBC News, The Verge, Wikipedia, or any URL. Results appear after a 5-stage live terminal animation.
-
-| Homepage | Results Dashboard |
-|---|---|
-| URL input + feature grid + tech stack | Sentiment chart + cluster donut + AI summary |
+**Frontend:**
+- `Bootstrap 5` — Responsive layout
+- `vis.js` — Interactive physics-based network graphs (Knowledge Graph)
+- `Chart.js` — Interactive donut charts (Sentiment & Topic Distribution)
 
 ---
 
-## 🚀 Local Setup
+## 🚀 Advanced Features
 
-```bash
-# 1. Clone the repo
-git clone https://github.com/Ojaswi-Gupta/GistProbe.git
-cd GistProbe
+### 🕸️ Interactive Entity Knowledge Graph
+Entities (People, Organizations, Locations) extracted via **spaCy** are mapped into an interactive network graph using **vis.js**. The physics engine groups entities based on sentence co-occurrences. Clicking an entity node instantly filters the raw data tables.
 
-# 2. Create & activate a virtual environment
-python3.11 -m venv venv
-source venv/bin/activate      # Windows: venv\Scripts\activate
+### 🤖 Chat with Website & Fact Check Mode
+Chat directly with the scraped contents using **Llama-3**. Enable **Fact Check Mode** to force the AI to cross-reference claims in the article against real-world knowledge, highlighting biases and inaccuracies.
 
-# 3. Install dependencies
-pip install -r requirements.txt
-
-# 4. Download required spaCy & NLTK models (first run only)
-python -m spacy download en_core_web_sm
-python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
-
-# 5. Set up your Groq API Key
-export GROQ_API_KEY="your-api-key-here"
-
-# 6. Start the server
-python app.py
-```
-
-Open **http://127.0.0.1:5000** in your browser.
-
-### ⚡ Demo Mode
-
-After running at least one successful probe, visit **http://127.0.0.1:5000/demo** to instantly load the cached result — no waiting for a crawl. Perfect for live demos and interviews.
-
-### 🧪 Running Tests
-
-```bash
-python -m unittest tests -v
-```
-
-11 unit tests cover the core NLP pipeline: text cleaning, deduplication, sentiment analysis, clustering, and extractive summarization.
-
----
-
-## 🚢 Deployment
-
-> ⚠️ **Do NOT deploy to Vercel or Netlify.** This app runs heavy NLP + ML tasks that exceed serverless 10s timeout limits and 250MB bundle limits.
-
-**Recommended: Render or Railway**
-
-1. Connect your GitHub repo to [Render](https://render.com)
-2. Add your `GROQ_API_KEY` to the Environment Variables.
-3. Set **Build Command:** `pip install -r requirements.txt && python -m spacy download en_core_web_sm`
-4. Set **Start Command:** `gunicorn app:app --timeout 120`
-5. Select a **Standard** instance (not free tier — needs >512MB RAM for sklearn)
+### ⚖️ Multi-URL Debate Mode
+Compare two URLs side-by-side. The AI acts as an Expert Media Analyst, reading both articles and generating an **Executive Comparison Summary** that highlights differences in tone, framing, biases, and factual omissions between the sources.
 
 ---
 
 ## 📂 Project Structure
 
-```
+```text
 GistProbe/
-├── app.py              # Flask routes & pipeline orchestration
-├── crawler.py          # Multi-tier web scraper (BS4 + trafilatura)
-├── analyser.py         # Text cleaning, deduplication & sentiment scoring
-├── clustering.py       # TF-IDF vectorization, K-Means, Silhouette Score
-├── ner.py              # Named Entity Recognition (spaCy)
-├── wordcloud_gen.py    # TF-IDF visualization generator
-├── tests.py            # Unit tests for the core NLP pipeline
-├── templates/
-│   ├── index.html      # Full-stack SPA-like dashboard (Bootstrap + Chart.js)
-│   └── compare.html    # Side-by-side URL comparison dashboard
-├── requirements.txt
-└── README.md
+├── app.py              # Flask routes, pipeline orchestration & DB Models
+├── crawler.py          # Playwright & BS4 Web Scraper
+├── analyser.py         # Text cleaning, NLTK deduplication & TextBlob sentiment
+├── clustering.py       # Scikit-learn TF-IDF, K-Means & Silhouette optimization
+├── ner.py              # spaCy Named Entity Recognition engine
+├── wordcloud_gen.py    # TF-IDF visual representation logic
+├── tests.py            # Unit tests for the core ML pipeline
+├── templates/          # Jinja2 HTML Dashboard Views
+└── requirements.txt    # Strict environment dependencies
 ```
 
 ---
 
-## 📊 What the Dashboard Shows
+## ⚙️ Local Setup (Run it yourself!)
 
-- **Interactive Knowledge Graph** — physics-based network of how entities connect.
-- **Chatbot / Fact Check Mode** — interrogate the webpage's claims in real time.
-- **Compare Mode** — side-by-side Llama-3 debate analysis of two different URLs.
-- **AI Executive Summary** — top 3 most information-dense sentences ranked by TF-IDF score.
-- **Word Cloud & Sentiment** — visual representation of TF-IDF term importance and sentiment donut.
-- **Topic Distribution** — donut chart of K-Means cluster sizes.
-- **Extracted Insights Table** — full paginated/filterable DataTable of all scraped text.
+Follow these exact steps to run the complete NLP pipeline on your local machine:
+
+**1. Clone the repository**
+```bash
+git clone https://github.com/Ojaswi-Gupta/GistProbe.git
+cd GistProbe
+```
+
+**2. Create & activate a virtual environment**
+```bash
+# Mac/Linux:
+python3 -m venv venv
+source venv/bin/activate
+
+# Windows:
+python -m venv venv
+venv\Scripts\activate
+```
+
+**3. Install dependencies**
+```bash
+pip install -r requirements.txt
+```
+
+**4. Download ML Models & Browser Binaries (First run only)**
+```bash
+playwright install chromium
+python -m spacy download en_core_web_sm
+python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
+```
+
+**5. Set up Environment Variables**
+Create a `.env` file in the root directory and add your API keys. You can get a free API key from the [Groq Console](https://console.groq.com/).
+```env
+GROQ_API_KEY="your-groq-api-key-here"
+FLASK_SECRET_KEY="any-random-string"
+# Google OAuth (Optional, only needed if you want to test the login feature)
+GOOGLE_CLIENT_ID="optional"
+GOOGLE_CLIENT_SECRET="optional"
+```
+
+**6. Start the Server**
+```bash
+python app.py
+```
+
+**7. Access the App**
+Open your browser and navigate to: **http://127.0.0.1:5000**
 
 ---
 
-## 📝 Resume Bullet
+## 📝 Resume Bullet Example
 
-> *"Built GistProbe, a full-stack NLP web application that crawls and semantically clusters web content using K-Means + TF-IDF, featuring a spaCy+vis.js Interactive Knowledge Graph and Llama-3 (Groq API) integration for real-time web chat, fact-checking, and multi-URL media debate analysis."*
+> *"Built GistProbe, a full-stack NLP web application that dynamically scrapes and semantically clusters web content using K-Means + TF-IDF, featuring a spaCy Interactive Knowledge Graph and Llama-3 integration for real-time web chat, fact-checking, and multi-URL media debate analysis."*
 
 ---
 
-## 📜 License
-
-Created by **Ojaswi Gupta**. All rights reserved.
+**License:** Created by Ojaswi Gupta. All rights reserved.

@@ -90,3 +90,7 @@ weasel==1.0.0
 Werkzeug==3.1.8
 wordcloud==1.9.6
 wrapt==2.1.2
+playwright==1.44.0
+playwright-stealth==2.0.3
+gTTS==2.5.4
+Flask-APScheduler==1.13.1

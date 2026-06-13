@@ -20,7 +20,7 @@
     <!-- html2pdf.js -->
     <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
     <!-- External CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <link rel="stylesheet" href="/static/css/index.css">
     <!-- vis.js for Network Graph -->
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
 </head>
@@ -30,12 +30,7 @@
     <div class="cursor-glow" id="cursor-glow"></div>
 
     <!-- Initial Page Loader (Only shows on first visit) -->
-    {% if not url %}
-    <div id="app-init-loader">
-        <div class="sleek-loader"></div>
-        <div class="loader-text">Initializing Engine</div>
-    </div>
-    {% endif %}
+    
 
     <!-- Main Content Wrapper -->
     <!-- Navbar -->
@@ -49,25 +44,18 @@
             <a href="/compare" class="gp-nav-link" title="Compare two URLs side-by-side">
                 ⚖️ Compare
             </a>
-            {% if current_user.is_authenticated %}
-            <a href="/history" class="gp-nav-link" title="View your probe history">
-                📚 History
-            </a>
-            <a href="/logout" class="gp-nav-link text-danger" title="Sign out">
-                🚪 Logout
-            </a>
-            {% else %}
+            
             <a href="/login" class="gp-nav-link" style="color: var(--accent-primary); font-weight: 600;" title="Sign in with Google">
                 🔐 Sign In
             </a>
-            {% endif %}
+            
             <button class="gp-nav-link" id="theme-toggle" style="background:none; cursor:pointer;" title="Toggle Dark Mode">
                 <span id="theme-icon">🌙</span>
             </button>
         </div>
     </nav>
 
-    <div id="main-content" class="{% if not url %}hidden-initially{% endif %}">
+    <div id="main-content" class="">
 
         <div class="hero">
             <h1>GistProbe</h1>
@@ -83,7 +71,7 @@
                             <div class="input-group">
                                 <input type="url" name="url" class="form-control"
                                     placeholder="Enter Target URL (e.g., bbc.com, theverge.com)"
-                                    value="{{ url if url else '' }}" required>
+                                    value="https://example.com" required>
                                 <button class="btn btn-probe" id="submit-btn" type="submit">Probe</button>
                             </div>
                         </form>
@@ -92,20 +80,7 @@
                             <div class="mt-2"><span class="term-cursor"></span></div>
                         </div>
 
-                        {% if not cluster_counts %}
-                        <div class="mt-4 pt-2 text-center fade-in-up" style="animation-delay: 0.1s;">
-                            <p class="text-muted small mb-2">Try an example:</p>
-                            <span class="quick-chip" onclick="fillAndProbe('https://www.bbc.com/news')">📰 BBC
-                                News</span>
-                            <span class="quick-chip" onclick="fillAndProbe('https://www.theverge.com/')">💻 The
-                                Verge</span>
-                            <span class="quick-chip" onclick="fillAndProbe('https://finance.yahoo.com/')">📈 Yahoo
-                                Finance</span>
-                            <span class="quick-chip"
-                                onclick="fillAndProbe('https://en.wikipedia.org/wiki/Portal:Current_events')">🌍
-                                Wikipedia</span>
-                        </div>
-                        {% endif %}
+                        
                     </div>
                 </div>
             </div>
@@ -244,235 +219,33 @@
                 </div>
             </div>
 
-            {% if not cluster_counts and not error %}
-            <div id="initial-features" class="w-100">
-                <!-- Feature Highlight Grid (Only visible on initial load) -->
-                <div class="row mt-4 mb-5 pt-3 fade-in-up" style="animation-delay: 0.2s;">
-                <div class="col-md-4 mb-4">
-                    <div class="glass-card p-4 h-100 text-center">
-                        <div class="feature-icon">🧠</div>
-                        <h5>Semantic Clustering</h5>
-                        <p class="text-muted small mt-3">Powered by K-Means & TF-IDF math to intelligently group related
-                            paragraphs without relying on expensive LLMs.</p>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-4">
-                    <div class="glass-card p-4 h-100 text-center">
-                        <div class="feature-icon">🎭</div>
-                        <h5>Sentiment Analysis</h5>
-                        <p class="text-muted small mt-3">Real-time TextBlob polarity scoring detects whether the content
-                            is
-                            positive, negative, and factual vs. opinionated.</p>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-4">
-                    <div class="glass-card p-4 h-100 text-center">
-                        <div class="feature-icon">⚡</div>
-                        <h5>AI Summarization</h5>
-                        <p class="text-muted small mt-3">Extracts the most information-dense sentences instantly using
-                            Document-Term Matrices to generate Executive Summaries.</p>
-                    </div>
-                </div>
-            </div>
+            
 
-            <!-- How It Works: 3-Step Pipeline -->
-            <div class="row justify-content-center mb-5 fade-in-up" style="animation-delay: 0.3s;">
-                <div class="col-md-10">
-                    <p class="text-uppercase fw-bold text-muted small text-center mb-4" style="letter-spacing: 2px;">How
-                        It Works</p>
-                    <div class="d-flex align-items-start justify-content-center gap-0 flex-wrap">
+            
 
-                        <!-- Step 1 -->
-                        <div class="text-center px-4" style="flex: 1; min-width: 160px;">
-                            <div
-                                style="width: 48px; height: 48px; border-radius: 50%; background: rgba(14,165,233,0.1); border: 1.5px solid rgba(14,165,233,0.4); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 1.1rem;">
-                                🕷️</div>
-                            <h6 class="fw-bold mb-1">01 — Crawl</h6>
-                            <p class="text-muted" style="font-size: 0.78rem; line-height: 1.5;">BeautifulSoup scrapes
-                                the target URL, bypassing rate limits with rotating user-agents.</p>
-                        </div>
-
-                        <!-- Connector -->
-                        <div class="d-none d-md-flex align-items-center justify-content-center"
-                            style="flex: 0; padding-top: 24px;">
-                            <div
-                                style="width: 60px; height: 1.5px; background: linear-gradient(90deg, rgba(14,165,233,0.4), rgba(139,92,246,0.4));">
-                            </div>
-                            <span style="color: rgba(14,165,233,0.5); font-size: 0.7rem; margin-left: 4px;">▶</span>
-                        </div>
-
-                        <!-- Step 2 -->
-                        <div class="text-center px-4" style="flex: 1; min-width: 160px;">
-                            <div
-                                style="width: 48px; height: 48px; border-radius: 50%; background: rgba(139,92,246,0.1); border: 1.5px solid rgba(139,92,246,0.4); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 1.1rem;">
-                                🔬</div>
-                            <h6 class="fw-bold mb-1">02 — Analyse</h6>
-                            <p class="text-muted" style="font-size: 0.78rem; line-height: 1.5;">NLTK cleans text. TextBlob scores sentiment. spaCy extracts Named Entities.</p>
-                        </div>
-
-                        <!-- Connector -->
-                        <div class="d-none d-md-flex align-items-center justify-content-center"
-                            style="flex: 0; padding-top: 24px;">
-                            <div
-                                style="width: 60px; height: 1.5px; background: linear-gradient(90deg, rgba(139,92,246,0.4), rgba(16,185,129,0.4));">
-                            </div>
-                            <span style="color: rgba(139,92,246,0.5); font-size: 0.7rem; margin-left: 4px;">▶</span>
-                        </div>
-
-                        <!-- Step 3 -->
-                        <div class="text-center px-4" style="flex: 1; min-width: 160px;">
-                            <div
-                                style="width: 48px; height: 48px; border-radius: 50%; background: rgba(16,185,129,0.1); border: 1.5px solid rgba(16,185,129,0.4); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 1.1rem;">
-                                🧩</div>
-                            <h6 class="fw-bold mb-1">03 — Cluster</h6>
-                            <p class="text-muted" style="font-size: 0.78rem; line-height: 1.5;">TF-IDF vectorizes text.
-                                K-Means finds optimal groupings. Extractive NLP summarizes key insights.</p>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
-            <!-- Live Stats Counter -->
-            <div class="row justify-content-center mb-5 fade-in-up" style="animation-delay: 0.4s;">
-                <div class="col-md-10">
-                    <div class="glass-card p-4">
-                        <div class="row text-center">
-                            <div class="col-4" style="border-right: 1px solid var(--glass-border);">
-                                <div
-                                    style="font-size: 2rem; font-weight: 800; font-family: 'Outfit', sans-serif; background: linear-gradient(135deg, #38bdf8, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-                                    5</div>
-                                <div class="text-muted small mt-1">NLP Pipeline Stages</div>
-                            </div>
-                            <div class="col-4" style="border-right: 1px solid var(--glass-border);">
-                                <div
-                                    style="font-size: 2rem; font-weight: 800; font-family: 'Outfit', sans-serif; background: linear-gradient(135deg, #38bdf8, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-                                    9×</div>
-                                <div class="text-muted small mt-1">k Values Evaluated</div>
-                            </div>
-                            <div class="col-4">
-                                <div
-                                    style="font-size: 2rem; font-weight: 800; font-family: 'Outfit', sans-serif; background: linear-gradient(135deg, #38bdf8, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-                                    0$</div>
-                                <div class="text-muted small mt-1">No LLM API Cost</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tech Stack Pills -->
-            <div class="row justify-content-center mb-5 fade-in-up" style="animation-delay: 0.5s;">
-                <div class="col-md-10 text-center">
-                    <p class="text-uppercase fw-bold text-muted small mb-3" style="letter-spacing: 2px;">Built With</p>
-                    <div class="d-flex flex-wrap justify-content-center gap-2">
-                        <span class="badge rounded-pill px-3 py-2"
-                            style="background: rgba(14,165,233,0.08); color: #0ea5e9; border: 1px solid rgba(14,165,233,0.2); font-weight: 500; font-size: 0.8rem;">Python</span>
-                        <span class="badge rounded-pill px-3 py-2"
-                            style="background: rgba(14,165,233,0.08); color: #0ea5e9; border: 1px solid rgba(14,165,233,0.2); font-weight: 500; font-size: 0.8rem;">Flask</span>
-                        <span class="badge rounded-pill px-3 py-2"
-                            style="background: rgba(139,92,246,0.08); color: #8b5cf6; border: 1px solid rgba(139,92,246,0.2); font-weight: 500; font-size: 0.8rem;">scikit-learn</span>
-                        <span class="badge rounded-pill px-3 py-2"
-                            style="background: rgba(139,92,246,0.08); color: #8b5cf6; border: 1px solid rgba(139,92,246,0.2); font-weight: 500; font-size: 0.8rem;">K-Means</span>
-                        <span class="badge rounded-pill px-3 py-2"
-                            style="background: rgba(139,92,246,0.08); color: #8b5cf6; border: 1px solid rgba(139,92,246,0.2); font-weight: 500; font-size: 0.8rem;">TF-IDF</span>
-                        <span class="badge rounded-pill px-3 py-2"
-                            style="background: rgba(16,185,129,0.08); color: #10b981; border: 1px solid rgba(16,185,129,0.2); font-weight: 500; font-size: 0.8rem;">NLTK</span>
-                        <span class="badge rounded-pill px-3 py-2"
-                            style="background: rgba(16,185,129,0.08); color: #10b981; border: 1px solid rgba(16,185,129,0.2); font-weight: 500; font-size: 0.8rem;">TextBlob</span>
-                        <span class="badge rounded-pill px-3 py-2"
-                            style="background: rgba(16,185,129,0.08); color: #10b981; border: 1px solid rgba(16,185,129,0.2); font-weight: 500; font-size: 0.8rem;">BeautifulSoup</span>
-                        <span class="badge rounded-pill px-3 py-2"
-                            style="background: rgba(236,72,153,0.08); color: #ec4899; border: 1px solid rgba(236,72,153,0.2); font-weight: 500; font-size: 0.8rem;">spaCy</span>
-                        <span class="badge rounded-pill px-3 py-2"
-                            style="background: rgba(245,158,11,0.08); color: #f59e0b; border: 1px solid rgba(245,158,11,0.2); font-weight: 500; font-size: 0.8rem;">Chart.js</span>
-                        <span class="badge rounded-pill px-3 py-2"
-                            style="background: rgba(245,158,11,0.08); color: #f59e0b; border: 1px solid rgba(245,158,11,0.2); font-weight: 500; font-size: 0.8rem;">DataTables</span>
-                    </div>
-                </div>
-            </div>
-            </div> <!-- End initial-features -->
-            {% endif %}
-
-            {% if error %}
-            <div class="row justify-content-center mb-4 fade-in-up">
-                <div class="col-md-8">
-                    <div class="alert alert-danger glass-card" style="border-left: 4px solid #ef4444;" role="alert">
-                        <strong>⚠️ Pipeline Error:</strong> {{ error }}
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-
-            {% if cluster_counts %}
+            
             <div id="results-dashboard" class="w-100">
                 <div id="report-container" class="w-100">
-                    {% if cached %}
-                    <div class="row justify-content-center mb-3 fade-in-up no-pdf">
-                        <div class="col-md-8">
-                            <div class="glass-card p-3 text-center"
-                                style="border: 1px solid rgba(245,158,11,0.3); background: rgba(245,158,11,0.05);">
-                                <span style="color: #f59e0b; font-size: 0.85rem;">⚡ Cached Result — Loaded instantly from last
-                                    probe. <a href="/" style="color: #0ea5e9;">Run a fresh probe →</a></span>
-                            </div>
-                        </div>
-                    </div>
-                    {% endif %}
+                    
 
                     <div class="text-center mb-5 fade-in-up" style="animation-delay: 0.1s;">
                         <p class="text-muted mb-1 small text-uppercase fw-bold">Active Probe Target</p>
-                        <div class="d-flex justify-content-center align-items-center gap-2">
-                            <a href="{{ url }}" target="_blank" class="active-url fw-bold fs-5 mb-0" style="word-break: break-all;">{{ url }}</a>
-                            <button class="btn btn-sm no-pdf"
-                                style="background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 8px; color: var(--text-main);"
-                                data-bs-toggle="modal" data-bs-target="#logsModal" title="View Execution Logs">
-                                ⚙️ Logs
+                        <a href="https://example.com" target="_blank" class="active-url fw-bold fs-5">https://example.com</a>
+                        <div class="mt-3 no-pdf">
+                            <button class="btn btn-outline-info btn-sm"
+                                style="border-radius: 20px; font-size: 0.8rem; border-color: rgba(14, 165, 233, 0.4);"
+                                data-bs-toggle="modal" data-bs-target="#logsModal">
+                                View Execution Logs ⚙️
                             </button>
+                            
                         </div>
                     </div>
 
-            <div id="nlp-data" data-labels='{{ cluster_counts.keys()|list|tojson | safe }}'
-                data-values='{{ cluster_counts.values()|list|tojson | safe }}' style="display:none;">
+            <div id="nlp-data" data-labels='["0: General Topics"]'
+                data-values='[2]' style="display:none;">
             </div>
 
-            {% if takeaways %}
-            <div class="row justify-content-center mb-5 fade-in-up" style="animation-delay: 0.15s;">
-                <div class="col-md-10">
-                    <div class="glass-card p-4" style="border-left: 4px solid var(--accent-primary);">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 class="mb-0 d-flex align-items-center" style="color: var(--text-main);">
-                                <span class="fs-4 me-2">✨</span> AI Executive Summary
-                            </h5>
-                            {% if avg_subjectivity is defined %}
-                            <div class="text-end">
-                                <span
-                                    class="badge rounded-pill {% if avg_subjectivity > 0.4 %}bg-danger{% elif avg_subjectivity > 0.2 %}bg-warning text-dark{% else %}bg-success{% endif %} mb-1"
-                                    style="font-size: 0.75rem;">
-                                    {% if avg_subjectivity > 0.4 %}Opinionated{% elif avg_subjectivity > 0.2 %}Mixed
-                                    Fact/Opinion{% else %}Highly Factual{% endif %}
-                                </span>
-                            </div>
-                            {% endif %}
-                        </div>
-                        <ul class="mb-0" style="color: var(--text-muted); line-height: 1.6;">
-                            {% for item in takeaways %}
-                            <li class="mb-2 interactive-takeaway" onclick="filterTableByTakeaway(this)"
-                                title="Click to find in table">{{ item }}</li>
-                            {% endfor %}
-                        </ul>
-                        {% if audio_file %}
-                        <div class="mt-4 pt-3 text-center" style="border-top: 1px solid var(--glass-border);">
-                            <p class="text-muted small mb-2 fw-bold text-uppercase" style="letter-spacing: 1px;">🎧 Listen to Summary</p>
-                            <audio controls class="w-100 rounded" style="height: 40px; outline: none; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-                                <source src="{{ url_for('static', filename=audio_file) }}" type="audio/mpeg">
-                                Your browser does not support the audio element.
-                            </audio>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            {% endif %}
+            
 
             <div class="row mb-5">
                 <div class="col-md-4 mb-4 fade-in-up" style="animation-delay: 0.2s;">
@@ -484,29 +257,29 @@
                     </div>
                 </div>
 
-                {% if sentiment_counts %}
+                
                 <div class="col-md-4 mb-4 fade-in-up" style="animation-delay: 0.25s;">
                     <div class="glass-card p-4 h-100 d-flex flex-column">
                         <h5 class="text-center mb-4">Overall Sentiment</h5>
-                        <div id="sentiment-data" data-labels='{{ sentiment_counts.keys()|list|tojson | safe }}'
-                            data-values='{{ sentiment_counts.values()|list|tojson | safe }}' style="display:none;">
+                        <div id="sentiment-data" data-labels='["Neutral"]'
+                            data-values='[2]' style="display:none;">
                         </div>
                         <div style="flex-grow: 1; position: relative; min-height: 250px;">
                             <canvas id="sentimentChart"></canvas>
                         </div>
                     </div>
                 </div>
-                {% endif %}
+                
 
                 <div class="col-md-4 mb-4 fade-in-up" style="animation-delay: 0.3s;">
                     <div class="glass-card p-4 h-100 d-flex flex-column">
                         <h5 class="mb-4">Cluster Dominance</h5>
                         <div class="list-group list-group-flush mb-4 flex-grow-1">
-                            {% for name, count in cluster_counts.items() %}
+                            
                             <div class="list-group-item d-flex justify-content-between align-items-center">
-                                {{ name }} <span class="badge badge-cluster rounded-pill">{{ count }} items</span>
+                                0: General Topics <span class="badge badge-cluster rounded-pill">2 items</span>
                             </div>
-                            {% endfor %}
+                            
                         </div>
                         <div id="action-button-row" class="d-flex gap-2 w-100 mt-auto no-pdf">
                             <a href="/download" class="btn btn-outline-info w-50" style="border-radius: 12px; font-weight: 600;">📥 CSV</a>
@@ -516,76 +289,26 @@
                 </div>
             </div>
 
+            
 
+            
 
-            {% if wordcloud_image %}
-            <div class="row justify-content-center mb-5 fade-in-up" style="animation-delay: 0.35s;">
-                <div class="col-md-10">
-                    <div class="glass-card p-4 text-center">
-                        <h5 class="mb-4">Word Cloud</h5>
-                        <p class="text-muted small mb-3">Term size reflects TF-IDF importance across all extracted text</p>
-                        <img src="{{ url_for('static', filename=wordcloud_image) }}" alt="Word Cloud"
-                            style="max-width: 100%; height: auto; border-radius: 12px;">
-                    </div>
-                </div>
-            </div>
-            {% endif %}
+            
 
-            {% if entities or graph_data %}
-            <!-- Entity Analysis Trigger Card -->
+            
+            <!-- Knowledge Graph Trigger Card -->
             <div class="glass-card p-4 mb-5 fade-in-up text-center" style="animation-delay: 0.39s;">
-                <h4 class="mb-2">Entity Analysis</h4>
-                <p class="text-muted small mb-4">Explore extracted named entities and their interactive relationships</p>
-                
-                <div class="d-flex justify-content-center gap-3 flex-wrap">
-                    {% if entities %}
-                    <button class="btn btn-primary px-4 py-2" data-bs-toggle="modal" data-bs-target="#entitiesModal" style="border-radius: 20px; font-weight: 600; background: linear-gradient(135deg, #10b981, #059669); border: none; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); transition: transform 0.2s;">
-                        🏷️ View Named Entities
-                    </button>
-                    {% endif %}
-                    
-                    {% if graph_data %}
-                    <script id="graph-data-json" type="application/json">
-                        {{ graph_data | tojson | safe }}
-                    </script>
-                    <button class="btn btn-primary px-4 py-2" data-bs-toggle="modal" data-bs-target="#graphModal" style="border-radius: 20px; font-weight: 600; background: linear-gradient(135deg, #0ea5e9, #6366f1); border: none; box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4); transition: transform 0.2s;">
-                        🕸️ View Interactive Graph
-                    </button>
-                    {% endif %}
-                </div>
+                <h4 class="mb-2">Entity Knowledge Graph</h4>
+                <p class="text-muted small mb-4">Interactive map of how entities co-occur in the text</p>
+                <!-- Safely embed JSON data -->
+                <script id="graph-data-json" type="application/json">
+                    {"edges": [], "nodes": []}
+                </script>
+                <button class="btn btn-primary px-4 py-2" data-bs-toggle="modal" data-bs-target="#graphModal" style="border-radius: 20px; font-weight: 600; background: linear-gradient(135deg, #0ea5e9, #6366f1); border: none; box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4); transition: transform 0.2s;">
+                    🕸️ View Interactive Graph
+                </button>
             </div>
             
-            {% if entities %}
-            <!-- Named Entities Modal -->
-            <div class="modal fade" id="entitiesModal" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-lg modal-dialog-centered">
-                    <div class="modal-content" style="background: var(--bg-color); border: 1px solid var(--glass-border); border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
-                        <div class="modal-header border-0 pb-0">
-                            <h5 class="modal-title fw-bold" style="color: var(--text-main);">Named Entities Detected</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: var(--bs-btn-close-white-filter, none);"></button>
-                        </div>
-                        <div class="modal-body pt-3 pb-4">
-                            <div class="row">
-                                {% for category, items in entities.items() %}
-                                <div class="col-md-6 mb-4">
-                                    <h6 class="text-muted text-uppercase mb-3" style="letter-spacing: 1px; font-size: 0.85rem;">{{ category }}</h6>
-                                    <div class="d-flex flex-wrap gap-2">
-                                        {% for entity_name, count in items %}
-                                        <span class="badge rounded-pill entity-badge" onclick="filterTableByEntity(this); var myModalEl = document.getElementById('entitiesModal'); var modal = bootstrap.Modal.getInstance(myModalEl); modal.hide();" style="cursor: pointer; background: rgba(99, 102, 241, 0.1); color: var(--accent-primary); border: 1px solid rgba(99, 102, 241, 0.2); padding: 8px 12px; font-size: 0.85rem; font-weight: 500;">
-                                            {{ entity_name }} <span style="opacity: 0.6; margin-left: 4px; font-size: 0.75rem;">x{{ count }}</span>
-                                        </span>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-
-            {% if graph_data %}
             <!-- Knowledge Graph Modal -->
             <div class="modal fade" id="graphModal" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog modal-xl modal-dialog-centered">
@@ -607,8 +330,7 @@
                     </div>
                 </div>
             </div>
-            {% endif %}
-            {% endif %}
+            
 
             <div class="glass-card p-4 mb-5 fade-in-up" style="animation-delay: 0.4s;">
                 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
@@ -619,12 +341,32 @@
                     </div>
                 </div>
                 <div class="table-responsive" style="padding-bottom: 20px;">
-                    {{ table|safe }}
+                    <table border="1" class="dataframe table table-hover" id="resultsTable">
+  <thead>
+    <tr style="text-align: right;">
+      <th>text</th>
+      <th>Cluster</th>
+      <th>Sentiment</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Example Domain</td>
+      <td>0</td>
+      <td>⬜ Neutral</td>
+    </tr>
+    <tr>
+      <td>This domain is for use in documentation examples without needing permission. Avoid use in operations.</td>
+      <td>0</td>
+      <td>⬜ Neutral</td>
+    </tr>
+  </tbody>
+</table>
                 </div>
             </div>
             </div> <!-- End report-container -->
             </div> <!-- End results-dashboard -->
-            {% endif %}
+            
 
             <!-- Execution Logs Modal -->
             <div class="modal fade" id="logsModal" tabindex="-1" aria-hidden="true">
@@ -642,29 +384,26 @@
                             style="font-family: 'Courier New', Courier, monospace; color: #38bdf8; font-size: 0.85rem; line-height: 1.6;">
                             <!-- Logs will be dynamically injected here to match the active probe -->
                         </div>
-                        {% if metrics %}
+                        
                         <div class="modal-footer border-0 pt-0"
                             style="font-family: 'Courier New', Courier, monospace; font-size: 0.8rem; justify-content: flex-start;">
                             <div
                                 style="color: #64748b; width: 100%; border-top: 1px dashed #334155; padding-top: 10px;">
-                                <span style="color: #0ea5e9;">[DIAGNOSTICS]</span> Silhouette Score: {{
-                                metrics.silhouette_score }}<br>
-                                <span style="color: #8b5cf6;">[DIAGNOSTICS]</span> Optimal Clusters (k): {{
-                                metrics.optimal_k }}<br>
-                                <span style="color: #10b981;">[DIAGNOSTICS]</span> Vocabulary Size: {{
-                                metrics.vocab_size }} Features
+                                <span style="color: #0ea5e9;">[DIAGNOSTICS]</span> Silhouette Score: N/A<br>
+                                <span style="color: #8b5cf6;">[DIAGNOSTICS]</span> Optimal Clusters (k): 1<br>
+                                <span style="color: #10b981;">[DIAGNOSTICS]</span> Vocabulary Size: 0 Features
                             </div>
                         </div>
-                        {% endif %}
+                        
                     </div>
                 </div>
             </div>
 
 
             <!-- Chat with Website -->
-            {% if cached == False %}
-            <div class="row mt-5 justify-content-center fade-in-up" style="animation-delay: 0.4s;">
-                <div class="col-md-10">
+            
+            <div class="row mt-5 fade-in-up" style="animation-delay: 0.4s;">
+                <div class="col-12 mx-auto" style="max-width: 900px;">
                     <div class="glass-card" style="border-top: 4px solid var(--accent-primary); box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
                         <div class="card-header border-0 bg-transparent pt-5 pb-2 text-center">
                             <h3 class="chat-header-text" style="font-family: 'Outfit', sans-serif; font-weight: 700; letter-spacing: -0.5px;">
@@ -699,53 +438,7 @@
                     </div>
                 </div>
             </div>
-            {% endif %}
-
-            {% if current_user.is_authenticated %}
-            <div class="row mt-5 mb-5 fade-in-up" style="animation-delay: 0.32s;">
-                <div class="col-md-10 mx-auto">
-                    <div class="glass-card p-4 position-relative">
-                        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-                            <h5 class="m-0 d-flex align-items-center gap-2">
-                                <span>📈 Sentiment Timeline (Avg Subjectivity)</span>
-                                {% if is_subscribed %}
-                                <span class="badge bg-info bg-opacity-25 text-info rounded-pill px-3 py-2">Active Subscription</span>
-                                {% endif %}
-                            </h5>
-                            
-                            <form action="/subscribe" method="POST" class="m-0" onsubmit="event.preventDefault(); fetch('/subscribe', {method: 'POST', body: new FormData(this)}).then(() => { const btn = this.querySelector('button'); if(btn.innerText.includes('Track')) { btn.innerText = 'Unsubscribe 🔕'; btn.className = 'btn btn-info btn-sm text-white'; btn.style.color = 'white'; } else { btn.innerText = 'Track Sentiment 🔔'; btn.className = 'btn btn-outline-info btn-sm'; } });">
-                                <input type="hidden" name="url" value="{{ url }}">
-                                {% if is_subscribed %}
-                                <button type="submit" class="btn btn-info btn-sm text-white" style="border-radius: 20px; font-weight: 600; padding: 6px 16px;">
-                                    Unsubscribe 🔕
-                                </button>
-                                {% else %}
-                                <button type="submit" class="btn btn-outline-info btn-sm" style="border-radius: 20px; font-weight: 600; padding: 6px 16px;">
-                                    Track Sentiment 🔔
-                                </button>
-                                {% endif %}
-                            </form>
-                        </div>
-                        
-                        {% if time_series_data and time_series_data|length > 0 %}
-                        <div id="time-series-data" data-series='{{ time_series_data|tojson|safe }}' style="display:none;"></div>
-                        <div style="position: relative; height: 300px; width: 100%;">
-                            <canvas id="timeSeriesChart"></canvas>
-                        </div>
-                        {% if time_series_data|length == 1 %}
-                        <div class="text-center position-absolute w-100" style="bottom: 40px; left: 0; pointer-events: none;">
-                            <p class="text-muted small" style="background: var(--glass-bg); display: inline-block; padding: 4px 12px; border-radius: 12px;">Track this URL to build a sentiment timeline over multiple probes.</p>
-                        </div>
-                        {% endif %}
-                        {% else %}
-                        <div class="text-center py-5">
-                            <p class="text-muted mb-0">No timeline data available.</p>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            {% endif %}
+            
 
 
             <!-- Connect Footer -->
@@ -790,7 +483,7 @@
         <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
         <!-- External JS -->
-        <script src="{{ url_for('static', filename='js/index.js') }}?v=14.0"></script>
+        <script src="/static/js/index.js?v=14.0"></script>
 
 </body>
 
