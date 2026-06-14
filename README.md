@@ -15,7 +15,8 @@ GistProbe is not a standard wrapper around an API. It is a full-fledged NLP pipe
 - **Dynamic Dataset Generation:** Uses **Playwright** and **BeautifulSoup** to scrape the DOM dynamically, bypassing basic blocks.
 - **Unsupervised Optimization:** Instead of hardcoding K-Means clusters, it dynamically evaluates **k = 2 to 10** and selects the value with the highest **Silhouette Score** for the specific webpage.
 - **Intelligent Deduplication:** Uses `SequenceMatcher` to compute string similarity ratios, filtering out paragraphs with >85% overlap to ensure cluster quality.
-- **Generative AI Chat (RAG):** Integrates **Llama-3.1 (via Groq API)** to allow users to chat directly with the scraped contents of any webpage or compare two URLs side-by-side.
+- **RAG Generative AI Chat:** Integrates **Sentence-Transformers**, **FAISS Vector DB**, and **Llama-3.1 (via Groq API)**. The system vectorizes text, performs mathematical semantic searches, and implements a true Retrieval-Augmented Generation pipeline to answer questions without hallucinations.
+- **MLOps Telemetry:** Integrates **Weights & Biases (WandB)** to securely log mathematically optimized k-values, Silhouette Scores, and vocabulary sizes during K-Means loops.
 - **Background Automation:** Integrates **Flask-APScheduler** to autonomously re-scrape user-subscribed URLs daily, graphing subjectivity and sentiment shifts over time.
 - **Audio Summaries:** Leverages the **gTTS API** to automatically generate downloadable MP3 spoken summaries of the abstractive text chunks.
 
@@ -41,8 +42,10 @@ graph TD
     K --> L[vis.js Knowledge Graph]
     
     H & J & L --> M[Flask UI & SQLite Database]
-    M <--> N[Groq Llama-3.1 RAG Engine]
+    M <--> N[FAISS Vector DB]
+    N <--> Q[Groq Llama-3.1 RAG Engine]
     H --> O[gTTS Text-to-Speech API]
+    G --> R[WandB MLOps Tracking]
     O --> P[Downloadable MP3 Audio]
 ```
 
@@ -53,9 +56,9 @@ graph TD
 | **1. Crawl** | Playwright & BeautifulSoup | Scrapes the DOM with rotating user-agents & extracts raw text nodes. |
 | **2. Clean** | Python (Regex) & NLTK | Removes non-alphanumeric noise, normalizes text, and removes near-duplicates (>85% similarity). |
 | **3. Sentiment**| TextBlob | Computes sentiment polarity & subjectivity scoring for every extracted sentence. |
-| **4. Cluster** | scikit-learn (TF-IDF & K-Means) | Vectorizes text, computes optimal `k` via Silhouette Score, and assigns sentences to semantic clusters. |
+| **4. Cluster** | scikit-learn (TF-IDF & K-Means) | Vectorizes text, computes optimal `k` via Silhouette Score, logs metrics to **WandB**, and assigns sentences to semantic clusters. |
 | **5. Entity** | spaCy (en_core_web_sm) | Performs Named Entity Recognition (NER) to map People, Organizations, and Locations. |
-| **6. Synthesize**| Groq API & gTTS | Generates abstractive AI summaries and converts them into an MP3 audio file. |
+| **6. Synthesize**| FAISS & Groq API | Computes Hugging Face embeddings, performs semantic similarity searches, and implements RAG to generate grounded abstractive AI summaries. |
 
 ---
 
@@ -92,7 +95,9 @@ GistProbe uses **SQLAlchemy** with an SQLite database to cache NLP results and m
 - `spaCy` — Named Entity Recognition (NER)
 - `NLTK` — Text tokenization & stop words
 - `TextBlob` — Sentiment polarity & subjectivity scoring
+- `Sentence-Transformers` & `FAISS` — Local embedding generation and Vector Database retrieval
 - `Groq API (Llama-3.1)` — Conversational RAG agent and media debate analysis
+- `Weights & Biases (WandB)` — MLOps experiment tracking and telemetry
 - `gTTS API` — Text-to-Speech audio generation
 
 **Backend & Automation:**

@@ -4,6 +4,8 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 from sklearn.metrics.pairwise import cosine_similarity
 from difflib import SequenceMatcher
+import wandb
+import os
 
 def _similarity(a, b):
     return SequenceMatcher(None, a, b).ratio()
@@ -63,6 +65,15 @@ def perform_clustering(df):
     """
     print(f"\n--- Phase 3: Intelligent Clustering (GistProbe) ---")
 
+    # Initialize wandb run for MLOps tracking
+    try:
+        if os.getenv("WANDB_API_KEY"):
+            wandb.init(project="GistProbe", job_type="clustering", reinit=True)
+        else:
+            wandb.init(mode="disabled")
+    except Exception as e:
+        print(f"WandB init error: {e}")
+
     if df.empty or len(df) < 3:
         print("Data volume too low for clustering. Defaulting to Cluster 0.")
         df["cluster"] = 0
@@ -108,6 +119,11 @@ def perform_clustering(df):
             # Silhouette Score: closer to 1 = better separation
             score = silhouette_score(X, labels)
             print(f"  k={k} → Silhouette Score: {score:.4f}")
+            
+            try:
+                wandb.log({"k": k, "silhouette_score": score})
+            except Exception:
+                pass
 
             if score > best_score:
                 best_score = score
@@ -170,6 +186,12 @@ def perform_clustering(df):
         "optimal_k": best_k,
         "vocab_size": vocab_size
     }
+    
+    try:
+        wandb.log({"optimal_k": best_k, "best_silhouette_score": best_score, "vocab_size": vocab_size})
+        wandb.finish()
+    except Exception:
+        pass
 
     # Package TF-IDF data for word cloud generation
     tfidf_data = {"matrix": X, "terms": terms}

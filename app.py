@@ -19,6 +19,7 @@ from clustering import perform_clustering, compute_similarity
 from wordcloud_gen import generate_wordcloud, cleanup_old_wordclouds
 from ner import extract_entities
 from audio_gen import generate_summary_audio, cleanup_old_audio
+from rag import build_faiss_index, retrieve_context
 
 load_dotenv()
 
@@ -291,9 +292,14 @@ def process_url():
 
     _add_time_series(result, url)
     
-    # Save context for Groq chat
+    # Save context for RAG Groq chat
     user_key = current_user.id if current_user.is_authenticated else request.remote_addr
-    chat_contexts[user_key] = " ".join(result.get("cleaned_text", []))
+    texts = result.get("cleaned_text", [])
+    faiss_index = build_faiss_index(texts)
+    chat_contexts[user_key] = {
+        "texts": texts,
+        "index": faiss_index
+    }
     
     return render_template("index.html", cached=False, **result)
 
@@ -341,13 +347,16 @@ def chat_api():
         return jsonify({"error": "Empty question."}), 400
         
     user_key = current_user.id if current_user.is_authenticated else request.remote_addr
-    context_text = chat_contexts.get(user_key, "")
+    context_data = chat_contexts.get(user_key, {})
     
-    if not context_text:
+    texts = context_data.get("texts", [])
+    index = context_data.get("index", None)
+    
+    if not texts or not index:
         return jsonify({"error": "No website context found. Please probe a URL first."}), 400
         
-    # Truncate context to ~25k chars to fit inside Groq token limit safely
-    context_text = context_text[:25000]
+    # RAG Retrieval: Extract exactly the top 7 most semantically relevant chunks for the question
+    context_text = retrieve_context(question, index, texts, top_k=7)
     
     fact_check = data.get("fact_check", False)
     

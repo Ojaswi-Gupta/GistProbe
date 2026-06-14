@@ -18,10 +18,13 @@ def _gistprobe_color_func(word, font_size, position, orientation, random_state=N
 
 
 def cleanup_old_wordclouds():
-    """Remove old word cloud images to prevent disk clutter."""
+    """Remove old word cloud images (older than 1 hour) to prevent disk clutter."""
+    import time
+    now = time.time()
     for f in glob.glob("static/wordcloud_*.png"):
         try:
-            os.remove(f)
+            if os.stat(f).st_mtime < now - 3600:
+                os.remove(f)
         except OSError:
             pass
 

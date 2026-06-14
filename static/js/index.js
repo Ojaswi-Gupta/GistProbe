@@ -1,5 +1,5 @@
 // App Init Loader Logic
-window.addEventListener('load', function () {
+document.addEventListener('DOMContentLoaded', function () {
     const loader = document.getElementById('app-init-loader');
     const mainContent = document.getElementById('main-content');
 
@@ -65,8 +65,12 @@ function handleFormSubmit(e) {
         `[INFO] [${time}] analyser.py: Running TextBlob sentiment polarity metrics...`,
         `[INFO] [${time}] clustering.py: --- Phase 3: Semantic Clustering ---`,
         `[INFO] [${time}] clustering.py: Computing TF-IDF Document-Term Matrix (max_features=1000)...`,
+        `[INFO] [${time}] clustering.py: Running K-Means loop (k=2 to 10) to find optimal Silhouette Score...`,
         `[INFO] [${time}] clustering.py: Initializing MiniBatchKMeans algorithm (n_clusters=optimal)...`,
+        `[INFO] [${time}] clustering.py: Logging evaluation metrics to Weights & Biases (WandB)...`,
         `[INFO] [${time}] clustering.py: Generating AI Executive Summary via extractive density...`,
+        `[INFO] [${time}] rag.py: Generating Hugging Face embeddings (all-MiniLM-L6-v2)...`,
+        `[INFO] [${time}] rag.py: Building local FAISS Vector Index for semantic retrieval...`,
         `[INFO] [${time}] app.py: Saved results to results_session.csv`,
         `[INFO] [${time}] app.py: Pipeline Execution Complete. Rendering UI.`
     ];

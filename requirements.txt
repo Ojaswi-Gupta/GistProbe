@@ -94,3 +94,6 @@ playwright==1.44.0
 playwright-stealth==2.0.3
 gTTS==2.5.4
 Flask-APScheduler==1.13.1
+faiss-cpu
+sentence-transformers
+wandb

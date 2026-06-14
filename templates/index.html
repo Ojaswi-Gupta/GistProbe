@@ -631,7 +631,8 @@
                                 <span style="color: #8b5cf6;">[DIAGNOSTICS]</span> Optimal Clusters (k): {{
                                 metrics.optimal_k }}<br>
                                 <span style="color: #10b981;">[DIAGNOSTICS]</span> Vocabulary Size: {{
-                                metrics.vocab_size }} Features
+                                metrics.vocab_size }} Features<br>
+                                <span style="color: #f59e0b;">[MLOPS]</span> Telemetry tracked via Weights & Biases (W&B)
                             </div>
                         </div>
                         {% endif %}
@@ -677,7 +678,7 @@
                             <h3 class="chat-header-text mb-2" style="font-family: 'Outfit', sans-serif; font-weight: 700; letter-spacing: -0.5px;">
                                 💬 Chat with this Website
                             </h3>
-                            <p class="text-muted small mb-0">Ask questions about the content we just probed. <span style="color: #0ea5e9; font-weight: 600;">Powered by Groq AI.</span></p>
+                            <p class="text-muted small mb-0">Ask questions about the content we just probed. <span style="color: #0ea5e9; font-weight: 600;">Powered by Groq AI & FAISS Vector RAG.</span></p>
                         </div>
                         <div class="card-body p-4 d-flex flex-column flex-grow-1">
                             <div id="chat-history" class="mb-3 p-3 rounded-4 chat-history-box" style="flex-grow: 1; min-height: 250px; max-height: 350px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;">

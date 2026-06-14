@@ -30,9 +30,12 @@ def generate_summary_audio(takeaways, session_id):
         return None
 
 def cleanup_old_audio():
-    """Remove old audio files to prevent disk clutter."""
+    """Remove old audio files (older than 1 hour) to prevent disk clutter."""
+    import time
+    now = time.time()
     for f in glob.glob("static/audio_*.mp3"):
         try:
-            os.remove(f)
+            if os.stat(f).st_mtime < now - 3600:
+                os.remove(f)
         except OSError:
             pass
