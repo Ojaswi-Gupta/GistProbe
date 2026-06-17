@@ -42,8 +42,12 @@
     <nav class="gp-navbar" id="gp-navbar">
         <a href="/" class="gp-navbar-brand">⚡ GistProbe</a>
         <div class="gp-navbar-links">
-            <a href="https://github.com/Ojaswi-Gupta/GistProbe" target="_blank" rel="noopener" class="gp-nav-link" title="View Source">
-                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+            <a href="https://github.com/Ojaswi-Gupta/GistProbe" target="_blank" rel="noopener" class="gp-nav-link"
+                title="View Source">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                    <path
+                        d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+                </svg>
                 GitHub
             </a>
             <a href="/compare" class="gp-nav-link" title="Compare two URLs side-by-side">
@@ -57,11 +61,13 @@
                 🚪 Logout
             </a>
             {% else %}
-            <a href="/login" class="gp-nav-link" style="color: var(--accent-primary); font-weight: 600;" title="Sign in with Google">
+            <a href="/login" class="gp-nav-link" style="color: var(--accent-primary); font-weight: 600;"
+                title="Sign in with Google">
                 🔐 Sign In
             </a>
             {% endif %}
-            <button class="gp-nav-link" id="theme-toggle" style="background:none; cursor:pointer;" title="Toggle Dark Mode">
+            <button class="gp-nav-link" id="theme-toggle" style="background:none; cursor:pointer;"
+                title="Toggle Dark Mode">
                 <span id="theme-icon">🌙</span>
             </button>
         </div>
@@ -136,13 +142,15 @@
                 <!-- Skeleton 3-Card Row (Charts & Dominance) -->
                 <div class="row mb-5">
                     <div class="col-md-4 mb-4">
-                        <div class="glass-card p-4 h-100 d-flex flex-column align-items-center justify-content-center" style="min-height: 350px;">
+                        <div class="glass-card p-4 h-100 d-flex flex-column align-items-center justify-content-center"
+                            style="min-height: 350px;">
                             <div class="skeleton-text mb-4" style="width: 150px; height: 18px;"></div>
                             <div class="skeleton-circle" style="width: 180px; height: 180px;"></div>
                         </div>
                     </div>
                     <div class="col-md-4 mb-4">
-                        <div class="glass-card p-4 h-100 d-flex flex-column align-items-center justify-content-center" style="min-height: 350px;">
+                        <div class="glass-card p-4 h-100 d-flex flex-column align-items-center justify-content-center"
+                            style="min-height: 350px;">
                             <div class="skeleton-text mb-4" style="width: 150px; height: 18px;"></div>
                             <div class="skeleton-circle" style="width: 180px; height: 180px;"></div>
                         </div>
@@ -217,26 +225,50 @@
                         <table class="table" style="opacity: 0.5;">
                             <thead>
                                 <tr>
-                                    <th><div class="skeleton-text" style="width: 120px;"></div></th>
-                                    <th><div class="skeleton-text" style="width: 80px;"></div></th>
-                                    <th><div class="skeleton-text" style="width: 90px;"></div></th>
+                                    <th>
+                                        <div class="skeleton-text" style="width: 120px;"></div>
+                                    </th>
+                                    <th>
+                                        <div class="skeleton-text" style="width: 80px;"></div>
+                                    </th>
+                                    <th>
+                                        <div class="skeleton-text" style="width: 90px;"></div>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td><div class="skeleton-text w-100"></div></td>
-                                    <td><div class="skeleton-text" style="width: 30px;"></div></td>
-                                    <td><div class="skeleton-badge" style="width: 80px; height: 24px;"></div></td>
+                                    <td>
+                                        <div class="skeleton-text w-100"></div>
+                                    </td>
+                                    <td>
+                                        <div class="skeleton-text" style="width: 30px;"></div>
+                                    </td>
+                                    <td>
+                                        <div class="skeleton-badge" style="width: 80px; height: 24px;"></div>
+                                    </td>
                                 </tr>
                                 <tr>
-                                    <td><div class="skeleton-text w-75"></div></td>
-                                    <td><div class="skeleton-text" style="width: 30px;"></div></td>
-                                    <td><div class="skeleton-badge" style="width: 80px; height: 24px;"></div></td>
+                                    <td>
+                                        <div class="skeleton-text w-75"></div>
+                                    </td>
+                                    <td>
+                                        <div class="skeleton-text" style="width: 30px;"></div>
+                                    </td>
+                                    <td>
+                                        <div class="skeleton-badge" style="width: 80px; height: 24px;"></div>
+                                    </td>
                                 </tr>
                                 <tr>
-                                    <td><div class="skeleton-text w-100"></div></td>
-                                    <td><div class="skeleton-text" style="width: 30px;"></div></td>
-                                    <td><div class="skeleton-badge" style="width: 80px; height: 24px;"></div></td>
+                                    <td>
+                                        <div class="skeleton-text w-100"></div>
+                                    </td>
+                                    <td>
+                                        <div class="skeleton-text" style="width: 30px;"></div>
+                                    </td>
+                                    <td>
+                                        <div class="skeleton-badge" style="width: 80px; height: 24px;"></div>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -248,149 +280,157 @@
             <div id="initial-features" class="w-100">
                 <!-- Feature Highlight Grid (Only visible on initial load) -->
                 <div class="row mt-4 mb-5 pt-3 fade-in-up" style="animation-delay: 0.2s;">
-                <div class="col-md-4 mb-4">
-                    <div class="glass-card p-4 h-100 text-center">
-                        <div class="feature-icon">🧠</div>
-                        <h5>Semantic Clustering</h5>
-                        <p class="text-muted small mt-3">Powered by K-Means & TF-IDF math to intelligently group related
-                            paragraphs without relying on expensive LLMs.</p>
+                    <div class="col-md-4 mb-4">
+                        <div class="glass-card p-4 h-100 text-center">
+                            <div class="feature-icon">🧠</div>
+                            <h5>Semantic Clustering</h5>
+                            <p class="text-muted small mt-3">Powered by K-Means & TF-IDF math to intelligently group
+                                related
+                                paragraphs without relying on expensive LLMs.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="glass-card p-4 h-100 text-center">
+                            <div class="feature-icon">🎭</div>
+                            <h5>Sentiment Analysis</h5>
+                            <p class="text-muted small mt-3">Real-time TextBlob polarity scoring detects whether the
+                                content
+                                is
+                                positive, negative, and factual vs. opinionated.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="glass-card p-4 h-100 text-center">
+                            <div class="feature-icon">⚡</div>
+                            <h5>AI Summarization</h5>
+                            <p class="text-muted small mt-3">Extracts the most information-dense sentences instantly
+                                using
+                                Document-Term Matrices to generate Executive Summaries.</p>
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-4 mb-4">
-                    <div class="glass-card p-4 h-100 text-center">
-                        <div class="feature-icon">🎭</div>
-                        <h5>Sentiment Analysis</h5>
-                        <p class="text-muted small mt-3">Real-time TextBlob polarity scoring detects whether the content
-                            is
-                            positive, negative, and factual vs. opinionated.</p>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-4">
-                    <div class="glass-card p-4 h-100 text-center">
-                        <div class="feature-icon">⚡</div>
-                        <h5>AI Summarization</h5>
-                        <p class="text-muted small mt-3">Extracts the most information-dense sentences instantly using
-                            Document-Term Matrices to generate Executive Summaries.</p>
-                    </div>
-                </div>
-            </div>
 
-            <!-- How It Works: 3-Step Pipeline -->
-            <div class="row justify-content-center mb-5 fade-in-up" style="animation-delay: 0.3s;">
-                <div class="col-md-10">
-                    <p class="text-uppercase fw-bold text-muted small text-center mb-4" style="letter-spacing: 2px;">How
-                        It Works</p>
-                    <div class="d-flex align-items-start justify-content-center gap-0 flex-wrap">
+                <!-- How It Works: 3-Step Pipeline -->
+                <div class="row justify-content-center mb-5 fade-in-up" style="animation-delay: 0.3s;">
+                    <div class="col-md-10">
+                        <p class="text-uppercase fw-bold text-muted small text-center mb-4"
+                            style="letter-spacing: 2px;">How
+                            It Works</p>
+                        <div class="d-flex align-items-start justify-content-center gap-0 flex-wrap">
 
-                        <!-- Step 1 -->
-                        <div class="text-center px-4" style="flex: 1; min-width: 160px;">
-                            <div
-                                style="width: 48px; height: 48px; border-radius: 50%; background: rgba(14,165,233,0.1); border: 1.5px solid rgba(14,165,233,0.4); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 1.1rem;">
-                                🕷️</div>
-                            <h6 class="fw-bold mb-1">01 — Crawl</h6>
-                            <p class="text-muted" style="font-size: 0.78rem; line-height: 1.5;">BeautifulSoup scrapes
-                                the target URL, bypassing rate limits with rotating user-agents.</p>
-                        </div>
-
-                        <!-- Connector -->
-                        <div class="d-none d-md-flex align-items-center justify-content-center"
-                            style="flex: 0; padding-top: 24px;">
-                            <div
-                                style="width: 60px; height: 1.5px; background: linear-gradient(90deg, rgba(14,165,233,0.4), rgba(139,92,246,0.4));">
-                            </div>
-                            <span style="color: rgba(14,165,233,0.5); font-size: 0.7rem; margin-left: 4px;">▶</span>
-                        </div>
-
-                        <!-- Step 2 -->
-                        <div class="text-center px-4" style="flex: 1; min-width: 160px;">
-                            <div
-                                style="width: 48px; height: 48px; border-radius: 50%; background: rgba(139,92,246,0.1); border: 1.5px solid rgba(139,92,246,0.4); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 1.1rem;">
-                                🔬</div>
-                            <h6 class="fw-bold mb-1">02 — Analyse</h6>
-                            <p class="text-muted" style="font-size: 0.78rem; line-height: 1.5;">NLTK cleans text. TextBlob scores sentiment. spaCy extracts Named Entities.</p>
-                        </div>
-
-                        <!-- Connector -->
-                        <div class="d-none d-md-flex align-items-center justify-content-center"
-                            style="flex: 0; padding-top: 24px;">
-                            <div
-                                style="width: 60px; height: 1.5px; background: linear-gradient(90deg, rgba(139,92,246,0.4), rgba(16,185,129,0.4));">
-                            </div>
-                            <span style="color: rgba(139,92,246,0.5); font-size: 0.7rem; margin-left: 4px;">▶</span>
-                        </div>
-
-                        <!-- Step 3 -->
-                        <div class="text-center px-4" style="flex: 1; min-width: 160px;">
-                            <div
-                                style="width: 48px; height: 48px; border-radius: 50%; background: rgba(16,185,129,0.1); border: 1.5px solid rgba(16,185,129,0.4); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 1.1rem;">
-                                🧩</div>
-                            <h6 class="fw-bold mb-1">03 — Cluster</h6>
-                            <p class="text-muted" style="font-size: 0.78rem; line-height: 1.5;">TF-IDF vectorizes text.
-                                K-Means finds optimal groupings. Extractive NLP summarizes key insights.</p>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
-            <!-- Live Stats Counter -->
-            <div class="row justify-content-center mb-5 fade-in-up" style="animation-delay: 0.4s;">
-                <div class="col-md-10">
-                    <div class="glass-card p-4">
-                        <div class="row text-center">
-                            <div class="col-4" style="border-right: 1px solid var(--glass-border);">
+                            <!-- Step 1 -->
+                            <div class="text-center px-4" style="flex: 1; min-width: 160px;">
                                 <div
-                                    style="font-size: 2rem; font-weight: 800; font-family: 'Outfit', sans-serif; background: linear-gradient(135deg, #38bdf8, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-                                    5</div>
-                                <div class="text-muted small mt-1">NLP Pipeline Stages</div>
+                                    style="width: 48px; height: 48px; border-radius: 50%; background: rgba(14,165,233,0.1); border: 1.5px solid rgba(14,165,233,0.4); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 1.1rem;">
+                                    🕷️</div>
+                                <h6 class="fw-bold mb-1">01 — Crawl</h6>
+                                <p class="text-muted" style="font-size: 0.78rem; line-height: 1.5;">BeautifulSoup
+                                    scrapes
+                                    the target URL, bypassing rate limits with rotating user-agents.</p>
                             </div>
-                            <div class="col-4" style="border-right: 1px solid var(--glass-border);">
+
+                            <!-- Connector -->
+                            <div class="d-none d-md-flex align-items-center justify-content-center"
+                                style="flex: 0; padding-top: 24px;">
                                 <div
-                                    style="font-size: 2rem; font-weight: 800; font-family: 'Outfit', sans-serif; background: linear-gradient(135deg, #38bdf8, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-                                    9×</div>
-                                <div class="text-muted small mt-1">k Values Evaluated</div>
+                                    style="width: 60px; height: 1.5px; background: linear-gradient(90deg, rgba(14,165,233,0.4), rgba(139,92,246,0.4));">
+                                </div>
+                                <span style="color: rgba(14,165,233,0.5); font-size: 0.7rem; margin-left: 4px;">▶</span>
                             </div>
-                            <div class="col-4">
+
+                            <!-- Step 2 -->
+                            <div class="text-center px-4" style="flex: 1; min-width: 160px;">
                                 <div
-                                    style="font-size: 2rem; font-weight: 800; font-family: 'Outfit', sans-serif; background: linear-gradient(135deg, #38bdf8, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-                                    0$</div>
-                                <div class="text-muted small mt-1">No LLM API Cost</div>
+                                    style="width: 48px; height: 48px; border-radius: 50%; background: rgba(139,92,246,0.1); border: 1.5px solid rgba(139,92,246,0.4); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 1.1rem;">
+                                    🔬</div>
+                                <h6 class="fw-bold mb-1">02 — Analyse</h6>
+                                <p class="text-muted" style="font-size: 0.78rem; line-height: 1.5;">NLTK cleans text.
+                                    TextBlob scores sentiment. spaCy extracts Named Entities.</p>
+                            </div>
+
+                            <!-- Connector -->
+                            <div class="d-none d-md-flex align-items-center justify-content-center"
+                                style="flex: 0; padding-top: 24px;">
+                                <div
+                                    style="width: 60px; height: 1.5px; background: linear-gradient(90deg, rgba(139,92,246,0.4), rgba(16,185,129,0.4));">
+                                </div>
+                                <span style="color: rgba(139,92,246,0.5); font-size: 0.7rem; margin-left: 4px;">▶</span>
+                            </div>
+
+                            <!-- Step 3 -->
+                            <div class="text-center px-4" style="flex: 1; min-width: 160px;">
+                                <div
+                                    style="width: 48px; height: 48px; border-radius: 50%; background: rgba(16,185,129,0.1); border: 1.5px solid rgba(16,185,129,0.4); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 1.1rem;">
+                                    🧩</div>
+                                <h6 class="fw-bold mb-1">03 — Cluster</h6>
+                                <p class="text-muted" style="font-size: 0.78rem; line-height: 1.5;">TF-IDF vectorizes
+                                    text.
+                                    K-Means finds optimal groupings. Extractive NLP summarizes key insights.</p>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Stats Counter -->
+                <div class="row justify-content-center mb-5 fade-in-up" style="animation-delay: 0.4s;">
+                    <div class="col-md-10">
+                        <div class="glass-card p-4">
+                            <div class="row text-center">
+                                <div class="col-4" style="border-right: 1px solid var(--glass-border);">
+                                    <div
+                                        style="font-size: 2rem; font-weight: 800; font-family: 'Outfit', sans-serif; background: linear-gradient(135deg, #38bdf8, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                                        5</div>
+                                    <div class="text-muted small mt-1">NLP Pipeline Stages</div>
+                                </div>
+                                <div class="col-4" style="border-right: 1px solid var(--glass-border);">
+                                    <div
+                                        style="font-size: 2rem; font-weight: 800; font-family: 'Outfit', sans-serif; background: linear-gradient(135deg, #38bdf8, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                                        9×</div>
+                                    <div class="text-muted small mt-1">k Values Evaluated</div>
+                                </div>
+                                <div class="col-4">
+                                    <div
+                                        style="font-size: 2rem; font-weight: 800; font-family: 'Outfit', sans-serif; background: linear-gradient(135deg, #38bdf8, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                                        0$</div>
+                                    <div class="text-muted small mt-1">No LLM API Cost</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Tech Stack Pills -->
-            <div class="row justify-content-center mb-5 fade-in-up" style="animation-delay: 0.5s;">
-                <div class="col-md-10 text-center">
-                    <p class="text-uppercase fw-bold text-muted small mb-3" style="letter-spacing: 2px;">Built With</p>
-                    <div class="d-flex flex-wrap justify-content-center gap-2">
-                        <span class="badge rounded-pill px-3 py-2"
-                            style="background: rgba(14,165,233,0.08); color: #0ea5e9; border: 1px solid rgba(14,165,233,0.2); font-weight: 500; font-size: 0.8rem;">Python</span>
-                        <span class="badge rounded-pill px-3 py-2"
-                            style="background: rgba(14,165,233,0.08); color: #0ea5e9; border: 1px solid rgba(14,165,233,0.2); font-weight: 500; font-size: 0.8rem;">Flask</span>
-                        <span class="badge rounded-pill px-3 py-2"
-                            style="background: rgba(139,92,246,0.08); color: #8b5cf6; border: 1px solid rgba(139,92,246,0.2); font-weight: 500; font-size: 0.8rem;">scikit-learn</span>
-                        <span class="badge rounded-pill px-3 py-2"
-                            style="background: rgba(139,92,246,0.08); color: #8b5cf6; border: 1px solid rgba(139,92,246,0.2); font-weight: 500; font-size: 0.8rem;">K-Means</span>
-                        <span class="badge rounded-pill px-3 py-2"
-                            style="background: rgba(139,92,246,0.08); color: #8b5cf6; border: 1px solid rgba(139,92,246,0.2); font-weight: 500; font-size: 0.8rem;">TF-IDF</span>
-                        <span class="badge rounded-pill px-3 py-2"
-                            style="background: rgba(16,185,129,0.08); color: #10b981; border: 1px solid rgba(16,185,129,0.2); font-weight: 500; font-size: 0.8rem;">NLTK</span>
-                        <span class="badge rounded-pill px-3 py-2"
-                            style="background: rgba(16,185,129,0.08); color: #10b981; border: 1px solid rgba(16,185,129,0.2); font-weight: 500; font-size: 0.8rem;">TextBlob</span>
-                        <span class="badge rounded-pill px-3 py-2"
-                            style="background: rgba(16,185,129,0.08); color: #10b981; border: 1px solid rgba(16,185,129,0.2); font-weight: 500; font-size: 0.8rem;">BeautifulSoup</span>
-                        <span class="badge rounded-pill px-3 py-2"
-                            style="background: rgba(236,72,153,0.08); color: #ec4899; border: 1px solid rgba(236,72,153,0.2); font-weight: 500; font-size: 0.8rem;">spaCy</span>
-                        <span class="badge rounded-pill px-3 py-2"
-                            style="background: rgba(245,158,11,0.08); color: #f59e0b; border: 1px solid rgba(245,158,11,0.2); font-weight: 500; font-size: 0.8rem;">Chart.js</span>
-                        <span class="badge rounded-pill px-3 py-2"
-                            style="background: rgba(245,158,11,0.08); color: #f59e0b; border: 1px solid rgba(245,158,11,0.2); font-weight: 500; font-size: 0.8rem;">DataTables</span>
+                <!-- Tech Stack Pills -->
+                <div class="row justify-content-center mb-5 fade-in-up" style="animation-delay: 0.5s;">
+                    <div class="col-md-10 text-center">
+                        <p class="text-uppercase fw-bold text-muted small mb-3" style="letter-spacing: 2px;">Built With
+                        </p>
+                        <div class="d-flex flex-wrap justify-content-center gap-2">
+                            <span class="badge rounded-pill px-3 py-2"
+                                style="background: rgba(14,165,233,0.08); color: #0ea5e9; border: 1px solid rgba(14,165,233,0.2); font-weight: 500; font-size: 0.8rem;">Python</span>
+                            <span class="badge rounded-pill px-3 py-2"
+                                style="background: rgba(14,165,233,0.08); color: #0ea5e9; border: 1px solid rgba(14,165,233,0.2); font-weight: 500; font-size: 0.8rem;">Flask</span>
+                            <span class="badge rounded-pill px-3 py-2"
+                                style="background: rgba(139,92,246,0.08); color: #8b5cf6; border: 1px solid rgba(139,92,246,0.2); font-weight: 500; font-size: 0.8rem;">scikit-learn</span>
+                            <span class="badge rounded-pill px-3 py-2"
+                                style="background: rgba(139,92,246,0.08); color: #8b5cf6; border: 1px solid rgba(139,92,246,0.2); font-weight: 500; font-size: 0.8rem;">K-Means</span>
+                            <span class="badge rounded-pill px-3 py-2"
+                                style="background: rgba(139,92,246,0.08); color: #8b5cf6; border: 1px solid rgba(139,92,246,0.2); font-weight: 500; font-size: 0.8rem;">TF-IDF</span>
+                            <span class="badge rounded-pill px-3 py-2"
+                                style="background: rgba(16,185,129,0.08); color: #10b981; border: 1px solid rgba(16,185,129,0.2); font-weight: 500; font-size: 0.8rem;">NLTK</span>
+                            <span class="badge rounded-pill px-3 py-2"
+                                style="background: rgba(16,185,129,0.08); color: #10b981; border: 1px solid rgba(16,185,129,0.2); font-weight: 500; font-size: 0.8rem;">TextBlob</span>
+                            <span class="badge rounded-pill px-3 py-2"
+                                style="background: rgba(16,185,129,0.08); color: #10b981; border: 1px solid rgba(16,185,129,0.2); font-weight: 500; font-size: 0.8rem;">BeautifulSoup</span>
+                            <span class="badge rounded-pill px-3 py-2"
+                                style="background: rgba(236,72,153,0.08); color: #ec4899; border: 1px solid rgba(236,72,153,0.2); font-weight: 500; font-size: 0.8rem;">spaCy</span>
+                            <span class="badge rounded-pill px-3 py-2"
+                                style="background: rgba(245,158,11,0.08); color: #f59e0b; border: 1px solid rgba(245,158,11,0.2); font-weight: 500; font-size: 0.8rem;">Chart.js</span>
+                            <span class="badge rounded-pill px-3 py-2"
+                                style="background: rgba(245,158,11,0.08); color: #f59e0b; border: 1px solid rgba(245,158,11,0.2); font-weight: 500; font-size: 0.8rem;">DataTables</span>
+                        </div>
                     </div>
                 </div>
-            </div>
             </div> <!-- End initial-features -->
             {% endif %}
 
@@ -412,7 +452,8 @@
                         <div class="col-md-8">
                             <div class="glass-card p-3 text-center"
                                 style="border: 1px solid rgba(245,158,11,0.3); background: rgba(245,158,11,0.05);">
-                                <span style="color: #f59e0b; font-size: 0.85rem;">⚡ Cached Result — Loaded instantly from last
+                                <span style="color: #f59e0b; font-size: 0.85rem;">⚡ Cached Result — Loaded instantly
+                                    from last
                                     probe. <a href="/" style="color: #0ea5e9;">Run a fresh probe →</a></span>
                             </div>
                         </div>
@@ -422,7 +463,8 @@
                     <div class="text-center mb-5 fade-in-up" style="animation-delay: 0.1s;">
                         <p class="text-muted mb-1 small text-uppercase fw-bold">Active Probe Target</p>
                         <div class="mb-2">
-                            <a href="{{ url }}" target="_blank" class="active-url fw-bold fs-5 mb-0" style="word-break: break-all;">{{ url }}</a>
+                            <a href="{{ url }}" target="_blank" class="active-url fw-bold fs-5 mb-0"
+                                style="word-break: break-all;">{{ url }}</a>
                         </div>
                         <div>
                             <button class="btn btn-sm no-pdf mt-2"
@@ -433,175 +475,233 @@
                         </div>
                     </div>
 
-            <div id="nlp-data" data-labels='{{ cluster_counts.keys()|list|tojson | safe }}'
-                data-values='{{ cluster_counts.values()|list|tojson | safe }}' style="display:none;">
-            </div>
+                    <div id="nlp-data" data-labels='{{ cluster_counts.keys()|list|tojson | safe }}'
+                        data-values='{{ cluster_counts.values()|list|tojson | safe }}' style="display:none;">
+                    </div>
 
-            {% if takeaways %}
-            <div class="row justify-content-center mb-5 fade-in-up" style="animation-delay: 0.15s;">
-                <div class="col-md-10">
-                    <div class="glass-card p-4" style="border-left: 4px solid var(--accent-primary);">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 class="mb-0 d-flex align-items-center" style="color: var(--text-main);">
-                                <span class="fs-4 me-2">✨</span> AI Executive Summary
-                            </h5>
-                            {% if avg_subjectivity is defined %}
-                            <div class="text-end">
-                                <span
-                                    class="badge rounded-pill {% if avg_subjectivity > 0.4 %}bg-danger{% elif avg_subjectivity > 0.2 %}bg-warning text-dark{% else %}bg-success{% endif %} mb-1"
-                                    style="font-size: 0.75rem;">
-                                    {% if avg_subjectivity > 0.4 %}Opinionated{% elif avg_subjectivity > 0.2 %}Mixed
-                                    Fact/Opinion{% else %}Highly Factual{% endif %}
-                                </span>
+                    {% if processing_time_sec %}
+                    <div class="row justify-content-center mb-5 fade-in-up">
+                        <div class="col-md-10">
+                            <div class="glass-card p-4 text-center"
+                                style="border: 2px solid #10b981; background: rgba(16, 185, 129, 0.05);">
+                                <h5 style="color: #10b981; font-weight: 700; margin-bottom: 10px;">📉 Operational Time
+                                    Saved</h5>
+                                <p class="mb-0" style="font-size: 1.1rem;">
+                                    Estimated Human Reading Time: <span class="fw-bold text-white">{{ human_time_mins }}
+                                        mins</span>
+                                    <span class="mx-2 text-muted">|</span>
+                                    AI Processing Time: <span class="fw-bold text-white">{{ processing_time_sec
+                                        }}s</span>
+                                </p>
                             </div>
-                            {% endif %}
                         </div>
-                        <ul class="mb-0" style="color: var(--text-muted); line-height: 1.6;">
-                            {% for item in takeaways %}
-                            <li class="mb-2 interactive-takeaway" onclick="filterTableByTakeaway(this)"
-                                title="Click to find in table">{{ item }}</li>
-                            {% endfor %}
-                        </ul>
-                        {% if audio_file %}
-                        <div class="mt-4 pt-3 text-center" style="border-top: 1px solid var(--glass-border);">
-                            <p class="text-muted small mb-2 fw-bold text-uppercase" style="letter-spacing: 1px;">🎧 Listen to Summary</p>
-                            <audio controls class="w-100 rounded" style="height: 40px; outline: none; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-                                <source src="{{ url_for('static', filename=audio_file) }}" type="audio/mpeg">
-                                Your browser does not support the audio element.
-                            </audio>
+                    </div>
+                    {% endif %}
+
+                    {% if takeaways %}
+                    <div class="row justify-content-center mb-5 fade-in-up" style="animation-delay: 0.15s;">
+                        <div class="col-md-10">
+                            <div class="glass-card p-4" style="border-left: 4px solid var(--accent-primary);">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="mb-0 d-flex align-items-center" style="color: var(--text-main);">
+                                        <span class="fs-4 me-2">✨</span> AI Executive Summary
+                                    </h5>
+                                    {% if avg_subjectivity is defined %}
+                                    <div class="text-end">
+                                        <span
+                                            class="badge rounded-pill {% if avg_subjectivity > 0.4 %}bg-danger{% elif avg_subjectivity > 0.2 %}bg-warning text-dark{% else %}bg-success{% endif %} mb-1"
+                                            style="font-size: 0.75rem;">
+                                            {% if avg_subjectivity > 0.4 %}Opinionated{% elif avg_subjectivity > 0.2
+                                            %}Mixed
+                                            Fact/Opinion{% else %}Highly Factual{% endif %}
+                                        </span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <ul class="mb-0" style="color: var(--text-muted); line-height: 1.6;">
+                                    {% for item in takeaways %}
+                                    <li class="mb-2 interactive-takeaway" onclick="filterTableByTakeaway(this)"
+                                        title="Click to find in table">{{ item }}</li>
+                                    {% endfor %}
+                                </ul>
+                                {% if audio_file %}
+                                <div class="mt-4 pt-3 text-center" style="border-top: 1px solid var(--glass-border);">
+                                    <p class="text-muted small mb-2 fw-bold text-uppercase"
+                                        style="letter-spacing: 1px;">🎧 Listen to Summary</p>
+                                    <audio controls class="w-100 rounded"
+                                        style="height: 40px; outline: none; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                                        <source src="{{ url_for('static', filename=audio_file) }}" type="audio/mpeg">
+                                        Your browser does not support the audio element.
+                                    </audio>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="row mb-5">
+                        <div class="col-md-4 mb-4 fade-in-up" style="animation-delay: 0.2s;">
+                            <div class="glass-card p-4 h-100 d-flex flex-column">
+                                <h5 class="text-center mb-4">Topic Distribution</h5>
+                                <div style="flex-grow: 1; position: relative; min-height: 250px;">
+                                    <canvas id="myChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if sentiment_counts %}
+                        <div class="col-md-4 mb-4 fade-in-up" style="animation-delay: 0.25s;">
+                            <div class="glass-card p-4 h-100 d-flex flex-column">
+                                <h5 class="text-center mb-4">Overall Sentiment</h5>
+                                <div id="sentiment-data" data-labels='{{ sentiment_counts.keys()|list|tojson | safe }}'
+                                    data-values='{{ sentiment_counts.values()|list|tojson | safe }}'
+                                    style="display:none;">
+                                </div>
+                                <div style="flex-grow: 1; position: relative; min-height: 250px;">
+                                    <canvas id="sentimentChart"></canvas>
+                                </div>
+                            </div>
                         </div>
                         {% endif %}
-                    </div>
-                </div>
-            </div>
-            {% endif %}
 
-            <div class="row mb-5">
-                <div class="col-md-4 mb-4 fade-in-up" style="animation-delay: 0.2s;">
-                    <div class="glass-card p-4 h-100 d-flex flex-column">
-                        <h5 class="text-center mb-4">Topic Distribution</h5>
-                        <div style="flex-grow: 1; position: relative; min-height: 250px;">
-                            <canvas id="myChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                {% if sentiment_counts %}
-                <div class="col-md-4 mb-4 fade-in-up" style="animation-delay: 0.25s;">
-                    <div class="glass-card p-4 h-100 d-flex flex-column">
-                        <h5 class="text-center mb-4">Overall Sentiment</h5>
-                        <div id="sentiment-data" data-labels='{{ sentiment_counts.keys()|list|tojson | safe }}'
-                            data-values='{{ sentiment_counts.values()|list|tojson | safe }}' style="display:none;">
-                        </div>
-                        <div style="flex-grow: 1; position: relative; min-height: 250px;">
-                            <canvas id="sentimentChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-
-                <div class="col-md-4 mb-4 fade-in-up" style="animation-delay: 0.3s;">
-                    <div class="glass-card p-4 h-100 d-flex flex-column">
-                        <h5 class="mb-4">Cluster Dominance</h5>
-                        <div class="list-group list-group-flush mb-4 flex-grow-1">
-                            {% for name, count in cluster_counts.items() %}
-                            <div class="list-group-item d-flex justify-content-between align-items-center">
-                                {{ name }} <span class="badge badge-cluster rounded-pill">{{ count }} items</span>
+                        <div class="col-md-4 mb-4 fade-in-up" style="animation-delay: 0.3s;">
+                            <div class="glass-card p-4 h-100 d-flex flex-column">
+                                <h5 class="mb-4">Cluster Dominance</h5>
+                                <div class="list-group list-group-flush mb-4 flex-grow-1">
+                                    {% for name, count in cluster_counts.items() %}
+                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                        {{ name }} <span class="badge badge-cluster rounded-pill">{{ count }}
+                                            items</span>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <div id="action-button-row" class="d-flex flex-column gap-2 w-100 mt-auto no-pdf">
+                                    <a href="/export/excel" class="btn btn-success w-100"
+                                        style="border-radius: 12px; font-weight: 700; background: linear-gradient(135deg, #10b981, #059669); border: none;">📊
+                                        Export BA Report (.xlsx)</a>
+                                    <div class="d-flex gap-2 w-100">
+                                        <a href="/download" class="btn btn-outline-info w-50"
+                                            style="border-radius: 12px; font-weight: 600;">📥 CSV</a>
+                                        <button onclick="downloadPDF()" class="btn btn-outline-danger w-50"
+                                            style="border-radius: 12px; font-weight: 600;">📄 PDF</button>
+                                    </div>
+                                </div>
                             </div>
-                            {% endfor %}
-                        </div>
-                        <div id="action-button-row" class="d-flex gap-2 w-100 mt-auto no-pdf">
-                            <a href="/download" class="btn btn-outline-info w-50" style="border-radius: 12px; font-weight: 600;">📥 CSV</a>
-                            <button onclick="downloadPDF()" class="btn btn-outline-danger w-50" style="border-radius: 12px; font-weight: 600;">📄 PDF</button>
                         </div>
                     </div>
-                </div>
-            </div>
 
 
 
-            {% if wordcloud_image %}
-            <div class="row justify-content-center mb-5 fade-in-up" style="animation-delay: 0.35s;">
-                <div class="col-md-10">
-                    <div class="glass-card p-4 text-center">
-                        <h5 class="mb-4">Word Cloud</h5>
-                        <p class="text-muted small mb-3">Term size reflects TF-IDF importance across all extracted text</p>
-                        <img src="{{ url_for('static', filename=wordcloud_image) }}" alt="Word Cloud"
-                            style="max-width: 100%; height: auto; border-radius: 12px;">
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-
-
-            
-            {% if entities %}
-            <!-- Named Entities Modal -->
-            <div class="modal fade" id="entitiesModal" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-lg modal-dialog-centered">
-                    <div class="modal-content" style="background: var(--bg-color); border: 1px solid var(--glass-border); border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
-                        <div class="modal-header border-0 pb-0">
-                            <h5 class="modal-title fw-bold" style="color: var(--text-main);">Named Entities Detected</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: var(--bs-btn-close-white-filter, none);"></button>
+                    {% if wordcloud_image %}
+                    <div class="row justify-content-center mb-5 fade-in-up" style="animation-delay: 0.35s;">
+                        <div class="col-md-10">
+                            <div class="glass-card p-4 text-center">
+                                <h5 class="mb-4">Word Cloud</h5>
+                                <p class="text-muted small mb-3">Term size reflects TF-IDF importance across all
+                                    extracted text</p>
+                                <img src="{{ url_for('static', filename=wordcloud_image) }}" alt="Word Cloud"
+                                    style="max-width: 100%; height: auto; border-radius: 12px;">
+                            </div>
                         </div>
-                        <div class="modal-body pt-3 pb-4">
-                            <div class="row">
-                                {% for category, items in entities.items() %}
-                                <div class="col-md-6 mb-4">
-                                    <h6 class="text-muted text-uppercase mb-3" style="letter-spacing: 1px; font-size: 0.85rem;">{{ category }}</h6>
-                                    <div class="d-flex flex-wrap gap-2">
-                                        {% for entity_name, count in items %}
-                                        <span class="badge rounded-pill entity-badge" onclick="filterTableByEntity(this); var myModalEl = document.getElementById('entitiesModal'); var modal = bootstrap.Modal.getInstance(myModalEl); modal.hide();" style="cursor: pointer; background: rgba(99, 102, 241, 0.1); color: var(--accent-primary); border: 1px solid rgba(99, 102, 241, 0.2); padding: 8px 12px; font-size: 0.85rem; font-weight: 500;">
-                                            {{ entity_name }} <span style="opacity: 0.6; margin-left: 4px; font-size: 0.75rem;">x{{ count }}</span>
-                                        </span>
+                    </div>
+                    {% endif %}
+
+
+
+                    {% if entities %}
+                    <!-- Named Entities Modal -->
+                    <div class="modal fade" id="entitiesModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-lg modal-dialog-centered">
+                            <div class="modal-content"
+                                style="background: var(--bg-color); border: 1px solid var(--glass-border); border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
+                                <div class="modal-header border-0 pb-0">
+                                    <h5 class="modal-title fw-bold" style="color: var(--text-main);">Named Entities
+                                        Detected</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                                        style="filter: var(--bs-btn-close-white-filter, none);"></button>
+                                </div>
+                                <div class="modal-body pt-3 pb-4">
+                                    <div class="row">
+                                        {% for category, items in entities.items() %}
+                                        <div class="col-md-6 mb-4">
+                                            <h6 class="text-muted text-uppercase mb-3"
+                                                style="letter-spacing: 1px; font-size: 0.85rem;">{{ category }}</h6>
+                                            <div class="d-flex flex-wrap gap-2">
+                                                {% for entity_name, count in items %}
+                                                <span class="badge rounded-pill entity-badge"
+                                                    onclick="filterTableByEntity(this); var myModalEl = document.getElementById('entitiesModal'); var modal = bootstrap.Modal.getInstance(myModalEl); modal.hide();"
+                                                    style="cursor: pointer; background: rgba(99, 102, 241, 0.1); color: var(--accent-primary); border: 1px solid rgba(99, 102, 241, 0.2); padding: 8px 12px; font-size: 0.85rem; font-weight: 500;">
+                                                    {{ entity_name }} <span
+                                                        style="opacity: 0.6; margin-left: 4px; font-size: 0.75rem;">x{{
+                                                        count }}</span>
+                                                </span>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
                                         {% endfor %}
                                     </div>
                                 </div>
-                                {% endfor %}
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-            {% endif %}
+                    {% endif %}
 
-            {% if graph_data %}
-            <!-- Knowledge Graph Modal -->
-            <div class="modal fade" id="graphModal" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-xl modal-dialog-centered">
-                    <div class="modal-content" style="background: var(--bg-color); border: 1px solid var(--glass-border); border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
-                        <div class="modal-header border-0 pb-0">
-                            <h5 class="modal-title fw-bold" style="color: var(--text-main);">Entity Knowledge Graph</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: var(--bs-btn-close-white-filter, none);"></button>
-                        </div>
-                        <div class="modal-body pt-3 pb-4">
-                            <div class="position-relative">
-                                <div id="knowledge-graph" style="width: 100%; height: 70vh; min-height: 500px; border-radius: 12px; border: 1px solid var(--glass-border); background: var(--input-bg);"></div>
-                                <div class="position-absolute top-0 end-0 p-3 d-flex flex-column gap-2" style="z-index: 10;">
-                                    <button class="btn btn-sm shadow-sm fw-bold" style="background: var(--glass-bg); color: var(--text-main); border: 1px solid var(--glass-border);" onclick="window.kgNetwork && window.kgNetwork.moveTo({scale: window.kgNetwork.getScale() + 0.2})" title="Zoom In">+</button>
-                                    <button class="btn btn-sm shadow-sm fw-bold" style="background: var(--glass-bg); color: var(--text-main); border: 1px solid var(--glass-border);" onclick="window.kgNetwork && window.kgNetwork.moveTo({scale: window.kgNetwork.getScale() - 0.2})" title="Zoom Out">-</button>
-                                    <button class="btn btn-sm shadow-sm" style="background: var(--glass-bg); color: var(--text-main); border: 1px solid var(--glass-border);" onclick="window.kgNetwork && window.kgNetwork.fit({ animation: { duration: 500 } })" title="Fit to Screen">⛶</button>
+                    {% if graph_data %}
+                    <!-- Knowledge Graph Modal -->
+                    <div class="modal fade" id="graphModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-xl modal-dialog-centered">
+                            <div class="modal-content"
+                                style="background: var(--bg-color); border: 1px solid var(--glass-border); border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
+                                <div class="modal-header border-0 pb-0">
+                                    <h5 class="modal-title fw-bold" style="color: var(--text-main);">Entity Knowledge
+                                        Graph</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                                        style="filter: var(--bs-btn-close-white-filter, none);"></button>
+                                </div>
+                                <div class="modal-body pt-3 pb-4">
+                                    <div class="position-relative">
+                                        <div id="knowledge-graph"
+                                            style="width: 100%; height: 70vh; min-height: 500px; border-radius: 12px; border: 1px solid var(--glass-border); background: var(--input-bg);">
+                                        </div>
+                                        <div class="position-absolute top-0 end-0 p-3 d-flex flex-column gap-2"
+                                            style="z-index: 10;">
+                                            <button class="btn btn-sm shadow-sm fw-bold"
+                                                style="background: var(--glass-bg); color: var(--text-main); border: 1px solid var(--glass-border);"
+                                                onclick="window.kgNetwork && window.kgNetwork.moveTo({scale: window.kgNetwork.getScale() + 0.2})"
+                                                title="Zoom In">+</button>
+                                            <button class="btn btn-sm shadow-sm fw-bold"
+                                                style="background: var(--glass-bg); color: var(--text-main); border: 1px solid var(--glass-border);"
+                                                onclick="window.kgNetwork && window.kgNetwork.moveTo({scale: window.kgNetwork.getScale() - 0.2})"
+                                                title="Zoom Out">-</button>
+                                            <button class="btn btn-sm shadow-sm"
+                                                style="background: var(--glass-bg); color: var(--text-main); border: 1px solid var(--glass-border);"
+                                                onclick="window.kgNetwork && window.kgNetwork.fit({ animation: { duration: 500 } })"
+                                                title="Fit to Screen">⛶</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-            {% endif %}
+                    {% endif %}
 
-            <div class="glass-card p-4 mb-5 fade-in-up" style="animation-delay: 0.4s;">
-                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-                    <h4 class="m-0">Extracted Insights</h4>
-                    <div id="table-filter-indicator" class="badge bg-info p-2" style="display: none; border-radius: 12px; font-size: 0.85rem; font-weight: 500; align-items: center; gap: 8px; background: rgba(14, 165, 233, 0.1) !important; color: var(--accent-primary); border: 1px solid rgba(14, 165, 233, 0.3);">
-                        Filtered by: <span id="active-filter-val" class="fw-bold"></span>
-                        <button onclick="clearTableFilters()" class="btn-close btn-close-white" style="font-size: 0.65rem; filter: var(--bs-btn-close-white-filter, invert(1)); cursor: pointer;" aria-label="Clear"></button>
+                    <div class="glass-card p-4 mb-5 fade-in-up" style="animation-delay: 0.4s;">
+                        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                            <h4 class="m-0">Extracted Insights</h4>
+                            <div id="table-filter-indicator" class="badge bg-info p-2"
+                                style="display: none; border-radius: 12px; font-size: 0.85rem; font-weight: 500; align-items: center; gap: 8px; background: rgba(14, 165, 233, 0.1) !important; color: var(--accent-primary); border: 1px solid rgba(14, 165, 233, 0.3);">
+                                Filtered by: <span id="active-filter-val" class="fw-bold"></span>
+                                <button onclick="clearTableFilters()" class="btn-close btn-close-white"
+                                    style="font-size: 0.65rem; filter: var(--bs-btn-close-white-filter, invert(1)); cursor: pointer;"
+                                    aria-label="Clear"></button>
+                            </div>
+                        </div>
+                        <div class="table-responsive" style="padding-bottom: 20px;">
+                            {{ table|safe }}
+                        </div>
                     </div>
-                </div>
-                <div class="table-responsive" style="padding-bottom: 20px;">
-                    {{ table|safe }}
-                </div>
-            </div>
-            </div> <!-- End report-container -->
+                </div> <!-- End report-container -->
             </div> <!-- End results-dashboard -->
             {% endif %}
 
@@ -632,7 +732,8 @@
                                 metrics.optimal_k }}<br>
                                 <span style="color: #10b981;">[DIAGNOSTICS]</span> Vocabulary Size: {{
                                 metrics.vocab_size }} Features<br>
-                                <span style="color: #f59e0b;">[MLOPS]</span> Telemetry tracked via Weights & Biases (W&B)
+                                <span style="color: #f59e0b;">[MLOPS]</span> Telemetry tracked via Weights & Biases
+                                (W&B)
                             </div>
                         </div>
                         {% endif %}
@@ -642,27 +743,35 @@
 
 
             <!-- Combined Entity Analysis & Chatbot Row -->
-            <div class="row mt-5 mb-5 justify-content-center align-items-stretch fade-in-up" style="animation-delay: 0.39s;">
+            <div class="row mt-5 mb-5 justify-content-center align-items-stretch fade-in-up"
+                style="animation-delay: 0.39s;">
                 <!-- Entity Analysis Column -->
                 {% if entities or graph_data %}
                 <div class="col-md-{{ '4' if not cached else '10 mx-auto' }} mb-4 mb-md-0 d-flex">
-                    <div class="glass-card p-4 text-center w-100 d-flex flex-column justify-content-center" style="border-top: 4px solid #10b981; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
-                        <h3 class="mb-3" style="font-family: 'Outfit', sans-serif; font-weight: 700;">Entity Analysis</h3>
-                        <p class="text-muted small mb-4">Explore extracted named entities and their interactive relationships</p>
-                        
+                    <div class="glass-card p-4 text-center w-100 d-flex flex-column justify-content-center"
+                        style="border-top: 4px solid #10b981; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                        <h3 class="mb-3" style="font-family: 'Outfit', sans-serif; font-weight: 700;">Entity Analysis
+                        </h3>
+                        <p class="text-muted small mb-4">Explore extracted named entities and their interactive
+                            relationships</p>
+
                         <div class="d-flex justify-content-center gap-3 flex-wrap mt-auto mb-auto">
                             {% if entities %}
-                            <button class="btn btn-primary px-4 py-3" data-bs-toggle="modal" data-bs-target="#entitiesModal" style="border-radius: 20px; font-weight: 600; background: linear-gradient(135deg, #10b981, #059669); border: none; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); transition: transform 0.2s;">
+                            <button class="btn btn-primary px-4 py-3" data-bs-toggle="modal"
+                                data-bs-target="#entitiesModal"
+                                style="border-radius: 20px; font-weight: 600; background: linear-gradient(135deg, #10b981, #059669); border: none; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); transition: transform 0.2s;">
                                 🏷️ View Named Entities
                             </button>
                             {% endif %}
-                            
+
                             {% if graph_data %}
                             <script id="graph-data-json" type="application/json">
                                 {{ graph_data | tojson | safe }}
                             </script>
-                            <button class="btn btn-primary px-4 py-3" data-bs-toggle="modal" data-bs-target="#graphModal" style="border-radius: 20px; font-weight: 600; background: linear-gradient(135deg, #0ea5e9, #6366f1); border: none; box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4); transition: transform 0.2s;">
-                                🕸️ View Interactive Graph
+                            <button class="btn btn-primary px-4 py-3" data-bs-toggle="modal"
+                                data-bs-target="#graphModal"
+                                style="border-radius: 20px; font-weight: 600; background: linear-gradient(135deg, #0ea5e9, #6366f1); border: none; box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4); transition: transform 0.2s;">
+                                🕸️ View Graph
                             </button>
                             {% endif %}
                         </div>
@@ -673,31 +782,48 @@
                 <!-- Chatbot Column -->
                 {% if cached == False %}
                 <div class="col-md-{{ '8' if entities or graph_data else '10 mx-auto' }} d-flex">
-                    <div class="glass-card w-100 d-flex flex-column" style="border-top: 4px solid var(--accent-primary); box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                    <div class="glass-card w-100 d-flex flex-column"
+                        style="border-top: 4px solid var(--accent-primary); box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
                         <div class="card-header border-0 bg-transparent pt-4 pb-2 text-center">
-                            <h3 class="chat-header-text mb-2" style="font-family: 'Outfit', sans-serif; font-weight: 700; letter-spacing: -0.5px;">
+                            <h3 class="chat-header-text mb-2"
+                                style="font-family: 'Outfit', sans-serif; font-weight: 700; letter-spacing: -0.5px;">
                                 💬 Chat with this Website
                             </h3>
-                            <p class="text-muted small mb-0">Ask questions about the content we just probed. <span style="color: #0ea5e9; font-weight: 600;">Powered by Groq AI & FAISS Vector RAG.</span></p>
+                            <p class="text-muted small mb-0">Ask questions about the content we just probed. <span
+                                    style="color: #0ea5e9; font-weight: 600;">Powered by Groq AI & FAISS Vector
+                                    RAG.</span></p>
                         </div>
                         <div class="card-body p-4 d-flex flex-column flex-grow-1">
-                            <div id="chat-history" class="mb-3 p-3 rounded-4 chat-history-box" style="flex-grow: 1; min-height: 250px; max-height: 350px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;">
+                            <div id="chat-history" class="mb-3 p-3 rounded-4 chat-history-box"
+                                style="flex-grow: 1; min-height: 250px; max-height: 350px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;">
                                 <div class="text-muted small text-center my-auto" id="chat-placeholder">
-                                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" class="mb-2 opacity-50" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg><br>
+                                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5"
+                                        class="mb-2 opacity-50" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z">
+                                        </path>
+                                    </svg><br>
                                     Ask your first question about this article!
                                 </div>
                             </div>
-                            
+
                             <div class="d-flex align-items-center justify-content-end mb-2 pe-1">
-                                <div class="form-check form-switch" title="When enabled, the AI will use its internal knowledge to verify claims made in the article.">
-                                    <input class="form-check-input" type="checkbox" role="switch" id="fact-check-toggle" style="cursor: pointer;">
-                                    <label class="form-check-label text-muted small ms-2" for="fact-check-toggle" style="font-weight: 600; cursor: pointer;">🔍 Fact Check</label>
+                                <div class="form-check form-switch"
+                                    title="When enabled, the AI will use its internal knowledge to verify claims made in the article.">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="fact-check-toggle"
+                                        style="cursor: pointer;">
+                                    <label class="form-check-label text-muted small ms-2" for="fact-check-toggle"
+                                        style="font-weight: 600; cursor: pointer;">🔍 Fact Check</label>
                                 </div>
                             </div>
 
                             <div class="d-flex gap-2 mt-auto">
-                                <input type="text" id="chat-input" class="form-control glass-input py-2 px-3" placeholder="e.g. What is the main argument?" style="border-radius: 12px; font-size: 0.95rem; box-shadow: inset 0 2px 4px var(--card-shadow); border: 1px solid var(--glass-border);">
-                                <button class="btn px-3 d-flex align-items-center justify-content-center gap-2" id="chat-send-btn" style="border-radius: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; background: linear-gradient(135deg, #0ea5e9, #6366f1); color: white; border: none; box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4); min-width: 100px; transition: all 0.2s ease;">
+                                <input type="text" id="chat-input" class="form-control glass-input py-2 px-3"
+                                    placeholder="e.g. What is the main argument?"
+                                    style="border-radius: 12px; font-size: 0.95rem; box-shadow: inset 0 2px 4px var(--card-shadow); border: 1px solid var(--glass-border);">
+                                <button class="btn px-3 d-flex align-items-center justify-content-center gap-2"
+                                    id="chat-send-btn"
+                                    style="border-radius: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; background: linear-gradient(135deg, #0ea5e9, #6366f1); color: white; border: none; box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4); min-width: 100px; transition: all 0.2s ease;">
                                     <span>Send</span>
                                 </button>
                             </div>
@@ -715,32 +841,40 @@
                             <h5 class="m-0 d-flex align-items-center gap-2">
                                 <span>📈 Sentiment Timeline (Avg Subjectivity)</span>
                                 {% if is_subscribed %}
-                                <span class="badge bg-info bg-opacity-25 text-info rounded-pill px-3 py-2">Active Subscription</span>
+                                <span class="badge bg-info bg-opacity-25 text-info rounded-pill px-3 py-2">Active
+                                    Subscription</span>
                                 {% endif %}
                             </h5>
-                            
-                            <form action="/subscribe" method="POST" class="m-0" onsubmit="event.preventDefault(); fetch('/subscribe', {method: 'POST', body: new FormData(this)}).then(() => { const btn = this.querySelector('button'); if(btn.innerText.includes('Track')) { btn.innerText = 'Unsubscribe 🔕'; btn.className = 'btn btn-info btn-sm text-white'; btn.style.color = 'white'; } else { btn.innerText = 'Track Sentiment 🔔'; btn.className = 'btn btn-outline-info btn-sm'; } });">
+
+                            <form action="/subscribe" method="POST" class="m-0"
+                                onsubmit="event.preventDefault(); fetch('/subscribe', {method: 'POST', body: new FormData(this)}).then(() => { const btn = this.querySelector('button'); if(btn.innerText.includes('Track')) { btn.innerText = 'Unsubscribe 🔕'; btn.className = 'btn btn-info btn-sm text-white'; btn.style.color = 'white'; } else { btn.innerText = 'Track Sentiment 🔔'; btn.className = 'btn btn-outline-info btn-sm'; } });">
                                 <input type="hidden" name="url" value="{{ url }}">
                                 {% if is_subscribed %}
-                                <button type="submit" class="btn btn-info btn-sm text-white" style="border-radius: 20px; font-weight: 600; padding: 6px 16px;">
+                                <button type="submit" class="btn btn-info btn-sm text-white"
+                                    style="border-radius: 20px; font-weight: 600; padding: 6px 16px;">
                                     Unsubscribe 🔕
                                 </button>
                                 {% else %}
-                                <button type="submit" class="btn btn-outline-info btn-sm" style="border-radius: 20px; font-weight: 600; padding: 6px 16px;">
+                                <button type="submit" class="btn btn-outline-info btn-sm"
+                                    style="border-radius: 20px; font-weight: 600; padding: 6px 16px;">
                                     Track Sentiment 🔔
                                 </button>
                                 {% endif %}
                             </form>
                         </div>
-                        
+
                         {% if time_series_data and time_series_data|length > 0 %}
-                        <div id="time-series-data" data-series='{{ time_series_data|tojson|safe }}' style="display:none;"></div>
+                        <div id="time-series-data" data-series='{{ time_series_data|tojson|safe }}'
+                            style="display:none;"></div>
                         <div style="position: relative; height: 300px; width: 100%;">
                             <canvas id="timeSeriesChart"></canvas>
                         </div>
                         {% if time_series_data|length == 1 %}
-                        <div class="text-center position-absolute w-100" style="bottom: 40px; left: 0; pointer-events: none;">
-                            <p class="text-muted small" style="background: var(--glass-bg); display: inline-block; padding: 4px 12px; border-radius: 12px;">Track this URL to build a sentiment timeline over multiple probes.</p>
+                        <div class="text-center position-absolute w-100"
+                            style="bottom: 40px; left: 0; pointer-events: none;">
+                            <p class="text-muted small"
+                                style="background: var(--glass-bg); display: inline-block; padding: 4px 12px; border-radius: 12px;">
+                                Track this URL to build a sentiment timeline over multiple probes.</p>
                         </div>
                         {% endif %}
                         {% else %}

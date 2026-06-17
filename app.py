@@ -4,6 +4,8 @@ import uuid
 import os
 import glob
 import json
+import time
+import io
 from dotenv import load_dotenv
 
 from flask_sqlalchemy import SQLAlchemy
@@ -159,7 +161,7 @@ def run_scheduled_probes():
             except Exception as e:
                 print(f"[SCHEDULER] Error processing {url}: {e}")
 
-def _save_cache(url, table_html, cluster_counts, sentiment_counts, avg_subjectivity, takeaways, metrics, total_items, wordcloud_image=None, entities=None, graph_data=None, audio_file=None, override_user_id=None, csv_string=None):
+def _save_cache(url, table_html, cluster_counts, sentiment_counts, avg_subjectivity, takeaways, metrics, total_items, wordcloud_image=None, entities=None, graph_data=None, audio_file=None, override_user_id=None, csv_string=None, **kwargs):
     """Save the last successful probe result to database for the current user or override user."""
     target_user_id = override_user_id if override_user_id else (current_user.id if current_user.is_authenticated else None)
     if target_user_id:
@@ -174,6 +176,8 @@ def _save_cache(url, table_html, cluster_counts, sentiment_counts, avg_subjectiv
                 "entities": entities,
                 "graph_data": graph_data,
                 "audio_file": audio_file,
+                "processing_time_sec": kwargs.get("processing_time_sec") if kwargs else None,
+                "human_time_mins": kwargs.get("human_time_mins") if kwargs else None,
             }
             probe = ProbeResult(
                 user_id=target_user_id,
@@ -217,6 +221,7 @@ def home():
 
 def _process_url(url, cache_result=False):
     """Run the full NLP pipeline on a single URL and return context dict."""
+    start_time = time.time()
     # Phase 1: Crawl
     df = scrape_url(url)
     if df.empty:
@@ -258,8 +263,11 @@ def _process_url(url, cache_result=False):
         
     table_html = display_df.to_html(classes="table table-hover", table_id="resultsTable", index=False)
 
+    processing_time_sec = round(time.time() - start_time, 2)
+    human_time_mins = round(len(df) * 5 / 60, 1)
+
     if cache_result:
-        _save_cache(url, table_html, cluster_counts, sentiment_counts, avg_subjectivity, takeaways, metrics, len(df), wordcloud_image, entities, graph_data, audio_file, csv_string=csv_string)
+        _save_cache(url, table_html, cluster_counts, sentiment_counts, avg_subjectivity, takeaways, metrics, len(df), wordcloud_image, entities, graph_data, audio_file, csv_string=csv_string, processing_time_sec=processing_time_sec, human_time_mins=human_time_mins)
 
     return {
         "table": table_html,
@@ -275,7 +283,9 @@ def _process_url(url, cache_result=False):
         "graph_data": graph_data,
         "audio_file": audio_file,
         "csv_string": csv_string,
-        "cleaned_text": df["cleaned"].tolist() if "cleaned" in df.columns else []
+        "cleaned_text": df["cleaned"].tolist() if "cleaned" in df.columns else [],
+        "processing_time_sec": processing_time_sec,
+        "human_time_mins": human_time_mins
     }
 
 
@@ -495,6 +505,75 @@ def download():
     return redirect(url_for("home"))
 
 
+@app.route("/api/v1/analyze", methods=["POST"])
+def api_analyze():
+    """REST API endpoint for Power Automate and Enterprise integrations."""
+    data = request.json or {}
+    url = data.get("url")
+    if not url:
+        return jsonify({"error": "URL parameter is required"}), 400
+        
+    _cleanup_old_results()
+    result = _process_url(url, cache_result=False)
+    
+    if "error" in result:
+        return jsonify(result), 400
+        
+    # Return a JSON payload suitable for automated workflows
+    return jsonify({
+        "url": result["url"],
+        "total_items": result["total_items"],
+        "processing_time_sec": result.get("processing_time_sec"),
+        "human_time_mins": result.get("human_time_mins"),
+        "takeaways": result["takeaways"],
+        "cluster_counts": result["cluster_counts"],
+        "metrics": result["metrics"],
+        "avg_subjectivity": result["avg_subjectivity"]
+    })
+
+
+@app.route("/export/excel")
+def export_excel():
+    """Serves the most recent results as an Excel BA Report."""
+    latest_csv_string = None
+    if current_user.is_authenticated:
+        latest_probe = ProbeResult.query.filter_by(user_id=current_user.id).order_by(ProbeResult.timestamp.desc()).first()
+        if latest_probe and latest_probe.csv_data:
+            latest_csv_string = latest_probe.csv_data
+    else:
+        ip = request.remote_addr
+        if ip in latest_anon_csvs:
+            latest_csv_string = latest_anon_csvs[ip]
+            
+    if not latest_csv_string:
+        return redirect(url_for("home"))
+        
+    df = pd.read_csv(io.StringIO(latest_csv_string))
+    
+    # Try to load takeaways from cache if authenticated
+    takeaways = []
+    if current_user.is_authenticated:
+        latest_probe = ProbeResult.query.filter_by(user_id=current_user.id).order_by(ProbeResult.timestamp.desc()).first()
+        if latest_probe and latest_probe.results_json:
+            cache = json.loads(latest_probe.results_json)
+            takeaways = cache.get("takeaways", [])
+
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        if takeaways:
+            summary_df = pd.DataFrame({"Executive Summary (AI Generated)": takeaways})
+            summary_df.to_excel(writer, sheet_name="AI Summary", index=False)
+        df.to_excel(writer, sheet_name="Clustered Data", index=False)
+        
+    output.seek(0)
+    return send_file(
+        output,
+        download_name="GistProbe_BA_Report.xlsx",
+        as_attachment=True,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
+
 @app.route("/demo")
 def demo():
     """Load the last successful probe result from cache — instant demo mode."""
@@ -515,6 +594,8 @@ def demo():
         "entities": cache.get("entities"),
         "graph_data": cache.get("graph_data"),
         "audio_file": cache.get("audio_file"),
+        "processing_time_sec": cache.get("processing_time_sec"),
+        "human_time_mins": cache.get("human_time_mins"),
     }
     _add_time_series(result, cache["url"])
     return render_template("index.html", cached=True, **result)
@@ -561,6 +642,8 @@ def load_history(probe_id):
         entities=cache.get("entities"),
         graph_data=cache.get("graph_data"),
         audio_file=audio,
+        processing_time_sec=cache.get("processing_time_sec"),
+        human_time_mins=cache.get("human_time_mins"),
     )
 
 if __name__ == "__main__":

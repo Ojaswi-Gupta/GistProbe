@@ -97,3 +97,4 @@ Flask-APScheduler==1.13.1
 faiss-cpu
 sentence-transformers
 wandb
+openpyxl
