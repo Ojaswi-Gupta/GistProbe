@@ -18,9 +18,10 @@ GistProbe is not a standard wrapper around an API. It is a full-fledged NLP pipe
 - **RAG Generative AI Chat:** Integrates **Sentence-Transformers**, **FAISS Vector DB**, and **Llama-3.1 (via Groq API)**. The system vectorizes text, performs mathematical semantic searches, and implements a true Retrieval-Augmented Generation pipeline to answer questions without hallucinations.
 - **MLOps Telemetry:** Integrates **Weights & Biases (WandB)** to securely log mathematically optimized k-values, Silhouette Scores, and vocabulary sizes during K-Means loops.
 - **Background Automation:** Integrates **Flask-APScheduler** to autonomously re-scrape user-subscribed URLs daily, graphing subjectivity and sentiment shifts over time.
-- **Audio Summaries:** Leverages the **gTTS API** to automatically generate downloadable MP3 spoken summaries of the abstractive text chunks.
-
----
+- **Debate Mode (Media Analyst):** Analyzes two URLs side-by-side using Llama-3.1 to generate an executive contrast summary, comparing tone, bias, and framing.
+- **Enterprise API & Automations:** Features a dedicated `/api/v1/analyze` REST endpoint for easy integration into MS Power Automate and Enterprise workflows.
+- **Business Analyst Reporting:** Export comprehensive `.xlsx` reports detailing AI summaries and semantic clusters for offline analysis.
+- **Cost-Savings Dashboard:** Automatically tracks and visualizes the estimated human reading time saved vs. AI processing time.
 
 ## ⚙️ System Architecture & Data Flow
 
@@ -121,8 +122,14 @@ Users can "subscribe" to specific URLs. A background APScheduler job automatical
 ### 🕸️ Interactive Entity Knowledge Graph
 Entities (People, Organizations, Locations) extracted via **spaCy** are mapped into an interactive network graph using **vis.js**. The physics engine groups entities based on sentence co-occurrences.
 
-### 🤖 Chat with Website & Audio Summaries
-Chat directly with the scraped contents using **Llama-3**, and instantly generate playable MP3 audio summaries of the article via the **gTTS** integration. Enable **Fact Check Mode** to force the AI to cross-reference claims against real-world knowledge.
+### 🤖 Chat & Fact Check Mode
+Chat directly with the scraped contents using **Llama-3**, and instantly generate playable MP3 audio summaries. Enable **Fact Check Mode** to force the AI to cross-reference claims against real-world knowledge.
+
+### ⚖️ URL Debate Mode
+Compare two URLs simultaneously. The pipeline extracts entities and clusters from both sites, while the Llama-3 agent generates a Media Analyst Executive Summary contrasting their biases and narrative framing.
+
+### 📊 Enterprise Tooling (API & Excel)
+GistProbe exposes a RESTful API (`/api/v1/analyze`) for seamless integration into MS Power Automate or SharePoint workflows. Non-technical users can generate **Business Analyst Excel Reports (.xlsx)** to export semantic clusters and AI summaries offline.
 
 ---
 
