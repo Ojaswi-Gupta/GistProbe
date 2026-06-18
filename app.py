@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, send_file, redirect, url_for, jsonify, Response, has_request_context
+from werkzeug.middleware.proxy_fix import ProxyFix
 import pandas as pd
 import uuid
 import os
@@ -28,6 +29,7 @@ load_dotenv()
 latest_anon_csvs = {}
 
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "fallback-secret-key")
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///gistprobe.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
