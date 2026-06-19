@@ -23,7 +23,11 @@ GistProbe is not a standard wrapper around an API. It is a full-fledged NLP pipe
 - **Business Analyst Reporting:** Export comprehensive `.xlsx` reports detailing AI summaries and semantic clusters for offline analysis.
 - **Cost-Savings Dashboard:** Automatically tracks and visualizes the estimated human reading time saved vs. AI processing time.
 
-## ⚙️ System Architecture & Data Flow
+## ⚙️ System Architecture & Data Flow (Microservice Split)
+
+To overcome memory limitations on free-tier hosting platforms (like Render's 512MB RAM limit), GistProbe utilizes a highly efficient **Decoupled Microservice Architecture**:
+- **Frontend UI (Render):** An ultra-lightweight Flask web app that handles OAuth, SQLite Database subscriptions, UI rendering, WordCloud generation, and Audio synthesis.
+- **Heavy ML API (Hugging Face Spaces):** A dedicated FastAPI worker running on a 16GB RAM instance that handles the heavy NLP models (PyTorch, SpaCy, scikit-learn) and Playwright headless web crawling.
 
 ```mermaid
 graph TD
@@ -138,24 +142,28 @@ GistProbe exposes a RESTful API (`/api/v1/analyze`) for seamless integration int
 ```text
 GistProbe/
 ├── app.py              # Flask routes, pipeline orchestration, Schedulers & DB Models
-├── crawler.py          # Playwright & BS4 Web Scraper
-├── analyser.py         # Text cleaning, NLTK deduplication & TextBlob sentiment
-├── clustering.py       # Scikit-learn TF-IDF, K-Means & Silhouette optimization
-├── ner.py              # spaCy Named Entity Recognition engine
+├── ml_worker/          # Heavy ML API (FastAPI) hosted on Hugging Face Spaces
+│   ├── main.py         # FastAPI endpoints (/probe, /retrieve, /similarity)
+│   ├── crawler.py      # Playwright & BS4 Web Scraper
+│   ├── analyser.py     # Text cleaning, NLTK deduplication & TextBlob sentiment
+│   ├── clustering.py   # Scikit-learn TF-IDF, K-Means & Silhouette optimization
+│   ├── ner.py          # spaCy Named Entity Recognition engine
+│   └── rag.py          # Sentence-Transformers embeddings & FAISS Vector DB
 ├── wordcloud_gen.py    # TF-IDF visual representation logic
 ├── audio_gen.py        # gTTS API text-to-speech script & file cleanup
 ├── tests.py            # Unit tests for the core ML pipeline
 ├── templates/
 │   ├── index.html      # Main Dashboard View (33:67 Chatbot/Graph Layout)
 │   └── history.html    # Tabular user history and active subscription manager
-└── requirements.txt    # Strict environment dependencies
+├── requirements.txt    # Lightweight frontend dependencies
+└── ml_worker/requirements.txt # Heavy ML dependencies (PyTorch, SpaCy, Playwright)
 ```
 
 ---
 
 ## ⚙️ Local Setup (Run it yourself!)
 
-Follow these exact steps to run the complete NLP pipeline on your local machine:
+Follow these exact steps to run the complete NLP pipeline on your local machine. Because of the microservice architecture, you will need to run two separate terminals (one for the ML API and one for the Frontend).
 
 **1. Clone the repository**
 ```bash
@@ -163,30 +171,27 @@ git clone https://github.com/Ojaswi-Gupta/GistProbe.git
 cd GistProbe
 ```
 
-**2. Create & activate a virtual environment**
+**2. Setup the ML Worker API (Terminal 1)**
 ```bash
-# Mac/Linux:
+cd ml_worker
 python3 -m venv venv
-source venv/bin/activate
-
-# Windows:
-python -m venv venv
-venv\Scripts\activate
-```
-
-**3. Install dependencies**
-```bash
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
-```
-
-**4. Download ML Models & Browser Binaries (First run only)**
-```bash
 playwright install chromium
 python -m spacy download en_core_web_sm
 python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
+uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 
-**5. Set up Environment Variables**
+**3. Setup the Frontend (Terminal 2)**
+```bash
+# In a new terminal, from the root GistProbe directory:
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+**4. Set up Environment Variables**
 Create a `.env` file in the root directory and add your API keys. You can get a free API key from the [Groq Console](https://console.groq.com/).
 ```env
 GROQ_API_KEY="your-groq-api-key-here"
@@ -194,14 +199,16 @@ FLASK_SECRET_KEY="any-random-string"
 # Google OAuth (Optional, only needed if you want to test the login feature)
 GOOGLE_CLIENT_ID="optional"
 GOOGLE_CLIENT_SECRET="optional"
+# ML API URL (Defaults to localhost:8000 if testing locally)
+ML_API_URL="http://localhost:8000"
 ```
 
-**6. Start the Server**
+**5. Start the Frontend Server**
 ```bash
 python app.py
 ```
 
-**7. Access the App**
+**6. Access the App**
 Open your browser and navigate to: **http://127.0.0.1:5000**
 
 ---
