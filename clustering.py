@@ -1,8 +1,5 @@
 import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.cluster import KMeans
-from sklearn.metrics import silhouette_score
-from sklearn.metrics.pairwise import cosine_similarity
+# Heavy imports are lazy-loaded
 from difflib import SequenceMatcher
 import wandb
 import os
@@ -16,6 +13,8 @@ def compute_similarity(texts1, texts2):
     """
     if not texts1 or not texts2:
         return 0
+    from sklearn.feature_extraction.text import TfidfVectorizer
+    from sklearn.metrics.pairwise import cosine_similarity
     
     vectorizer = TfidfVectorizer(stop_words="english", max_features=1000)
     all_texts = [" ".join(texts1), " ".join(texts2)]
@@ -82,6 +81,10 @@ def perform_clustering(df):
         return df, {"0: General Topics": len(df)}, [], metrics, None
 
     texts = df["cleaned"]
+
+    from sklearn.feature_extraction.text import TfidfVectorizer
+    from sklearn.cluster import KMeans
+    from sklearn.metrics import silhouette_score
 
     # NLP: ngram_range=(1, 2) captures phrases like "climate change" or "supreme court"
     # max_features limits noise from rare terms

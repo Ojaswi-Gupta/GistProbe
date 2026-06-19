@@ -39,6 +39,9 @@ scheduler.init_app(app)
 scheduler.start()
 
 db = SQLAlchemy(app)
+
+with app.app_context():
+    db.create_all()
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
