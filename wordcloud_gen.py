@@ -29,23 +29,18 @@ def cleanup_old_wordclouds():
             pass
 
 
-def generate_wordcloud(tfidf_matrix, feature_names, session_id):
+def generate_wordcloud(word_scores, session_id):
     """
-    Generate a word cloud PNG from TF-IDF scores.
+    Generate a word cloud PNG from word frequency scores.
     
     Args:
-        tfidf_matrix: The fitted TF-IDF sparse matrix from clustering
-        feature_names: Array of feature names from the vectorizer
+        word_scores: Dictionary of word frequencies/scores
         session_id: Unique session ID for the filename
         
     Returns:
         str: Path to the generated word cloud image (relative to static/), or None on failure.
     """
     try:
-        # Sum TF-IDF scores across all documents to get global term importance
-        scores = tfidf_matrix.sum(axis=0).A1  # Convert sparse matrix to 1D array
-        word_scores = {feature_names[i]: scores[i] for i in range(len(feature_names)) if scores[i] > 0}
-
         if not word_scores:
             print("No word scores for word cloud generation.")
             return None

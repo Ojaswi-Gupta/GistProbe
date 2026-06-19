@@ -16,13 +16,11 @@ from authlib.integrations.base_client.errors import OAuthError
 from groq import Groq
 from flask_apscheduler import APScheduler
 
-from crawler import scrape_url
-from analyser import clean_text_data, compute_sentiment
-from clustering import perform_clustering, compute_similarity
+import requests
 from wordcloud_gen import generate_wordcloud, cleanup_old_wordclouds
-from ner import extract_entities
 from audio_gen import generate_summary_audio, cleanup_old_audio
-from rag import build_faiss_index, retrieve_context
+
+ML_API_URL = os.getenv("ML_API_URL", "http://localhost:8000")
 
 load_dotenv()
 
@@ -39,9 +37,6 @@ scheduler.init_app(app)
 scheduler.start()
 
 db = SQLAlchemy(app)
-
-with app.app_context():
-    db.create_all()
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
@@ -225,32 +220,39 @@ def home():
 
 
 def _process_url(url, cache_result=False):
-    """Run the full NLP pipeline on a single URL and return context dict."""
+    """Run the full NLP pipeline on a single URL via ML API."""
     start_time = time.time()
-    # Phase 1: Crawl
-    df = scrape_url(url)
-    if df.empty:
-        return {"error": "No content could be extracted from this URL. The site may be blocking requests, or the page has no readable text content.", "url": url}
+    
+    try:
+        response = requests.post(f"{ML_API_URL}/probe", json={"url": url}, timeout=180)
+        if response.status_code != 200:
+            err = response.json().get("detail", "Unknown ML API Error")
+            return {"error": err, "url": url}
+        data = response.json()
+    except Exception as e:
+        return {"error": f"Failed to contact ML API at {ML_API_URL}. Ensure it is running. Error: {e}", "url": url}
 
-    # Phase 2: Analyse
-    df = clean_text_data(df)
-    if df.empty or len(df) < 2:
-        return {"error": "After cleaning and deduplication, not enough unique text was found. Try a different URL with more content.", "url": url}
+    # Extract returned fields
+    cluster_counts = data["cluster_counts"]
+    sentiment_counts = data["sentiment_counts"]
+    avg_subjectivity = data["avg_subjectivity"]
+    takeaways = data["takeaways"]
+    metrics = data["metrics"]
+    entities = data["entities"]
+    graph_data = data["graph_data"]
+    word_scores = data.get("word_scores", {})
+    df_data = data.get("data", [])
+    
+    if not df_data:
+        return {"error": "ML API returned empty content.", "url": url}
 
-    # Phase 2.5: Sentiment Analysis
-    df, sentiment_counts, avg_subjectivity = compute_sentiment(df)
-
-    # Phase 2.8: Named Entity Recognition
-    entities, graph_data = extract_entities(df)
-
-    # Phase 3: Cluster and Summarize
-    df, cluster_counts, takeaways, metrics, tfidf_data = perform_clustering(df)
+    df = pd.DataFrame(df_data)
 
     # Phase 4: Word Cloud
     wordcloud_image = None
     session_id = str(uuid.uuid4())[:8]
-    if tfidf_data:
-        wordcloud_image = generate_wordcloud(tfidf_data["matrix"], tfidf_data["terms"], session_id)
+    if word_scores:
+        wordcloud_image = generate_wordcloud(word_scores, session_id)
 
     # Phase 5: Audio Summary
     audio_file = generate_summary_audio(takeaways, session_id)
@@ -307,13 +309,11 @@ def process_url():
 
     _add_time_series(result, url)
     
-    # Save context for RAG Groq chat
+    # Save context for RAG Groq chat (just texts, FAISS index is built on the fly in ML worker)
     user_key = current_user.id if current_user.is_authenticated else request.remote_addr
     texts = result.get("cleaned_text", [])
-    faiss_index = build_faiss_index(texts)
     chat_contexts[user_key] = {
-        "texts": texts,
-        "index": faiss_index
+        "texts": texts
     }
     
     return render_template("index.html", cached=False, **result)
@@ -365,13 +365,19 @@ def chat_api():
     context_data = chat_contexts.get(user_key, {})
     
     texts = context_data.get("texts", [])
-    index = context_data.get("index", None)
     
-    if not texts or not index:
+    if not texts:
         return jsonify({"error": "No website context found. Please probe a URL first."}), 400
         
-    # RAG Retrieval: Extract exactly the top 7 most semantically relevant chunks for the question
-    context_text = retrieve_context(question, index, texts, top_k=7)
+    # RAG Retrieval: Extract via ML API
+    try:
+        response = requests.post(f"{ML_API_URL}/retrieve", json={"question": question, "texts": texts, "top_k": 7}, timeout=30)
+        if response.status_code != 200:
+            return jsonify({"error": "ML API error retrieving context."}), 500
+        context_text = response.json().get("context_text", "")
+    except Exception as e:
+        print(f"ML API RAG Error: {e}")
+        return jsonify({"error": "Failed to connect to ML API for context retrieval."}), 500
     
     fact_check = data.get("fact_check", False)
     
@@ -417,7 +423,15 @@ def compare():
             return render_template("compare.html", error=f"Error in URL 1 ({url1}): {result1['error']}")
         if "error" in result2:
             return render_template("compare.html", error=f"Error in URL 2 ({url2}): {result2['error']}")
-        similarity_score = compute_similarity(result1.get("cleaned_text", []), result2.get("cleaned_text", []))
+        
+        try:
+            sim_res = requests.post(f"{ML_API_URL}/similarity", json={"texts1": result1.get("cleaned_text", []), "texts2": result2.get("cleaned_text", [])}, timeout=30)
+            if sim_res.status_code == 200:
+                similarity_score = sim_res.json()["score"]
+            else:
+                similarity_score = 0
+        except Exception:
+            similarity_score = 0
         
         # Calculate Shared Vocabulary (Entities)
         shared_vocab = []
@@ -651,7 +665,8 @@ def load_history(probe_id):
         human_time_mins=cache.get("human_time_mins"),
     )
 
+with app.app_context():
+    db.create_all()
+
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
     app.run(debug=True)
