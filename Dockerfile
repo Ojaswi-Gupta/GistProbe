@@ -34,4 +34,4 @@ EXPOSE 5000
 
 # Command to run the application using Gunicorn for production
 # We use the shell form so that it evaluates the $PORT environment variable injected by Render.
-CMD gunicorn --bind 0.0.0.0:${PORT:-5000} --workers 3 --timeout 120 app:app
+CMD gunicorn --bind 0.0.0.0:${PORT:-5000} --workers ${WEB_CONCURRENCY:-1} --timeout 120 app:app

@@ -5,13 +5,20 @@ Uses spaCy to extract and categorize entities (People, Organizations, Locations,
 import spacy
 from collections import Counter
 
-# Load the small English model
-# Will fallback gracefully if model isn't installed
-try:
-    nlp = spacy.load("en_core_web_sm")
-except OSError:
-    print("Warning: spaCy model 'en_core_web_sm' not found. NER will be disabled.")
-    nlp = None
+_nlp = None
+_nlp_loaded = False
+
+def get_nlp():
+    global _nlp, _nlp_loaded
+    if not _nlp_loaded:
+        try:
+            print("[NER] Loading spaCy model ('en_core_web_sm')...")
+            _nlp = spacy.load("en_core_web_sm")
+        except OSError:
+            print("Warning: spaCy model 'en_core_web_sm' not found. NER will be disabled.")
+            _nlp = None
+        _nlp_loaded = True
+    return _nlp
 
 # Mapping spaCy labels to user-friendly categories
 ENTITY_MAPPING = {
@@ -34,7 +41,11 @@ def extract_entities(df):
         dict: Categorized entities with counts, e.g.,
               {"Organizations": [("Google", 5), ("Apple", 3)], "People": [...]}
     """
-    if nlp is None or df.empty or "text" not in df.columns:
+    if df.empty or "text" not in df.columns:
+        return {}, {"nodes": [], "edges": []}
+        
+    nlp = get_nlp()
+    if nlp is None:
         return {}, {"nodes": [], "edges": []}
         
     print("\n--- Phase 2.8: Named Entity Recognition ---")
