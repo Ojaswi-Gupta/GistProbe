@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, send_file, redirect, url_for, jsonify, Response, has_request_context
+from flask import Flask, render_template, request, send_file, redirect, url_for, jsonify, Response, has_request_context, session
 from werkzeug.middleware.proxy_fix import ProxyFix
 import pandas as pd
 import uuid
@@ -310,7 +310,9 @@ def process_url():
     _add_time_series(result, url)
     
     # Save context for RAG Groq chat (just texts, FAISS index is built on the fly in ML worker)
-    user_key = current_user.id if current_user.is_authenticated else request.remote_addr
+    if not current_user.is_authenticated and 'anon_id' not in session:
+        session['anon_id'] = str(uuid.uuid4())
+    user_key = current_user.id if current_user.is_authenticated else session['anon_id']
     texts = result.get("cleaned_text", [])
     chat_contexts[user_key] = {
         "texts": texts
@@ -361,7 +363,9 @@ def chat_api():
     if not question:
         return jsonify({"error": "Empty question."}), 400
         
-    user_key = current_user.id if current_user.is_authenticated else request.remote_addr
+    if not current_user.is_authenticated and 'anon_id' not in session:
+        session['anon_id'] = str(uuid.uuid4())
+    user_key = current_user.id if current_user.is_authenticated else session['anon_id']
     context_data = chat_contexts.get(user_key, {})
     
     texts = context_data.get("texts", [])
@@ -388,7 +392,7 @@ def chat_api():
     
     try:
         completion = groq_client.chat.completions.create(
-            model="llama3-8b-8192",
+            model="gemma2-9b-it",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.5,
             max_tokens=500
@@ -482,7 +486,7 @@ Executive Comparison Summary (HTML only):"""
 
             try:
                 completion = groq_client.chat.completions.create(
-                    model="llama3-8b-8192",
+                    model="gemma2-9b-it",
                     messages=[{"role": "user", "content": prompt}],
                     temperature=0.6,
                     max_tokens=800
