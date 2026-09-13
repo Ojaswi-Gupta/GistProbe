@@ -15,10 +15,10 @@ GistProbe is not a standard wrapper around an API. It is a full-fledged NLP pipe
 - **Dynamic Dataset Generation:** Uses **Playwright** and **BeautifulSoup** to scrape the DOM dynamically, bypassing basic blocks.
 - **Unsupervised Optimization:** Instead of hardcoding K-Means clusters, it dynamically evaluates **k = 2 to 10** and selects the value with the highest **Silhouette Score** for the specific webpage.
 - **Intelligent Deduplication:** Uses `SequenceMatcher` to compute string similarity ratios, filtering out paragraphs with >85% overlap to ensure cluster quality.
-- **RAG Generative AI Chat:** Integrates **Sentence-Transformers**, **FAISS Vector DB**, and **Llama-3.1 (via Groq API)**. The system vectorizes text, performs mathematical semantic searches, and implements a true Retrieval-Augmented Generation pipeline to answer questions without hallucinations.
+- **RAG Generative AI Chat:** Integrates **Sentence-Transformers**, **FAISS Vector DB**, and **Groq API (gpt-oss-20b)**. The system vectorizes text, performs mathematical semantic searches, and implements a true Retrieval-Augmented Generation pipeline to answer questions without hallucinations.
 - **MLOps Telemetry:** Integrates **Weights & Biases (WandB)** to securely log mathematically optimized k-values, Silhouette Scores, and vocabulary sizes during K-Means loops.
 - **Background Automation:** Integrates **Flask-APScheduler** to autonomously re-scrape user-subscribed URLs daily, graphing subjectivity and sentiment shifts over time.
-- **Debate Mode (Media Analyst):** Analyzes two URLs side-by-side using Llama-3.1 to generate an executive contrast summary, comparing tone, bias, and framing.
+- **Debate Mode (Media Analyst):** Analyzes two URLs side-by-side using Groq LLMs to generate an executive contrast summary, comparing tone, bias, and framing.
 - **Enterprise API & Automations:** Features a dedicated `/api/v1/analyze` REST endpoint for easy integration into MS Power Automate and Enterprise workflows.
 - **Business Analyst Reporting:** Export comprehensive `.xlsx` reports detailing AI summaries and semantic clusters for offline analysis.
 - **Cost-Savings Dashboard:** Automatically tracks and visualizes the estimated human reading time saved vs. AI processing time.
@@ -101,7 +101,7 @@ GistProbe uses **SQLAlchemy** with an SQLite database to cache NLP results and m
 - `NLTK` — Text tokenization & stop words
 - `TextBlob` — Sentiment polarity & subjectivity scoring
 - `Sentence-Transformers` & `FAISS` — Local embedding generation and Vector Database retrieval
-- `Groq API (Llama-3.1)` — Conversational RAG agent and media debate analysis
+- `Groq API (gpt-oss-20b)` — Conversational RAG agent and media debate analysis
 - `Weights & Biases (WandB)` — MLOps experiment tracking and telemetry
 - `gTTS API` — Text-to-Speech audio generation
 
@@ -127,10 +127,15 @@ Users can "subscribe" to specific URLs. A background APScheduler job automatical
 Entities (People, Organizations, Locations) extracted via **spaCy** are mapped into an interactive network graph using **vis.js**. The physics engine groups entities based on sentence co-occurrences.
 
 ### 🤖 Chat & Fact Check Mode
-Chat directly with the scraped contents using **Llama-3**, and instantly generate playable MP3 audio summaries. Enable **Fact Check Mode** to force the AI to cross-reference claims against real-world knowledge.
+Chat directly with the scraped contents using **Groq LLMs**, and instantly generate playable MP3 audio summaries. Enable **Fact Check Mode** to force the AI to cross-reference claims against real-world knowledge.
 
 ### ⚖️ URL Debate Mode
-Compare two URLs simultaneously. The pipeline extracts entities and clusters from both sites, while the Llama-3 agent generates a Media Analyst Executive Summary contrasting their biases and narrative framing.
+Compare two URLs simultaneously. The pipeline extracts entities and clusters from both sites, while the Groq LLM agent generates a Media Analyst Executive Summary contrasting their biases and narrative framing.
+
+### 🛡️ Production Reliability & Fault Tolerance
+- **Resilient Web Crawler:** Implemented robust retry logic, exponential backoff for rate limits (429s), and graceful timeout handling. Seamlessly falls back to Playwright headless rendering if static scraping fails.
+- **Reverse Proxy Session Tracking:** Bypasses Cloudflare/Render load balancer IP obfuscation by utilizing secure Flask UUID session cookies, preventing FAISS context "amnesia" during RAG chats.
+- **Dockerized Deployments:** Containerized via Microsoft's official Playwright Ubuntu images to guarantee OS-level font and binary dependencies in production, managed securely via Gunicorn.
 
 ### 📊 Enterprise Tooling (API & Excel)
 GistProbe exposes a RESTful API (`/api/v1/analyze`) for seamless integration into MS Power Automate or SharePoint workflows. Non-technical users can generate **Business Analyst Excel Reports (.xlsx)** to export semantic clusters and AI summaries offline.
@@ -215,7 +220,7 @@ Open your browser and navigate to: **http://127.0.0.1:5000**
 
 ## 📝 Resume Bullet Example
 
-> *"Built GistProbe, a full-stack NLP web application that dynamically scrapes and semantically clusters web content using K-Means + TF-IDF. Engineered an automated background pipeline with Flask-APScheduler to track sentiment shifts, featuring a spaCy Interactive Knowledge Graph, gTTS audio generation, and Llama-3 integration for real-time web chat."*
+> *"Built GistProbe, a full-stack NLP web intelligence platform using Python, Flask, and Docker. Engineered a fault-tolerant web crawler via Playwright, utilized Scikit-learn (TF-IDF/K-Means) for semantic clustering, and deployed a FAISS-based RAG pipeline via Groq's API to reduce human reading time by over 95%."*
 
 ---
 
