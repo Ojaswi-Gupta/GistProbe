@@ -218,10 +218,4 @@ Open your browser and navigate to: **http://127.0.0.1:5000**
 
 ---
 
-## 📝 Resume Bullet Example
-
-> *"Built GistProbe, a full-stack NLP web intelligence platform using Python, Flask, and Docker. Engineered a fault-tolerant web crawler via Playwright, utilized Scikit-learn (TF-IDF/K-Means) for semantic clustering, and deployed a FAISS-based RAG pipeline via Groq's API to reduce human reading time by over 95%."*
-
----
-
 **License:** Created by Ojaswi Gupta. All rights reserved.
