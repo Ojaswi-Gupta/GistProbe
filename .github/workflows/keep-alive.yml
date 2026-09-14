@@ -12,6 +12,5 @@ jobs:
       - name: Ping Render Frontend
         run: curl -s https://gistprobe.onrender.com > /dev/null
         
-      - name: Ping Hugging Face API (Update this URL!)
-        # Replace the URL below with your actual Hugging Face Space URL
-        run: curl -s https://huggingface.co > /dev/null
+      - name: Ping Hugging Face API (Keep ML Worker Awake)
+        run: curl -s https://ojaswict-gistprobe-ml-api.hf.space > /dev/null
