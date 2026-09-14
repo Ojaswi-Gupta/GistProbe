@@ -1,0 +1,17 @@
+name: Keep Services Awake
+
+on:
+  schedule:
+    - cron: "*/14 * * * *" # Runs every 14 minutes
+  workflow_dispatch: # Allows you to manually trigger it from the Actions tab
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Render Frontend
+        run: curl -s https://gistprobe.onrender.com > /dev/null
+        
+      - name: Ping Hugging Face API (Update this URL!)
+        # Replace the URL below with your actual Hugging Face Space URL
+        run: curl -s https://huggingface.co > /dev/null
