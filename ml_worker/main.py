@@ -89,6 +89,6 @@ async def get_similarity(req: SimilarityRequest):
     score = compute_similarity(req.texts1, req.texts2)
     return {"score": score}
 
-@app.get("/health")
-async def health_check():
+@app.api_route("/health", methods=["GET", "HEAD"])
+def health_check():
     return {"status": "ok"}
