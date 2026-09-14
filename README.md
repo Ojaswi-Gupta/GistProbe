@@ -136,7 +136,7 @@ Compare two URLs simultaneously. The pipeline extracts entities and clusters fro
 - **Resilient Web Crawler:** Implemented robust retry logic, exponential backoff for rate limits (429s), and graceful timeout handling. Seamlessly falls back to Playwright headless rendering if static scraping fails.
 - **Reverse Proxy Session Tracking:** Bypasses Cloudflare/Render load balancer IP obfuscation by utilizing secure Flask UUID session cookies, preventing FAISS context "amnesia" during RAG chats.
 - **Dockerized Deployments:** Containerized via Microsoft's official Playwright Ubuntu images to guarantee OS-level font and binary dependencies in production, managed securely via Gunicorn.
-- **Automated Keep-Alive Pipeline:** Integrated a GitHub Actions cron workflow to ping the Render and Hugging Face deployments every 14 minutes, completely preventing cloud "cold starts" and preserving 100% uptime on free-tier infrastructure.
+- **Dual-Redundancy Keep-Alive Pipeline:** Engineered a high-availability pinging system using automated **GitHub Actions** cron jobs and **UptimeRobot** HTTP monitors. This dual-layer architecture prevents cloud "cold starts" and guarantees 100% uptime on free-tier Render and Hugging Face infrastructure.
 
 ### 📈 Real-World Performance Metrics
 - **97% Time Reduction:** Compresses standard 7-to-10 minute financial reading workflows into **11–14 second** automated processing windows end-to-end (Crawl + ML Pipeline + DB).
