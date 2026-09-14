@@ -13,4 +13,4 @@ jobs:
         run: curl -s https://gistprobe.onrender.com > /dev/null
         
       - name: Ping Hugging Face API (Keep ML Worker Awake)
-        run: curl -s https://ojaswict-gistprobe-ml-api.hf.space > /dev/null
+        run: curl -s https://ojaswict-gistprobe-ml-api.hf.space/health > /dev/null
